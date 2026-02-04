@@ -1,0 +1,70 @@
+{
+  "glossary": {
+    "name": "Telco Business Glossary",
+    "description": "Términos de negocio para operadora de telefonía móvil prepago",
+    "terms": [
+      {
+        "name": "churn",
+        "displayName": "Churn / Abandono",
+        "description": "Cliente que deja de usar el servicio. Definición operativa: sin recarga en los últimos 30 días",
+        "synonyms": ["abandono", "deserción", "baja"],
+        "relatedTerms": ["retention", "win-back"]
+      },
+      {
+        "name": "arpu",
+        "displayName": "ARPU (Average Revenue Per User)",
+        "description": "Ingreso promedio por usuario. Calculado como: suma de recargas / número de clientes activos en el período",
+        "synonyms": ["ingreso promedio", "revenue per user"],
+        "formula": "SUM(recharges.amount) / COUNT(DISTINCT customers.customer_id)"
+      },
+      {
+        "name": "retention",
+        "displayName": "Retención",
+        "description": "Porcentaje de clientes que permanecen activos mes a mes",
+        "formula": "(clientes_activos_fin_mes / clientes_activos_inicio_mes) * 100"
+      },
+      {
+        "name": "prepago",
+        "displayName": "Prepago",
+        "description": "Modalidad sin contrato donde el cliente recarga saldo antes de consumir. 95% de la base de clientes.",
+        "synonyms": ["prepaid", "sin contrato"]
+      },
+      {
+        "name": "postpago",
+        "displayName": "Postpago",
+        "description": "Modalidad con contrato mensual y facturación posterior. 5% de la base de clientes.",
+        "synonyms": ["postpaid", "contrato", "plan"]
+      },
+      {
+        "name": "recarga",
+        "displayName": "Recarga",
+        "description": "Transacción donde el cliente prepago agrega saldo a su cuenta",
+        "synonyms": ["top-up", "recharge"]
+      },
+      {
+        "name": "segmentacion",
+        "displayName": "Segmentación",
+        "description": "Agrupación de clientes por comportamiento similar usando técnicas de clustering (K-means)",
+        "synonyms": ["clustering", "agrupación"]
+      },
+      {
+        "name": "migracion",
+        "displayName": "Migración Pre→Post",
+        "description": "Conversión de cliente prepago a postpago. Indicador de lealtad y aumento de ARPU",
+        "synonyms": ["upgrade", "conversión"]
+      },
+      {
+        "name": "heavy_user",
+        "displayName": "Heavy User",
+        "description": "Cliente con consumo de datos superior a 5GB mensuales y/o recarga superior a $20/mes",
+        "synonyms": ["usuario intensivo", "high value"]
+      },
+      {
+        "name": "dormant",
+        "displayName": "Dormant / Inactivo",
+        "description": "Cliente sin consumo en los últimos 15 días pero que aún no alcanza los 30 días de churn",
+        "synonyms": ["inactivo", "sleeping"]
+      }
+    ]
+  }
+}
