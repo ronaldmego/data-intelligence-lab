@@ -14,8 +14,7 @@ class OpenMetadataConfig(BaseSettings):
     api_version: str = "v1"
     jwt_token: Optional[str] = None
     
-    class Config:
-        env_prefix = "OPENMETADATA_"
+    model_config = {"env_prefix": "OPENMETADATA_"}
 
 
 class TableInfo(BaseModel):
