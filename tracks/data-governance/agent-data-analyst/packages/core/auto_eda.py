@@ -147,9 +147,9 @@ class AutoEDA:
             columns=columns
         )
     
-    def generate_analysis_sql(self, table_name: str, columns: List[Dict], sample_size: Optional[int] = None) -> str:
+    def generate_analysis_sql(self, schema_name: str, table_name: str, columns: List[Dict], sample_size: Optional[int] = None) -> str:
         """Genera SQL para análisis descriptivo"""
-        schema_table = f"telco_demo.{table_name}"
+        schema_table = f"{schema_name}.{table_name}"
         
         select_parts = []
         for col in columns:
@@ -175,19 +175,19 @@ class AutoEDA:
         
         return sql
     
-    def generate_frequency_sql(self, table_name: str, column_name: str, limit: int = 10) -> str:
+    def generate_frequency_sql(self, schema_name: str, table_name: str, column_name: str, limit: int = 10) -> str:
         """Genera SQL para frecuencias de valores"""
         return f"""
 SELECT {column_name}, COUNT(*) as frequency, 
        ROUND(COUNT(*)::numeric * 100 / SUM(COUNT(*)) OVER(), 2) as percentage
-FROM telco_demo.{table_name}
+FROM {schema_name}.{table_name}
 WHERE {column_name} IS NOT NULL
 GROUP BY {column_name}
 ORDER BY frequency DESC
 LIMIT {limit}
 """
     
-    def generate_time_series_sql(self, table_name: str, date_column: str, value_column: str = None, granularity: str = 'day') -> str:
+    def generate_time_series_sql(self, schema_name: str, table_name: str, date_column: str, value_column: str = None, granularity: str = 'day') -> str:
         """Genera SQL para análisis de series de tiempo"""
         if granularity == 'day':
             date_trunc = f"DATE({date_column})"
@@ -204,14 +204,14 @@ SELECT {date_trunc} as period,
        COUNT(*) as records,
        SUM({value_column}) as total,
        AVG({value_column})::numeric(10,2) as average
-FROM telco_demo.{table_name}
+FROM {schema_name}.{table_name}
 GROUP BY {date_trunc}
 ORDER BY period
 """
         else:
             return f"""
 SELECT {date_trunc} as period, COUNT(*) as records
-FROM telco_demo.{table_name}
+FROM {schema_name}.{table_name}
 GROUP BY {date_trunc}
 ORDER BY period
 """
@@ -278,10 +278,10 @@ ORDER BY period
         
         return proposal
     
-    def generate_dashboard_spec(self, table_name: str, columns: List[Dict]) -> Dict:
+    def generate_dashboard_spec(self, schema_name: str, table_name: str, columns: List[Dict]) -> Dict:
         """Genera especificación de dashboard automático"""
         dashboard = {
-            "title": f"Auto-EDA: {table_name}",
+            "title": f"Auto-EDA: {schema_name}.{table_name}",
             "generated_by": "Khipu",
             "panels": []
         }
@@ -302,19 +302,19 @@ ORDER BY period
                 panel["sql"] = f"""
 SELECT 
   WIDTH_BUCKET({col_name}, 
-    (SELECT MIN({col_name}) FROM telco_demo.{table_name}),
-    (SELECT MAX({col_name}) FROM telco_demo.{table_name}),
+    (SELECT MIN({col_name}) FROM {schema_name}.{table_name}),
+    (SELECT MAX({col_name}) FROM {schema_name}.{table_name}),
     10) as bucket,
   COUNT(*) as frequency
-FROM telco_demo.{table_name}
+FROM {schema_name}.{table_name}
 WHERE {col_name} IS NOT NULL
 GROUP BY bucket
 ORDER BY bucket
 """
             elif viz in ["bar_chart", "horizontal_bar", "top_n_bar"]:
-                panel["sql"] = self.generate_frequency_sql(table_name, col_name)
+                panel["sql"] = self.generate_frequency_sql(schema_name, table_name, col_name)
             elif viz == "time_series":
-                panel["sql"] = self.generate_time_series_sql(table_name, col_name)
+                panel["sql"] = self.generate_time_series_sql(schema_name, table_name, col_name)
             
             dashboard["panels"].append(panel)
         

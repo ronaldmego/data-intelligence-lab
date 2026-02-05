@@ -52,7 +52,7 @@ PG_DB = os.getenv("POSTGRES_DB", "khipu")
 
 class ChatRequest(BaseModel):
     question: str
-    schema_filter: Optional[str] = "telco_demo"
+    schema_filter: str  # Required: schema to query (e.g., telco_demo, banca_demo)
     execute: bool = False
 
 
@@ -65,7 +65,7 @@ class ChatResponse(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     """Request para análisis EDA completo"""
-    schema_name: str = "telco_demo"
+    schema_name: str  # Required: schema to analyze (e.g., telco_demo, banca_demo)
     execute_queries: bool = True
     output_format: str = "json"  # json | html
     sample_size: Optional[int] = None  # Para tablas grandes
@@ -195,6 +195,7 @@ async def chat(request: ChatRequest):
     result = await agent.generate_sql(
         question=request.question,
         tables=tables_with_cols,
+        schema_name=request.schema_filter,
         execute=request.execute
     )
     
@@ -209,13 +210,13 @@ async def chat(request: ChatRequest):
 @app.post("/api/analyze")
 async def analyze(request: AnalyzeRequest):
     """
-    Ejecuta Auto-EDA completo para un schema
+    Ejecuta Auto-EDA completo para cualquier schema
     
     Analiza todas las tablas del schema especificado, genera estadísticas
     descriptivas y opcionalmente un dashboard HTML interactivo.
     
     Args:
-        schema_name: Schema a analizar (default: telco_demo)
+        schema_name: Schema a analizar (requerido) - ej: telco_demo, banca_demo, retail
         execute_queries: Si True, ejecuta queries contra la DB para stats reales
         output_format: "json" o "html" 
         sample_size: Límite de filas para tablas grandes (None = sin límite)
@@ -439,11 +440,16 @@ async def analyze(request: AnalyzeRequest):
 
 
 @app.get("/api/analyze/{schema_name}/dashboard")
-async def get_dashboard(schema_name: str = "telco_demo"):
+async def get_dashboard(schema_name: str):
     """
-    Genera dashboard HTML del Auto-EDA
+    Genera dashboard HTML del Auto-EDA para cualquier schema
     
     Shortcut para: POST /api/analyze con output_format=html
+    
+    Examples:
+        /api/analyze/telco_demo/dashboard
+        /api/analyze/banca_demo/dashboard
+        /api/analyze/retail/dashboard
     """
     request = AnalyzeRequest(
         schema_name=schema_name,

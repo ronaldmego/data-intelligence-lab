@@ -8,39 +8,58 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-# System prompt con contexto de telco
-SYSTEM_PROMPT = """Eres un experto en SQL para una empresa de telecomunicaciones (telco) en Venezuela.
+# System prompt genérico - se construye dinámicamente con el schema y glosario
+SYSTEM_PROMPT_TEMPLATE = """Eres un experto en SQL y análisis de datos.
 Tu trabajo es convertir preguntas en lenguaje natural a consultas SQL.
 
 ## Base de datos disponible
-Schema: telco_demo (PostgreSQL)
+Schema: {schema_name} (PostgreSQL)
 
 ### Tablas y columnas:
 {schema_context}
 
 ### Glosario de negocio:
-- **churn/churned**: Cliente sin actividad en 30+ días. En la DB: status = 'churned'
-- **activo/active**: Cliente con actividad reciente. En la DB: status = 'active'
-- **inactivo/inactive**: Cliente sin actividad 15-30 días. En la DB: status = 'inactive'
-- **prepago**: Sin contrato, recarga saldo. En la DB: segment = 'prepago'
-- **postpago**: Facturación mensual. En la DB: segment = 'postpago'
-- **ARPU**: Average Revenue Per User = SUM(amount) / COUNT(DISTINCT customer_id)
-- **recarga**: Transacción donde cliente prepago agrega saldo (tabla: recharges)
-- **retention**: Campaña para evitar churn
-- **win-back**: Campaña para recuperar clientes churned
-- **upsell**: Campaña para aumentar consumo/migrar a postpago
+{business_glossary}
 
 ## Reglas:
-1. SIEMPRE usa el schema telco_demo (ej: telco_demo.customers)
+1. SIEMPRE usa el schema {schema_name} (ej: {schema_name}.tabla)
 2. Genera SOLO el SQL, sin explicaciones
 3. Usa nombres de columnas exactos del schema
 4. Para fechas recientes, usa CURRENT_DATE
 5. Si no puedes responder, di "NO_SQL: [razón]"
-
-## Ejemplos:
-- "¿Cuántos clientes churned hay?" → SELECT COUNT(*) FROM telco_demo.customers WHERE status = 'churned';
-- "¿Cuál es el ARPU del último mes?" → SELECT ROUND(SUM(amount)::numeric / COUNT(DISTINCT customer_id), 2) as arpu FROM telco_demo.recharges WHERE recharge_date >= CURRENT_DATE - INTERVAL '30 days';
 """
+
+# Glosarios predefinidos por industria (se pueden extender)
+INDUSTRY_GLOSSARIES = {
+    "telco": """- **churn/churned**: Cliente sin actividad en 30+ días
+- **activo/active**: Cliente con actividad reciente
+- **inactivo/inactive**: Cliente sin actividad 15-30 días
+- **prepago**: Sin contrato, recarga saldo
+- **postpago**: Facturación mensual
+- **ARPU**: Average Revenue Per User = SUM(amount) / COUNT(DISTINCT customer_id)
+- **recarga**: Transacción donde cliente prepago agrega saldo
+- **retention**: Campaña para evitar churn
+- **win-back**: Campaña para recuperar clientes churned""",
+    
+    "banca": """- **mora**: Cliente con pagos vencidos
+- **activo**: Cuenta con movimientos recientes
+- **inactivo**: Cuenta sin movimientos en 90+ días
+- **saldo_promedio**: AVG(balance) del período
+- **transacción**: Movimiento de dinero (débito/crédito)
+- **préstamo/loan**: Crédito otorgado al cliente
+- **tasa_mora**: COUNT(en_mora) / COUNT(total_clientes)""",
+    
+    "retail": """- **churn**: Cliente sin compras en 90+ días
+- **ticket_promedio**: AVG(total_compra)
+- **frecuencia**: Número de visitas/compras por período
+- **recencia**: Días desde última compra
+- **LTV**: Lifetime Value = suma total de compras del cliente
+- **conversión**: Visitantes que compran / Total visitantes""",
+    
+    "default": """- Interpreta los términos de negocio según el contexto de las tablas
+- Usa COUNT, SUM, AVG según corresponda
+- Para análisis temporal, agrupa por fecha/período"""
+}
 
 class KhipuSQLAgent:
     """Agente que convierte lenguaje natural a SQL"""
@@ -75,10 +94,37 @@ class KhipuSQLAgent:
             lines.append(f"  Columnas: {cols}")
         return "\n".join(lines)
     
+    def _detect_industry(self, schema_name: str, tables: list) -> str:
+        """Detecta la industria basándose en el nombre del schema o tablas"""
+        schema_lower = schema_name.lower()
+        
+        # Detectar por nombre de schema
+        if 'telco' in schema_lower or 'telecom' in schema_lower:
+            return 'telco'
+        elif 'bank' in schema_lower or 'banca' in schema_lower or 'finance' in schema_lower:
+            return 'banca'
+        elif 'retail' in schema_lower or 'ecommerce' in schema_lower or 'tienda' in schema_lower:
+            return 'retail'
+        
+        # Detectar por nombres de tablas
+        table_names = [t.get('name', '').lower() for t in tables]
+        table_str = ' '.join(table_names)
+        
+        if 'recharge' in table_str or 'subscriber' in table_str or 'prepago' in table_str:
+            return 'telco'
+        elif 'account' in table_str or 'loan' in table_str or 'transaction' in table_str:
+            return 'banca'
+        elif 'product' in table_str or 'order' in table_str or 'cart' in table_str:
+            return 'retail'
+        
+        return 'default'
+    
     async def generate_sql(
         self,
         question: str,
         tables: list,
+        schema_name: str,
+        industry: Optional[str] = None,
         execute: bool = False,
         db_connection: Optional[any] = None
     ) -> dict:
@@ -88,6 +134,8 @@ class KhipuSQLAgent:
         Args:
             question: Pregunta del usuario
             tables: Lista de tablas con metadata de OpenMetadata
+            schema_name: Nombre del schema (requerido)
+            industry: Industria para glosario (telco, banca, retail) - auto-detecta si None
             execute: Si True, ejecuta el SQL y devuelve resultados
             db_connection: Conexión a la DB para ejecutar
         
@@ -96,8 +144,22 @@ class KhipuSQLAgent:
         """
         schema_context = self._build_schema_context(tables)
         
+        # Auto-detectar industria si no se especifica
+        if industry is None:
+            industry = self._detect_industry(schema_name, tables)
+        
+        # Obtener glosario de la industria
+        business_glossary = INDUSTRY_GLOSSARIES.get(industry, INDUSTRY_GLOSSARIES['default'])
+        
+        # Construir prompt dinámico
+        system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
+            schema_name=schema_name,
+            schema_context=schema_context,
+            business_glossary=business_glossary
+        )
+        
         prompt = ChatPromptTemplate.from_messages([
-            ("system", SYSTEM_PROMPT),
+            ("system", system_prompt),
             ("human", "{question}")
         ])
         
@@ -105,7 +167,6 @@ class KhipuSQLAgent:
         
         try:
             sql = await chain.ainvoke({
-                "schema_context": schema_context,
                 "question": question
             })
             
@@ -144,7 +205,13 @@ class KhipuSQLAgent:
 
 
 # Función helper para uso rápido
-async def ask_khipu(question: str, tables: list, api_key: Optional[str] = None) -> dict:
+async def ask_khipu(
+    question: str, 
+    tables: list, 
+    schema_name: str,
+    industry: Optional[str] = None,
+    api_key: Optional[str] = None
+) -> dict:
     """Helper para hacer preguntas rápidas"""
     agent = KhipuSQLAgent(openai_api_key=api_key)
-    return await agent.generate_sql(question, tables)
+    return await agent.generate_sql(question, tables, schema_name, industry)
