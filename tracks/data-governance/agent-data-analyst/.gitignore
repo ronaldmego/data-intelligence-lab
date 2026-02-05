@@ -46,3 +46,6 @@ htmlcov/
 # Build
 build/
 *.whl
+
+# Generated output
+output/
