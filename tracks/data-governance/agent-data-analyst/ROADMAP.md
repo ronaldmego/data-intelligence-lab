@@ -4,26 +4,30 @@
 
 ## Fase 1: Conocer y Describir los Datos
 
-### 1.0 Setup ⬜
+### 1.0 Setup ✅ (2026-02-13)
 - [x] Base desde openmetadata-mcp-client (patrón probado)
 - [x] CLAUDE.md con nueva visión
 - [x] ROADMAP.md con subfases
-- [ ] README.md público actualizado
-- [ ] Puerto 4005 registrado
-- [ ] Estructura de archivos limpia
+- [x] README.md público actualizado
+- [x] Estructura de archivos limpia
+- [x] Arquitectura MCP plug & play (agent.py con register_mcp)
+- [x] Multi-LLM: Gemini (enterprise) + OpenRouter (dev/testing)
+- [ ] Puerto 4005 registrado en port-registry
 
-### 1.1 Descubrimiento de datos ⬜
-- [ ] OpenMetadata MCP conectado y funcionando
-- [ ] Listar schemas, tablas, databases
-- [ ] Ver linaje de datos
-- [ ] Consultar glosario de negocio
-- [ ] El agente responde: "¿Qué datos tenemos?"
+### 1.1 Descubrimiento de datos ✅ (2026-02-13)
+- [x] OpenMetadata MCP conectado y funcionando
+- [x] Listar schemas, tablas, databases
+- [x] Ver linaje de datos
+- [x] Consultar glosario de negocio
+- [x] El agente responde: "¿Qué datos tenemos?"
+- [x] Probado: routing inteligente (preguntas de negocio → OpenMetadata)
 
-### 1.2 MCP SQL ⬜
-- [ ] Evaluar: MCP Supabase oficial vs custom PostgreSQL
-- [ ] Integrar segundo MCP para queries SQL
-- [ ] Queries READ-ONLY (seguridad)
-- [ ] El agente puede ejecutar SELECT contra las tablas reales
+### 1.2 MCP SQL ✅ (2026-02-13)
+- [x] Evaluado: custom PostgreSQL MCP (más seguro y enfocado que supabase-community)
+- [x] Integrado como segundo MCP plugin (sql_server.py)
+- [x] Queries READ-ONLY enforced (keywords bloqueados)
+- [x] El agente puede ejecutar SELECT contra las tablas reales
+- [x] 5 tools: list_schemas, describe_table, get_column_stats, get_table_profile, execute_query
 
 ### 1.3 Perfil básico ⬜
 - [ ] Row count por tabla
