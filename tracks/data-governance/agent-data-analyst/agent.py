@@ -99,10 +99,16 @@ Tools disponibles:
 
 Pregunta del usuario: "{query}"
 
-ESTRATEGIA:
-- Usa MCP openmetadata para entender contexto, gobernanza, linaje, glosario
-- Usa MCP sql para ejecutar queries y obtener stats reales de los datos
-- Puedes necesitar combinar ambos
+ESTRATEGIA (best practice):
+- SIEMPRE empieza por OpenMetadata cuando el usuario pregunta sobre una tabla o dato:
+  OpenMetadata te da la visión gobernada (descripción, tags, owner, linaje, glosario)
+  que es INDEPENDIENTE del motor de base de datos. Es tu fuente de verdad de contexto.
+- Usa SQL cuando necesites datos REALES: estadísticas, conteos, distribuciones, valores concretos.
+  SQL complementa lo que OpenMetadata no puede dar (los números reales).
+- Lo ideal es combinar: primero entiende el contexto (OpenMetadata), luego explora los datos (SQL).
+- Si la pregunta es solo sobre estructura/gobernanza → OpenMetadata.
+  Si la pregunta es sobre valores/estadísticas → SQL.
+  Si la pregunta es sobre "describe esta tabla" → OpenMetadata primero (contexto), luego SQL (perfil real).
 
 Responde SOLO con formato:
 TOOL: nombre_del_tool

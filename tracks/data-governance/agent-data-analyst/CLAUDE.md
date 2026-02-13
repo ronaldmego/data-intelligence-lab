@@ -41,12 +41,48 @@ Khipu Analytics es un agente conversacional que combina:
 3. **Visualización correcta** — Seguir data-to-viz.com, no gráficos al azar
 4. **Insights con fundamento** — Cada observación tiene base estadística
 
+### Arquitectura MCP Plug & Play
+
+El agente es un **cerebro** que conecta a **MCPs como plugins**. No tiene herramientas hardcodeadas.
+
+```
+agent.py (cerebro + Gemini)
+├── register_mcp("openmetadata", server)  ← catálogo gobernado
+├── register_mcp("sql", server)           ← queries directas
+├── register_mcp("snowflake", ...)        ← futuro, 1 línea
+└── register_mcp("bigquery", ...)         ← futuro, 1 línea
+```
+
+**Principio:** Como OpenClaw con skills. El cerebro no tiene las herramientas en su código.
+Las descubre automáticamente, las registra, y las usa via protocolo MCP.
+Agregar un nuevo "brazo" = crear el MCP server + una línea `register_mcp()`.
+
+**Cada MCP es independiente:** tiene su propia conexión, sus propios tools, y se puede
+reemplazar o actualizar sin tocar el cerebro ni los otros MCPs.
+
+### Estrategia de uso de MCPs
+
+El agente tiene acceso a múltiples MCPs que pueden tener información similar.
+La orientación es:
+
+1. **OpenMetadata primero para contexto** — Entender qué datos existen, cómo están
+   gobernados, documentados, con linaje y glosario de negocio. OpenMetadata da la
+   visión unificada e independiente del motor de base de datos.
+2. **SQL para exploración profunda** — Una vez que sabe qué hay, usar SQL para
+   obtener estadísticas reales, distribuciones, valores concretos.
+3. **Combinar ambos** — El análisis más valioso viene de cruzar: contexto de
+   gobernanza (OpenMetadata) + datos reales (SQL).
+
+El agente NO está obligado a seguir un orden rígido, pero el prompt le da esta
+orientación como best practice.
+
 ### Anti-patrones (NO hacer)
 
 - ❌ Saltar directo a churn/segmentación/ML
 - ❌ Gráficos decorativos sin propósito
 - ❌ Análisis sin entender primero qué datos hay
 - ❌ Reinventar la rueda — usar librerías probadas
+- ❌ Ignorar OpenMetadata cuando tiene información relevante (descripción, tags, linaje)
 
 ---
 
