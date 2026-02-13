@@ -1,47 +1,48 @@
-# Khipu Enterprise
+# Khipu Analytics 📊
 
-> Analytics automation powered by your data catalog
+> Super Analista de Datos con IA — entiende tus datos antes de analizarlos.
 
-**Private repository** - GalacticaIA
+**Private repository** - [GalacticaIA](https://galacticaia.com)
 
-## Overview
+## Qué es
 
-Khipu reads your OpenMetadata catalog (schemas, glossaries, lineage) and proposes automated analytics:
-- Churn prediction
-- Customer segmentation
-- Propensity scoring
-- Revenue analytics
-- Anomaly detection
+Khipu Analytics es un agente conversacional que combina:
+- **OpenMetadata** (catálogo de datos gobernado) — sabe qué datos existen y cómo están organizados
+- **SQL directo** — puede ejecutar queries para explorar los datos reales
+- **Visualización inteligente** — elige el gráfico correcto según el tipo de dato
 
-## Architecture
+## Filosofía
 
 ```
-OpenMetadata API → Khipu Core → Analytics Dashboard
-                      ↓
-              SQL Generation + ML Models
+Descriptiva → Inferencial → Predictiva
 ```
 
-## Tech Stack
+Primero entender. Después analizar. Nunca saltar a ML sin fundamento.
 
-- **API**: FastAPI + LangChain
-- **Frontend**: Next.js 14
-- **Data Catalog**: OpenMetadata integration
-- **ML**: scikit-learn, MindsDB
-- **Deploy**: Docker
+## Stack
 
-## Development
+- **UI**: Streamlit
+- **LLM**: Google Gemini 2.5 Pro
+- **Catálogo**: OpenMetadata (via MCP)
+- **SQL**: PostgreSQL/Supabase (via MCP)
+- **Viz**: matplotlib + seaborn
+
+## Quick Start
 
 ```bash
-# API
-cd apps/api
+cp .env.example .env
+# Editar .env con credenciales
 pip install -r requirements.txt
-uvicorn main:app --reload
-
-# Web
-cd apps/web
-npm install
-npm run dev
+streamlit run app.py --server.port 4005
 ```
+
+## Roadmap
+
+Ver [ROADMAP.md](./ROADMAP.md)
+
+## Basado en
+
+Evolución de [openmetadata-mcp-client](https://github.com/ronaldmego/openmetadata-agent) — patrón probado de agente conversacional con MCP.
 
 ## License
 

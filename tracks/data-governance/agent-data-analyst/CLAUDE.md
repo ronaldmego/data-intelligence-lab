@@ -1,14 +1,233 @@
-# Khipu Enterprise
+# Khipu Analytics - Super Analista de Datos con IA
 
-Sistema de gestion empresarial. No deployado actualmente.
+## Tabla de Contenidos
 
-## Registro de Puertos (Obligatorio)
+- [Puerto](#puerto)
+- [Visión y Filosofía](#visión-y-filosofía)
+- [Arquitectura](#arquitectura)
+- [Quick Start](#quick-start)
+- [Configuración](#configuración)
+- [Comandos Frecuentes](#comandos-frecuentes)
+- [Filosofía de Desarrollo](#filosofía-de-desarrollo)
+- [Referencias Teóricas](#referencias-teóricas)
+- [Deploy](#deploy)
+- [Seguridad](#seguridad)
 
-Este proyecto comparte servidor con otros proyectos. **Antes de usar o cambiar cualquier puerto:**
+---
 
-1. Consultar el registro central: `~/maintenance/docs/infrastructure/port-registry.md`
-2. Verificar que el puerto no este ocupado: `ss -tlnp | grep :<puerto>`
-3. Registrar el puerto elegido en el archivo de registro
-4. **Nunca usar puertos prohibidos** (3333, 4444, 14444, etc.) — disparan alertas de seguridad
+## Puerto
 
-> Este es un requisito mandatorio del servidor. Ver el documento completo para puertos disponibles, rangos asignados y reglas.
+| Item | Valor |
+|------|-------|
+| Puerto Prod | `4005` (Tailscale only) |
+| Bind | `<vps-host>` |
+| URL | http://<vps-host>:4005 |
+| Proceso | `streamlit run app.py` |
+
+---
+
+## Visión y Filosofía
+
+**Un Super Analista de Datos que primero ENTIENDE antes de opinar.**
+
+Khipu Analytics es un agente conversacional que combina:
+1. **Conocimiento del catálogo** (OpenMetadata MCP) — qué datos existen, cómo están gobernados, documentados, con linaje
+2. **Capacidad de exploración** (SQL MCP) — ejecutar queries para describir los datos reales
+
+### Principios Fundamentales
+
+1. **Paso firme antes del siguiente** — No saltar a ML sin entender los datos
+2. **Estadística antes de Machine Learning** — Descriptiva → Inferencial → Predictiva
+3. **Visualización correcta** — Seguir data-to-viz.com, no gráficos al azar
+4. **Insights con fundamento** — Cada observación tiene base estadística
+
+### Anti-patrones (NO hacer)
+
+- ❌ Saltar directo a churn/segmentación/ML
+- ❌ Gráficos decorativos sin propósito
+- ❌ Análisis sin entender primero qué datos hay
+- ❌ Reinventar la rueda — usar librerías probadas
+
+---
+
+## Arquitectura
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Streamlit     │────▶│   Agent         │────▶│  OpenMetadata   │
+│   Chat UI       │     │   (Gemini LLM)  │     │  REST API       │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │
+        │                       ├──────────────▶┌─────────────────┐
+        │                       │               │  PostgreSQL/    │
+        ▼                       ▼               │  Supabase (SQL) │
+   Usuario              MCP Tools:              └─────────────────┘
+   (browser)            ├── OpenMetadata MCP
+                        │   - search_catalog
+                        │   - list_tables
+                        │   - get_table_details
+                        │   - get_lineage
+                        │   - list_databases
+                        │   - list_glossary_terms
+                        │
+                        └── SQL MCP (Fase 1.2)
+                            - execute_query
+                            - describe_table
+                            - get_column_stats
+                            - get_distribution
+```
+
+### Estructura del Proyecto
+
+```
+khipu-analytics/
+├── app.py              # Streamlit UI (chat + visualizaciones)
+├── server.py           # OpenMetadata MCP tools
+├── sql_server.py       # SQL MCP tools (Fase 1.2)
+├── viz.py              # Módulo de visualización (matplotlib)
+├── classifier.py       # Clasificador de tipos de variables
+├── .env                # Configuración local (no commitear)
+├── .env.example        # Template de configuración
+├── requirements.txt    # Dependencias Python
+├── CLAUDE.md           # Este archivo — visión y estándares
+├── ROADMAP.md          # Roadmap progresivo con subfases
+└── README.md           # Documentación pública
+```
+
+---
+
+## Quick Start
+
+```bash
+cd ~/projects/khipu-analytics
+
+# Configurar
+cp .env.example .env
+# Editar .env con credenciales
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar
+streamlit run app.py --server.port 4005
+
+# Acceder: http://<vps-host>:4005
+```
+
+---
+
+## Configuración
+
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `GOOGLE_API_KEY` | API key de Gemini (pagada recomendada) | `AIzaSy...` |
+| `OPENMETADATA_URL` | URL de la instancia OpenMetadata | `http://<vps-host>:8585` |
+| `OPENMETADATA_TOKEN` | JWT token de bot de OpenMetadata | `eyJhbG...` |
+| `GEMINI_MODEL` | Modelo a usar | `gemini-2.5-pro` |
+| `DATABASE_URL` | Conexión PostgreSQL/Supabase (Fase 1.2) | `postgresql://...` |
+
+---
+
+## Comandos Frecuentes
+
+```bash
+# --- Desarrollo ---
+streamlit run app.py --server.port 4005
+streamlit run app.py --server.port 4005 --server.address <vps-host>
+
+# --- Testing ---
+python test_connection.py
+python -c "from server import list_tables; print(list_tables())"
+
+# --- Dependencias ---
+pip install -r requirements.txt
+```
+
+---
+
+## Filosofía de Desarrollo
+
+### Stack
+
+- **UI**: Streamlit (chat + matplotlib inline)
+- **LLM**: Google Gemini 2.5 Pro via `google-genai`
+- **Catálogo**: OpenMetadata REST API (via MCP)
+- **SQL**: PostgreSQL/Supabase (via MCP)
+- **Visualización**: matplotlib + seaborn
+- **Lenguaje**: Python 3.10+
+
+### Convenciones
+
+- **Idioma del código**: inglés (variables, funciones, clases)
+- **Idioma de respuestas al usuario**: español
+- **Naming**: snake_case para funciones, PascalCase para clases
+- **Un archivo por responsabilidad**
+- **Toda configuración en .env**, nunca hardcoded
+
+### Patrón base (heredado de openmetadata-mcp-client)
+
+- Tools MCP en `server.py` usando FastMCP
+- Agente orquesta LLM + tools
+- `app.py` solo capa de presentación
+- Respuestas siempre en español
+
+---
+
+## Referencias Teóricas
+
+### Visualización de Datos
+- **data-to-viz.com** — Árbol de decisión para elegir el gráfico correcto:
+  - 1 numérica → histogram, density plot
+  - 2 numéricas (no ordenadas, pocos puntos) → scatter plot
+  - 2 numéricas (ordenadas) → connected scatter, line chart
+  - Categórica → bar chart, treemap
+  - Numérica + Categórica → boxplot, violin plot
+  - Series de tiempo → line chart, area chart
+  - 3+ numéricas → heatmap, parallel coordinates
+
+- **Claus Wilke — Fundamentals of Data Visualization** (clauswilke.com/dataviz):
+  - Proporciones correctas (no distorsionar con 3D, truncar ejes, etc.)
+  - Escala adecuada (log vs lineal)
+  - Uso correcto del color
+  - Principio de tinta-datos (maximizar info, minimizar decoración)
+
+### Estadística Descriptiva
+- Medidas de tendencia central: media, mediana, moda
+- Medidas de dispersión: std, rango, IQR
+- Distribuciones: normal, sesgada, bimodal
+- Outliers: regla 1.5*IQR o 3σ
+
+---
+
+## Deploy
+
+### Requisitos
+- Python 3.10+
+- OpenMetadata (URL + token)
+- PostgreSQL/Supabase (connection string)
+- API key Gemini
+- Puerto 4005
+
+### Pasos
+1. Clonar proyecto
+2. Configurar `.env`
+3. `pip install -r requirements.txt`
+4. `streamlit run app.py --server.port 4005`
+
+---
+
+## Seguridad
+
+- **Credenciales**: siempre en `.env`, nunca en código
+- **Acceso**: restringir por Tailscale
+- **Tokens**: rotar periódicamente
+- **SQL**: READ-ONLY para el agente (nunca INSERT/UPDATE/DELETE)
+- **Puerto**: `4005` registrado en port-registry
+
+---
+
+## Proyecto Base
+
+Este proyecto evolucionó desde `openmetadata-mcp-client` (agente conversacional para OpenMetadata). El patrón Streamlit + Gemini + FastMCP está probado y funciona.
+
+Repositorio: https://github.com/ronaldmego/khipu-analytics
