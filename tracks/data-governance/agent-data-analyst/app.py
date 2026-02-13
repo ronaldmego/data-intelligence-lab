@@ -16,10 +16,9 @@ from dotenv import load_dotenv
 # Cargar configuración
 load_dotenv(Path(__file__).parent / ".env")
 
-from agent import create_agent
+from agent import create_agent, LLM_PROVIDER
 
 # Configuración
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
 OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585")
 
 # ============== STREAMLIT UI ==============
@@ -64,7 +63,10 @@ with st.sidebar:
     st.divider()
     
     st.header("⚙️ Configuración")
-    st.text(f"Modelo: {GEMINI_MODEL}")
+    if "agent" in st.session_state:
+        provider_label = "🟢 Gemini (enterprise)" if LLM_PROVIDER == "gemini" else "🔵 OpenRouter (dev)"
+        st.text(f"Provider: {provider_label}")
+        st.text(f"Modelo: {st.session_state.agent.model_name}")
     st.text(f"OpenMetadata: {OPENMETADATA_URL}")
     
     st.divider()

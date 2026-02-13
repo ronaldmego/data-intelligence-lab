@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
 Khipu Analytics - Agent Core
-Cerebro del agente: conecta a MCPs como plugins y orquesta con Gemini.
+Cerebro del agente: conecta a MCPs como plugins y orquesta con un LLM.
 
 Arquitectura plug & play:
 - Cada MCP es un "brazo" independiente (OpenMetadata, SQL, futuro: Snowflake, BigQuery)
 - El agente descubre tools automáticamente de cada MCP conectado
-- Agregar un nuevo MCP = agregar una entrada en mcp_config.json
+- Agregar un nuevo MCP = agregar una entrada en agent.py
+- LLM configurable: Gemini (enterprise) o cualquier modelo via OpenRouter (dev/testing)
 """
 
 import os
@@ -15,19 +16,43 @@ import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
 from fastmcp import Client
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 
 load_dotenv(Path(__file__).parent / ".env")
 
+# LLM Configuration
+# LLM_PROVIDER: "gemini" (enterprise, paid) or "openrouter" (dev/testing, free models available)
+# Set in .env or defaults to openrouter for cost savings during development
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openrouter")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "deepseek/deepseek-r1-0528:free")
+OPENROUTER_API_KEY = os.getenv("OPEN_ROUTER_API_KEY", "")
+
+
+def create_llm():
+    """Crear LLM según el provider configurado.
+    
+    - gemini: Google Gemini via API key (enterprise/production)
+    - openrouter: Cualquier modelo via OpenRouter (dev/testing, modelos gratis disponibles)
+    """
+    if LLM_PROVIDER == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        return ChatGoogleGenerativeAI(model=GEMINI_MODEL, temperature=0), GEMINI_MODEL
+    else:
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=OPENROUTER_MODEL,
+            openai_api_key=OPENROUTER_API_KEY,
+            openai_api_base="https://openrouter.ai/api/v1",
+            temperature=0,
+        ), OPENROUTER_MODEL
 
 
 class KhipuAgent:
     """Agente que conecta a múltiples MCPs y orquesta con un LLM."""
 
     def __init__(self):
-        self.llm = ChatGoogleGenerativeAI(model=GEMINI_MODEL, temperature=0)
+        self.llm, self.model_name = create_llm()
         self.mcp_servers = {}  # name -> FastMCP server object
         self.tools_registry = {}  # tool_name -> {mcp_name, description, params}
         self.tools_info = ""  # Text description for the LLM
