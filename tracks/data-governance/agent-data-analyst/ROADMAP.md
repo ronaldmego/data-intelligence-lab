@@ -36,6 +36,17 @@
 - [ ] Cardinalidad (valores únicos)
 - [ ] Output tabular claro
 
+### 1.3.5 Multi-Tool Reasoning ✅ (2026-02-14)
+- [x] Refactorizar `process()` en agent.py para soportar multi-step reasoning
+- [x] El LLM puede decidir llamar MÚLTIPLES tools en secuencia (2-5 pasos)
+- [x] Cada paso acumula contexto: resultados anteriores se pasan al LLM para decidir el siguiente paso
+- [x] El LLM puede decir "DONE" cuando tiene suficiente info para responder
+- [x] Flujo: pregunta → step1 (tool call) → resultado1 → step2 (con contexto) → ... → DONE → respuesta final
+- [x] Prompt orienta al agente a consultar OpenMetadata PRIMERO para entender esquema, luego SQL
+- [x] Backward compatibility mantenida - preguntas simples siguen funcionando rápido
+- [x] Safety limit de 5 tool calls máximo para evitar loops infinitos
+- [x] Permite análisis complejos como: "describe tabla + estadísticas" o "relaciones + JOINs"
+
 ### 1.4 Clasificación de variables ⬜
 - [ ] Clasificar automáticamente: numérica continua, discreta, categórica, temporal, ordinal, booleana, texto
 - [ ] La clasificación guía qué gráficos y análisis aplicar

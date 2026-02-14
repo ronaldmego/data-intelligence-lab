@@ -112,96 +112,153 @@ class KhipuAgent:
             return result.data if hasattr(result, 'data') and result.data else str(result)
 
     async def process(self, query: str) -> str:
-        """Procesar pregunta del usuario: decidir tool → ejecutar → formatear."""
+        """Procesar pregunta del usuario con razonamiento multi-step."""
+        return await self.process_multi_step(query)
 
-        # Paso 1: Decidir qué tool usar
-        decision_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos con IA.
+    async def process_multi_step(self, query: str, max_steps: int = 5) -> str:
+        """Procesar pregunta del usuario con múltiples tool calls en secuencia.
+        
+        Flujo: pregunta → step1 (tool call) → resultado1 → step2 (tool call con contexto) → ... → DONE → respuesta final
+        
+        Args:
+            query: Pregunta del usuario
+            max_steps: Máximo número de tool calls permitidos (safety limit)
+        """
+        
+        accumulated_context = []
+        step = 1
+        
+        while step <= max_steps:
+            # Crear contexto acumulativo
+            context_summary = ""
+            if accumulated_context:
+                context_summary = "\n\n".join([
+                    f"PASO {i+1} PREVIO:\n- Tool usado: {ctx['tool_name']}\n- Parámetros: {ctx['params']}\n- Resultado: {ctx['result'][:500]}..."
+                    for i, ctx in enumerate(accumulated_context)
+                ])
+            
+            # Decidir próximo paso
+            decision_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos con IA.
 Tienes acceso a múltiples fuentes de datos via MCP (Model Context Protocol).
-Cada MCP es un plugin que te da capacidades específicas.
 
 Tools disponibles:
 {self.tools_info}
 
-Pregunta del usuario: "{query}"
+Pregunta original del usuario: "{query}"
 
-ESTRATEGIA (best practice):
-- SIEMPRE empieza por OpenMetadata cuando el usuario pregunta sobre una tabla o dato:
-  OpenMetadata te da la visión gobernada (descripción, tags, owner, linaje, glosario)
-  que es INDEPENDIENTE del motor de base de datos. Es tu fuente de verdad de contexto.
-- Usa SQL cuando necesites datos REALES: estadísticas, conteos, distribuciones, valores concretos.
-  SQL complementa lo que OpenMetadata no puede dar (los números reales).
-- Lo ideal es combinar: primero entiende el contexto (OpenMetadata), luego explora los datos (SQL).
-- Si la pregunta es solo sobre estructura/gobernanza → OpenMetadata.
-  Si la pregunta es sobre valores/estadísticas → SQL.
-  Si la pregunta es sobre "describe esta tabla" → OpenMetadata primero (contexto), luego SQL (perfil real).
+CONTEXTO PREVIO (pasos ya ejecutados):
+{context_summary if context_summary else "NINGUNO - Este es el primer paso"}
 
-Responde SOLO con formato:
+ESTRATEGIA MULTI-STEP (best practice):
+1. SIEMPRE empieza por OpenMetadata cuando el usuario pregunta sobre una tabla:
+   - OpenMetadata da la visión gobernada (descripción, tags, owner, linaje, glosario)
+   - Es tu fuente de verdad de contexto, independiente del motor de base de datos
+2. Usa SQL para datos REALES: estadísticas, conteos, distribuciones, valores concretos
+3. Lo ideal es combinar: primero contexto (OpenMetadata), luego datos reales (SQL)
+4. Para análisis complejos, múltiples pasos:
+   - "Describe tabla customers" → OpenMetadata (contexto) + SQL (estadísticas reales)
+   - "Relaciones entre tablas" → OpenMetadata lineage + SQL para validar FKs
+   - "Análisis por grupo" → OpenMetadata (entender columnas) + SQL (GROUP BY)
+
+DECISIÓN - Responde con UNA de estas opciones:
+
+Opción A - Hacer otro tool call:
 TOOL: nombre_del_tool
 PARAMS: param1=valor1, param2=valor2
 
-Si necesitas múltiples tools, responde con la MÁS relevante primero.
+Opción B - Tengo suficiente información para responder al usuario:
+DONE
 
-Ejemplos:
-- Listar tablas del catálogo: TOOL: list_tables, PARAMS: limit=15
-- Perfil de una tabla: TOOL: get_table_profile, PARAMS: schema_name=telco_demo, table_name=customers
-- Stats de columna: TOOL: get_column_stats, PARAMS: schema_name=telco_demo, table_name=customers, column_name=city
-- Schemas SQL: TOOL: list_schemas, PARAMS: none
-- Query custom: TOOL: execute_query, PARAMS: sql=SELECT COUNT(*) FROM telco_demo.customers
-- Linaje: TOOL: get_lineage, PARAMS: asset_name=customers
-- Buscar en catálogo: TOOL: search_catalog, PARAMS: query=ventas
+Paso actual: {step}/{max_steps}
+
+Ejemplos de decisiones:
+- Si no tengo contexto de la tabla → TOOL: get_table_details (OpenMetadata primero)
+- Si tengo contexto pero necesito estadísticas → TOOL: get_table_profile (SQL después)
+- Si tengo todo lo necesario → DONE
+- Si usuario pregunta por relaciones → TOOL: get_lineage luego SQL para validar
 """
 
-        decision_response = self.llm.invoke([HumanMessage(content=decision_prompt)])
-        decision = decision_response.content.strip()
+            decision_response = self.llm.invoke([HumanMessage(content=decision_prompt)])
+            decision = decision_response.content.strip()
+            
+            # Verificar si el LLM decide terminar
+            if "DONE" in decision.upper():
+                break
+                
+            # Parsear y ejecutar tool call
+            try:
+                tool_name = ""
+                params = {}
 
-        # Paso 2: Parsear decisión y ejecutar
-        try:
-            tool_name = ""
-            params = {}
+                for line in decision.split("\n"):
+                    line = line.strip()
+                    if line.startswith("TOOL:"):
+                        tool_name = line.split("TOOL:")[1].strip().split(",")[0].strip()
+                    elif line.startswith("PARAMS:"):
+                        params_str = line.split("PARAMS:")[1].strip()
+                        if params_str.lower() != "none":
+                            for pair in params_str.split(","):
+                                pair = pair.strip()
+                                if "=" in pair:
+                                    key, val = pair.split("=", 1)
+                                    key = key.strip()
+                                    val = val.strip()
+                                    # Try to convert numeric
+                                    try:
+                                        val = int(val)
+                                    except ValueError:
+                                        pass
+                                    params[key] = val
 
-            for line in decision.split("\n"):
-                line = line.strip()
-                if line.startswith("TOOL:"):
-                    tool_name = line.split("TOOL:")[1].strip().split(",")[0].strip()
-                elif line.startswith("PARAMS:"):
-                    params_str = line.split("PARAMS:")[1].strip()
-                    if params_str.lower() != "none":
-                        for pair in params_str.split(","):
-                            pair = pair.strip()
-                            if "=" in pair:
-                                key, val = pair.split("=", 1)
-                                key = key.strip()
-                                val = val.strip()
-                                # Try to convert numeric
-                                try:
-                                    val = int(val)
-                                except ValueError:
-                                    pass
-                                params[key] = val
-
-            if not tool_name:
-                result = "No pude determinar qué herramienta usar."
-            else:
+                if not tool_name:
+                    # Si no se pudo parsear, terminar con lo que tenemos
+                    break
+                    
+                # Ejecutar tool
                 result = await self.call_tool(tool_name, params)
+                
+                # Guardar en contexto acumulativo
+                accumulated_context.append({
+                    "step": step,
+                    "tool_name": tool_name,
+                    "params": params,
+                    "result": result
+                })
+                
+                step += 1
 
-        except Exception as e:
-            result = f"Error ejecutando: {str(e)}"
+            except Exception as e:
+                # En caso de error, guardar el error y continuar
+                accumulated_context.append({
+                    "step": step,
+                    "tool_name": tool_name,
+                    "params": params,
+                    "result": f"Error: {str(e)}"
+                })
+                break
+        
+        # Generar respuesta final basada en todo el contexto acumulado
+        all_results = "\n\n".join([
+            f"PASO {ctx['step']}: {ctx['tool_name']}({ctx['params']})\nResultado:\n{ctx['result']}"
+            for ctx in accumulated_context
+        ])
+        
+        format_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
 
-        # Paso 3: Formatear respuesta
-        format_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos. Basándote en los datos obtenidos, responde al usuario.
+Pregunta original: "{query}"
 
-Pregunta: "{query}"
+Datos obtenidos en {len(accumulated_context)} pasos:
+{all_results}
 
-Datos obtenidos (via MCP):
-{result}
-
-Instrucciones:
+Instrucciones para la respuesta final:
 - Responde en español
+- Sintetiza toda la información de los múltiples pasos ejecutados
 - Sé conciso pero informativo
 - Si hay datos numéricos, resalta insights (Top 3, %, anomalías)
 - Interpreta los datos: no solo números, sino qué significan
 - Usa formato markdown
 - Si los datos sugieren un siguiente paso de análisis, proponlo
+- Menciona brevemente qué pasos seguiste para obtener la información (transparencia del proceso)
 """
 
         final_response = self.llm.invoke([HumanMessage(content=format_prompt)])
