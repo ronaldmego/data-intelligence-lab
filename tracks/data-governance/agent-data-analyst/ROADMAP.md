@@ -29,12 +29,12 @@
 - [x] El agente puede ejecutar SELECT contra las tablas reales
 - [x] 5 tools: list_schemas, describe_table, get_column_stats, get_table_profile, execute_query
 
-### 1.3 Perfil básico ⬜
-- [ ] Row count por tabla
-- [ ] Column count y tipos de datos
-- [ ] % nulls por columna
-- [ ] Cardinalidad (valores únicos)
-- [ ] Output tabular claro
+### 1.3 Perfil básico ✅ (2026-02-14)
+- [x] Row count por tabla
+- [x] Column count y tipos de datos
+- [x] % nulls por columna
+- [x] Cardinalidad (valores únicos)
+- [x] Output tabular claro
 
 ### 1.4 Clasificación de variables ⬜
 - [ ] Clasificar automáticamente: numérica continua, discreta, categórica, temporal, ordinal, booleana, texto
