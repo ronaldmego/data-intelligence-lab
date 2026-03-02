@@ -15,8 +15,8 @@
 - [x] Retry loop with alternative strategies
 - [x] Conversational memory ([#2](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/2))
 - [x] Smart error recovery ([#3](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/3))
-- [ ] Multi-tool per query — agent can chain multiple tools in one question
-- [ ] Full API coverage — tools for: data products, tags, policies, teams, users, pipelines
+- [x] Multi-tool per query — agent chains tools via Gemini's native function calling loop
+- [ ] Expanded API coverage — tools for: data products, policies, pipelines (nice-to-have)
 
 ## Phase 2: Write Operations ✅
 
@@ -41,33 +41,14 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 - [x] Dry-run mode to preview changes before applying ([#14](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/14))
 - [x] Audit log of all write operations ([#15](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/15))
 
-## Phase 3: Multi-User
+## Future: Enterprise Edition (separate project)
 
-- [ ] Per-user sessions (Streamlit session state)
-- [ ] Persistent conversation history
-- [ ] Request limits per session
-- [ ] Per-user query logging
+Phases 3-6 involve multi-user, authentication, enterprise audit, and production hardening.
+These are **out of scope for this project**, which serves as a single-user MVP/POC.
 
-## Phase 4: Authentication & Authorization
-
-- [ ] Login with username/password
-- [ ] SSO integration (SAML/OIDC)
-- [ ] Roles: admin, analyst, viewer
-- [ ] Granular permissions by schema/database
-
-## Phase 5: Enterprise Audit
-
-- [ ] Full query audit log
-- [ ] Usage dashboard (queries per user, per day)
-- [ ] Sensitive query alerts
-- [ ] Log export for compliance
-- [ ] SIEM integration
-
-## Phase 6: Production Hardening
-
-- [ ] Optimized Dockerfile
-- [ ] Docker Compose with nginx/traefik
-- [ ] Health checks
-- [ ] Rate limiting
-- [ ] Response caching
-- [ ] Configuration backup
+A separate enterprise project will take this codebase as a starting point and rearchitect for:
+- Multi-tenancy and per-user sessions
+- SSO/OIDC authentication and role-based authorization
+- Persistent audit logs with IT manager dashboards
+- Integrations (Microsoft Teams, Slack webhooks)
+- Production deployment (Docker, health checks, rate limiting)
