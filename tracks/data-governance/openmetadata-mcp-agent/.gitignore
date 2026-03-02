@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Agent instructions (internal, not for public repos)
+CLAUDE.md
