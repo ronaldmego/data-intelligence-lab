@@ -6,6 +6,7 @@ Usa function calling nativo de Gemini para selección automática de tools.
 """
 
 import os
+from datetime import datetime
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
@@ -51,6 +52,12 @@ TOOLS = [search_catalog, list_tables, get_table_details, list_databases,
          create_glossary, create_glossary_term, link_glossary_term,
          create_classification, create_tag, assign_tag, create_domain]
 TOOLS_BY_NAME = {fn.__name__: fn for fn in TOOLS}
+
+WRITE_TOOLS = {
+    "update_table_description", "update_column_description", "assign_owner",
+    "create_glossary", "create_glossary_term", "link_glossary_term",
+    "create_classification", "create_tag", "assign_tag", "create_domain",
+}
 
 SYSTEM_PROMPT = (
     "Eres un asistente de Data Governance experto. "
@@ -107,7 +114,7 @@ def init_llm():
     return llm.bind_tools(TOOLS)
 
 
-def agent_process(query: str, llm, chat_history: list = None) -> dict:
+def agent_process(query: str, llm, chat_history: list = None, dry_run: bool = False) -> dict:
     """Procesar query usando function calling nativo de Gemini.
 
     El LLM decide qué tools usar, puede encadenar varias, y responde
@@ -128,6 +135,7 @@ def agent_process(query: str, llm, chat_history: list = None) -> dict:
     messages.append(HumanMessage(content=query))
 
     tool_trace = []  # Para el debug expander
+    audit_entries = []  # Operaciones de escritura para el audit log
 
     for _ in range(MAX_TOOL_ITERATIONS):
         ai_message = llm.invoke(messages)
@@ -138,6 +146,7 @@ def agent_process(query: str, llm, chat_history: list = None) -> dict:
             return {
                 "response": extract_text(ai_message.content),
                 "tool_trace": tool_trace,
+                "audit_entries": audit_entries,
             }
 
         # Ejecutar cada tool call
@@ -148,6 +157,9 @@ def agent_process(query: str, llm, chat_history: list = None) -> dict:
 
             if tool_fn is None:
                 result = f"Tool '{tool_name}' no encontrada"
+            elif dry_run and tool_name in WRITE_TOOLS:
+                args_str = ", ".join(f"{k}={v!r}" for k, v in tool_args.items())
+                result = f"[DRY-RUN] Se ejecutaría: {tool_name}({args_str}) — no se aplicó ningún cambio."
             else:
                 try:
                     result = tool_fn(**tool_args)
@@ -161,6 +173,16 @@ def agent_process(query: str, llm, chat_history: list = None) -> dict:
                 "result": str(result),
             })
 
+            # Audit log para operaciones de escritura
+            if tool_name in WRITE_TOOLS:
+                audit_entries.append({
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "tool": tool_name,
+                    "args": tool_args,
+                    "result": str(result),
+                    "dry_run": dry_run,
+                })
+
             # Devolver resultado al LLM
             messages.append(ToolMessage(
                 content=str(result),
@@ -172,6 +194,7 @@ def agent_process(query: str, llm, chat_history: list = None) -> dict:
     return {
         "response": extract_text(ai_message.content) or "Se alcanzó el límite de iteraciones del agente.",
         "tool_trace": tool_trace,
+        "audit_entries": audit_entries,
     }
 
 
@@ -223,6 +246,8 @@ with st.sidebar:
     st.divider()
 
     st.header("⚙️ Configuración")
+    dry_run = st.toggle("🔒 Modo dry-run", value=False,
+                        help="Cuando está activo, las herramientas de escritura muestran qué harían sin aplicar cambios")
     st.text(f"Modelo: {GEMINI_MODEL}")
     st.text(f"OpenMetadata: {OPENMETADATA_URL}")
     tools_list = ", ".join(fn.__name__ for fn in TOOLS)
@@ -232,11 +257,25 @@ with st.sidebar:
 
     if st.button("🗑️ Limpiar chat"):
         st.session_state.messages = []
+        st.session_state.audit_log = []
         st.rerun()
 
-# Inicializar historial de chat
+    # Audit log de escritura
+    if st.session_state.get("audit_log"):
+        st.divider()
+        st.header("📋 Audit Log")
+        for entry in reversed(st.session_state.audit_log):
+            prefix = "🔒 DRY-RUN" if entry["dry_run"] else "✅"
+            st.markdown(f"**{prefix} {entry['tool']}** — {entry['timestamp']}")
+            args_str = ", ".join(f"{k}={v!r}" for k, v in entry["args"].items())
+            st.caption(f"Args: {args_str}")
+            st.caption(f"Result: {entry['result'][:120]}")
+
+# Inicializar historial de chat y audit log
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "audit_log" not in st.session_state:
+    st.session_state.audit_log = []
 
 # Inicializar LLM
 if "llm" not in st.session_state:
@@ -279,7 +318,7 @@ if prompt := st.chat_input("Pregunta sobre tu catálogo de datos..."):
     with st.chat_message("assistant"):
         with st.spinner("Consultando catálogo..."):
             try:
-                result = agent_process(prompt, st.session_state.llm, st.session_state.messages)
+                result = agent_process(prompt, st.session_state.llm, st.session_state.messages, dry_run=dry_run)
                 st.markdown(result["response"])
                 render_debug(result["tool_trace"])
 
@@ -288,6 +327,8 @@ if prompt := st.chat_input("Pregunta sobre tu catálogo de datos..."):
                     "content": result["response"],
                     "tool_trace": result["tool_trace"],
                 })
+                if result.get("audit_entries"):
+                    st.session_state.audit_log.extend(result["audit_entries"])
             except Exception as e:
                 error_msg = f"❌ Error: {str(e)}"
                 st.error(error_msg)

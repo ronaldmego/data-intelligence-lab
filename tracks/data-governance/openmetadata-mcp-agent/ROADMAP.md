@@ -18,7 +18,7 @@
 - [ ] Multi-tool per query — agent can chain multiple tools in one question
 - [ ] Full API coverage — tools for: data products, tags, policies, teams, users, pipelines
 
-## Phase 2: Write Operations 🚧
+## Phase 2: Write Operations ✅
 
 Enable the agent to **write metadata** to OpenMetadata, not just read it.
 
@@ -38,8 +38,8 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 
 ### Safety
 - [x] Confirmation prompt before any write operation ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
-- [ ] Dry-run mode to preview changes before applying ([#14](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/14))
-- [ ] Audit log of all write operations ([#15](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/15))
+- [x] Dry-run mode to preview changes before applying ([#14](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/14))
+- [x] Audit log of all write operations ([#15](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/15))
 
 ## Phase 3: Multi-User
 

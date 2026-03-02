@@ -4,6 +4,14 @@ Todos los cambios notables de este proyecto se documentan aquí.
 
 ---
 
+## [0.9.0] - 2026-03-02
+
+### Added
+- **Dry-run mode** — Sidebar toggle that intercepts write tool calls and shows what would be changed without executing. Read tools remain unaffected. ([#14](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/14))
+- **Audit log** — All write operations (including dry-runs) are logged with timestamp, tool, args, and result. Displayed in the sidebar in reverse chronological order. Cleared with "Limpiar chat". ([#15](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/15))
+
+---
+
 ## [0.8.0] - 2026-03-02
 
 ### Added
