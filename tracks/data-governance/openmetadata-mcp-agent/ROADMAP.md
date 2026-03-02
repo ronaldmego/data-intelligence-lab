@@ -16,7 +16,7 @@
 - [x] Conversational memory ([#2](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/2))
 - [x] Smart error recovery ([#3](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/3))
 - [x] Multi-tool per query — agent chains tools via Gemini's native function calling loop
-- [ ] Complete API coverage — remaining read tools to make server.py the full connection layer ([#17](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/17))
+- [x] Complete API coverage — 8 new read tools (storedProcedures, policies, roles, services, pipelines, dashboards, topics, dataProducts). server.py is now the full connection layer. ([#17](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/17))
 
 ## Phase 2: Write Operations ✅
 
