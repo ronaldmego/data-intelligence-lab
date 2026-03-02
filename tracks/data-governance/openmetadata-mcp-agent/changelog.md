@@ -4,6 +4,14 @@ Todos los cambios notables de este proyecto se documentan aquí.
 
 ---
 
+## [1.0.0] - 2026-03-02
+
+### Added
+- **Complete API coverage** — 8 new read tools: `list_stored_procedures`, `list_policies`, `list_roles`, `list_services`, `list_pipelines`, `list_dashboards`, `list_topics`, `list_data_products`. Total: 27 tools (17 read + 10 write). `server.py` is now the complete OpenMetadata connection layer. ([#17](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/17))
+- `list_services` accepts a `service_type` parameter to query different service categories (database, messaging, dashboard, pipeline, mlmodel, storage, search).
+
+---
+
 ## [0.9.0] - 2026-03-02
 
 ### Added

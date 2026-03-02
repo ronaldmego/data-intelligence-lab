@@ -356,6 +356,263 @@ def list_domains(limit: int = 50) -> str:
 
 
 @mcp.tool
+def list_stored_procedures(limit: int = 50) -> str:
+    """Listar stored procedures registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de stored procedures a retornar
+
+    Returns:
+        Lista de stored procedures con nombre, database y descripción
+    """
+    try:
+        result = api_get("/storedProcedures", {"limit": limit})
+        procedures = result.get("data", [])
+
+        if not procedures:
+            return "No hay stored procedures registrados"
+
+        output = [f"⚙️ Stored Procedures ({len(procedures)}):\n"]
+        for sp in procedures:
+            name = sp.get("name", "")
+            fqn = sp.get("fullyQualifiedName", "")
+            desc = strip_html(sp.get("description", "Sin descripción"))[:80]
+            db_schema = sp.get("databaseSchema", {}).get("name", "")
+            output.append(f"- {name}\n  FQN: {fqn}\n  Schema: {db_schema}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando stored procedures: {str(e)}"
+
+
+@mcp.tool
+def list_policies(limit: int = 50) -> str:
+    """Listar políticas de acceso en OpenMetadata.
+
+    Args:
+        limit: Máximo de políticas a retornar
+
+    Returns:
+        Lista de políticas con nombre, descripción y reglas
+    """
+    try:
+        result = api_get("/policies", {"limit": limit})
+        policies = result.get("data", [])
+
+        if not policies:
+            return "No hay políticas registradas"
+
+        output = [f"📜 Políticas ({len(policies)}):\n"]
+        for p in policies:
+            name = p.get("name", "")
+            display = p.get("displayName", name)
+            desc = strip_html(p.get("description", "Sin descripción"))[:80]
+            rules_count = len(p.get("rules", []))
+            output.append(f"- {display}\n  Nombre: {name}\n  Reglas: {rules_count}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando políticas: {str(e)}"
+
+
+@mcp.tool
+def list_roles(limit: int = 50) -> str:
+    """Listar roles definidos en OpenMetadata.
+
+    Args:
+        limit: Máximo de roles a retornar
+
+    Returns:
+        Lista de roles con nombre, descripción y políticas asociadas
+    """
+    try:
+        result = api_get("/roles", {"limit": limit})
+        roles = result.get("data", [])
+
+        if not roles:
+            return "No hay roles registrados"
+
+        output = [f"🔑 Roles ({len(roles)}):\n"]
+        for r in roles:
+            name = r.get("name", "")
+            display = r.get("displayName", name)
+            desc = strip_html(r.get("description", "Sin descripción"))[:80]
+            policies = [pol.get("name", "") for pol in r.get("policies", [])]
+            policies_str = f" (políticas: {', '.join(policies)})" if policies else ""
+            output.append(f"- {display}{policies_str}\n  Nombre: {name}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando roles: {str(e)}"
+
+
+@mcp.tool
+def list_services(service_type: str = "database", limit: int = 50) -> str:
+    """Listar servicios registrados en OpenMetadata.
+
+    Args:
+        service_type: Tipo de servicio: "database", "messaging", "dashboard", "pipeline", "mlmodel", "storage", "search"
+        limit: Máximo de servicios a retornar
+
+    Returns:
+        Lista de servicios con nombre, tipo y descripción
+    """
+    try:
+        type_map = {
+            "database": "databaseServices",
+            "messaging": "messagingServices",
+            "dashboard": "dashboardServices",
+            "pipeline": "pipelineServices",
+            "mlmodel": "mlmodelServices",
+            "storage": "storageServices",
+            "search": "searchServices",
+        }
+        endpoint = type_map.get(service_type)
+        if not endpoint:
+            return f"Tipo de servicio no válido: '{service_type}'. Opciones: {', '.join(type_map.keys())}"
+
+        result = api_get(f"/services/{endpoint}", {"limit": limit})
+        services = result.get("data", [])
+
+        if not services:
+            return f"No hay servicios de tipo '{service_type}' registrados"
+
+        output = [f"🔌 Servicios de {service_type} ({len(services)}):\n"]
+        for s in services:
+            name = s.get("name", "")
+            svc_type = s.get("serviceType", "")
+            desc = strip_html(s.get("description", "Sin descripción"))[:80]
+            output.append(f"- {name}\n  Tipo: {svc_type}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando servicios: {str(e)}"
+
+
+@mcp.tool
+def list_pipelines(limit: int = 50) -> str:
+    """Listar pipelines de datos registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de pipelines a retornar
+
+    Returns:
+        Lista de pipelines con nombre, servicio y descripción
+    """
+    try:
+        result = api_get("/pipelines", {"limit": limit})
+        pipelines = result.get("data", [])
+
+        if not pipelines:
+            return "No hay pipelines registrados"
+
+        output = [f"🔄 Pipelines ({len(pipelines)}):\n"]
+        for p in pipelines:
+            name = p.get("name", "")
+            fqn = p.get("fullyQualifiedName", "")
+            desc = strip_html(p.get("description", "Sin descripción"))[:80]
+            service = p.get("service", {}).get("name", "")
+            output.append(f"- {name}\n  FQN: {fqn}\n  Servicio: {service}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando pipelines: {str(e)}"
+
+
+@mcp.tool
+def list_dashboards(limit: int = 50) -> str:
+    """Listar dashboards registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de dashboards a retornar
+
+    Returns:
+        Lista de dashboards con nombre, servicio y descripción
+    """
+    try:
+        result = api_get("/dashboards", {"limit": limit})
+        dashboards = result.get("data", [])
+
+        if not dashboards:
+            return "No hay dashboards registrados"
+
+        output = [f"📊 Dashboards ({len(dashboards)}):\n"]
+        for d in dashboards:
+            name = d.get("name", "")
+            fqn = d.get("fullyQualifiedName", "")
+            display = d.get("displayName", name)
+            desc = strip_html(d.get("description", "Sin descripción"))[:80]
+            service = d.get("service", {}).get("name", "")
+            output.append(f"- {display}\n  FQN: {fqn}\n  Servicio: {service}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando dashboards: {str(e)}"
+
+
+@mcp.tool
+def list_topics(limit: int = 50) -> str:
+    """Listar topics (Kafka/mensajería) registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de topics a retornar
+
+    Returns:
+        Lista de topics con nombre, servicio y descripción
+    """
+    try:
+        result = api_get("/topics", {"limit": limit})
+        topics = result.get("data", [])
+
+        if not topics:
+            return "No hay topics registrados"
+
+        output = [f"📨 Topics ({len(topics)}):\n"]
+        for t in topics:
+            name = t.get("name", "")
+            fqn = t.get("fullyQualifiedName", "")
+            desc = strip_html(t.get("description", "Sin descripción"))[:80]
+            service = t.get("service", {}).get("name", "")
+            partitions = t.get("partitions", 0)
+            output.append(f"- {name}\n  FQN: {fqn}\n  Servicio: {service}\n  Particiones: {partitions}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando topics: {str(e)}"
+
+
+@mcp.tool
+def list_data_products(limit: int = 50) -> str:
+    """Listar data products registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de data products a retornar
+
+    Returns:
+        Lista de data products con nombre, dominio y descripción
+    """
+    try:
+        result = api_get("/dataProducts", {"limit": limit})
+        products = result.get("data", [])
+
+        if not products:
+            return "No hay data products registrados"
+
+        output = [f"📦 Data Products ({len(products)}):\n"]
+        for dp in products:
+            name = dp.get("name", "")
+            fqn = dp.get("fullyQualifiedName", "")
+            display = dp.get("displayName", name)
+            desc = strip_html(dp.get("description", "Sin descripción"))[:80]
+            domain = dp.get("domain", {}).get("name", "Sin dominio")
+            output.append(f"- {display}\n  FQN: {fqn}\n  Dominio: {domain}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando data products: {str(e)}"
+
+
+@mcp.tool
 def update_table_description(table_name: str, description: str) -> str:
     """Actualizar la descripción de una tabla en OpenMetadata.
 
