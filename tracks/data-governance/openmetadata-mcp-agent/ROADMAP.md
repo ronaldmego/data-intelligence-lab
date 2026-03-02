@@ -23,8 +23,8 @@
 Enable the agent to **write metadata** to OpenMetadata, not just read it.
 
 ### Metadata Enrichment
-- [ ] **Add/edit table descriptions** — PATCH table metadata with natural language
-- [ ] **Add/edit column descriptions** — PATCH column-level descriptions
+- [x] **Add/edit table descriptions** — PATCH table metadata with natural language ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
+- [x] **Add/edit column descriptions** — PATCH column-level descriptions ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
 - [ ] **Assign owners** to tables and assets — PATCH owner field
 
 ### Glossary Management
@@ -37,7 +37,7 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 - [ ] **Create/assign domains** — POST domains and associate assets to them
 
 ### Safety
-- [ ] Confirmation prompt before any write operation
+- [x] Confirmation prompt before any write operation ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
 - [ ] Dry-run mode to preview changes before applying
 - [ ] Audit log of all write operations
 

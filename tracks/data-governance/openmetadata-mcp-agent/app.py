@@ -24,7 +24,9 @@ from server import (
     list_databases,
     list_glossary_terms,
     get_lineage,
-    list_domains
+    list_domains,
+    update_table_description,
+    update_column_description,
 )
 
 # Configuración
@@ -33,7 +35,8 @@ OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585")
 
 # Registro de tools: lista y lookup por nombre
 TOOLS = [search_catalog, list_tables, get_table_details, list_databases,
-         list_glossary_terms, get_lineage, list_domains]
+         list_glossary_terms, get_lineage, list_domains,
+         update_table_description, update_column_description]
 TOOLS_BY_NAME = {fn.__name__: fn for fn in TOOLS}
 
 SYSTEM_PROMPT = (
@@ -44,7 +47,12 @@ SYSTEM_PROMPT = (
     "1. Si search_catalog no devuelve resultados, usa list_tables o list_databases para descubrir nombres correctos.\n"
     "2. Si el usuario escribe mal un nombre, busca coincidencias parciales en los listados.\n"
     "3. Puedes encadenar herramientas: search → list_tables → get_table_details.\n"
-    "4. No te rindas en el primer intento. Siempre intenta al menos una estrategia alternativa antes de decir que no encontraste nada."
+    "4. No te rindas en el primer intento. Siempre intenta al menos una estrategia alternativa antes de decir que no encontraste nada.\n\n"
+    "HERRAMIENTAS DE ESCRITURA (update_table_description, update_column_description):\n"
+    "1. Antes de ejecutar una herramienta de escritura, SIEMPRE confirma con el usuario mostrando exactamente qué se va a cambiar.\n"
+    "2. Muestra: tabla/columna afectada y la nueva descripción propuesta. Pregunta '¿Confirmas el cambio?'.\n"
+    "3. Solo ejecuta la herramienta de escritura después de recibir confirmación explícita del usuario.\n"
+    "4. Después de una escritura exitosa, confirma qué se cambió."
 )
 
 MAX_TOOL_ITERATIONS = 10
@@ -165,6 +173,10 @@ with st.sidebar:
     - ¿De dónde vienen los datos de la tabla orders?
     - ¿Qué bases de datos tenemos?
     - ¿Qué dominios tiene el catálogo?
+
+    **Escritura:**
+    - Actualiza la descripción de la tabla customers a "Clientes activos del sistema"
+    - Cambia la descripción de la columna email en customers a "Correo principal del cliente"
     """)
 
     st.divider()

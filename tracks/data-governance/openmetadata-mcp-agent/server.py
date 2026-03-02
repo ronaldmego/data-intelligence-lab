@@ -44,6 +44,16 @@ def api_get(endpoint: str, params: dict = None) -> dict:
     return response.json()
 
 
+def api_patch(endpoint: str, operations: list) -> dict:
+    """Hacer PATCH request a OpenMetadata API usando JSON Patch (RFC 6902)"""
+    url = f"{OPENMETADATA_URL}/api/v1{endpoint}"
+    headers = get_headers()
+    headers["Content-Type"] = "application/json-patch+json"
+    response = httpx.patch(url, headers=headers, json=operations, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+
 def strip_html(text: str) -> str:
     """Remover tags HTML de un string"""
     return re.sub(r"<[^>]+>", "", text).strip()
@@ -335,6 +345,92 @@ def list_domains(limit: int = 50) -> str:
         return "\n".join(output)
     except Exception as e:
         return f"Error listando dominios: {str(e)}"
+
+
+@mcp.tool
+def update_table_description(table_name: str, description: str) -> str:
+    """Actualizar la descripción de una tabla en OpenMetadata.
+
+    Args:
+        table_name: Nombre o FQN de la tabla
+        description: Nueva descripción para la tabla
+
+    Returns:
+        Confirmación del cambio o mensaje de error
+    """
+    try:
+        search_result = api_get("/search/query", {"q": table_name, "size": 1})
+        hits = search_result.get("hits", {}).get("hits", [])
+
+        if not hits:
+            return f"No se encontró la tabla '{table_name}'"
+
+        table_id = hits[0]["_source"].get("id")
+        fqn = hits[0]["_source"].get("fullyQualifiedName", table_name)
+        if not table_id:
+            return f"No se pudo obtener ID de la tabla '{table_name}'"
+
+        operations = [{"op": "add", "path": "/description", "value": description}]
+        api_patch(f"/tables/{table_id}", operations)
+
+        return f"Descripción de '{fqn}' actualizada a: {description}"
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP actualizando tabla: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error actualizando descripción de tabla: {str(e)}"
+
+
+@mcp.tool
+def update_column_description(table_name: str, column_name: str, description: str) -> str:
+    """Actualizar la descripción de una columna en una tabla de OpenMetadata.
+
+    Args:
+        table_name: Nombre o FQN de la tabla
+        column_name: Nombre de la columna a actualizar
+        description: Nueva descripción para la columna
+
+    Returns:
+        Confirmación del cambio o mensaje de error
+    """
+    try:
+        search_result = api_get("/search/query", {"q": table_name, "size": 1})
+        hits = search_result.get("hits", {}).get("hits", [])
+
+        if not hits:
+            return f"No se encontró la tabla '{table_name}'"
+
+        table_id = hits[0]["_source"].get("id")
+        fqn = hits[0]["_source"].get("fullyQualifiedName", table_name)
+        if not table_id:
+            return f"No se pudo obtener ID de la tabla '{table_name}'"
+
+        table = api_get(f"/tables/{table_id}")
+        columns = table.get("columns", [])
+
+        col_index = None
+        for i, col in enumerate(columns):
+            if col.get("name", "").lower() == column_name.lower():
+                col_index = i
+                break
+
+        if col_index is None:
+            available = [col.get("name", "") for col in columns]
+            return (
+                f"Columna '{column_name}' no encontrada en '{fqn}'. "
+                f"Columnas disponibles: {', '.join(available)}"
+            )
+
+        operations = [{"op": "add", "path": f"/columns/{col_index}/description", "value": description}]
+        api_patch(f"/tables/{table_id}", operations)
+
+        return (
+            f"Descripción de columna '{column_name}' en '{fqn}' "
+            f"actualizada a: {description}"
+        )
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP actualizando columna: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error actualizando descripción de columna: {str(e)}"
 
 
 if __name__ == "__main__":

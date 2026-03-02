@@ -4,6 +4,16 @@ Todos los cambios notables de este proyecto se documentan aquí.
 
 ---
 
+## [0.5.0] - 2026-03-02
+
+### Added
+- **Write tools: table & column descriptions** — Two new tools `update_table_description` and `update_column_description` allow the agent to update metadata in OpenMetadata via PATCH (JSON Patch RFC 6902). First write capabilities of the agent. ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
+- **`api_patch()` helper** — New HTTP helper in `server.py` for PATCH requests with `application/json-patch+json` content type.
+- **Write safety in SYSTEM_PROMPT** — The agent now asks for user confirmation before executing any write operation, showing exactly what will change.
+- **Column not found guidance** — If the user specifies a non-existent column, the tool returns the list of available column names.
+
+---
+
 ## [0.4.0] - 2026-02-19
 
 ### Added
