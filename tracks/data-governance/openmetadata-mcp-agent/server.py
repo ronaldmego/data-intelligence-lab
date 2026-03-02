@@ -690,6 +690,153 @@ def link_glossary_term(table_name: str, term_fqn: str) -> str:
         return f"Error vinculando término de glosario: {str(e)}"
 
 
+@mcp.tool
+def create_classification(name: str, description: str) -> str:
+    """Crear una nueva clasificación (categoría de tags) en OpenMetadata.
+
+    Args:
+        name: Nombre de la clasificación (sin espacios, usar guiones)
+        description: Descripción de la clasificación
+
+    Returns:
+        Confirmación de creación o mensaje de error
+    """
+    try:
+        result = api_post("/classifications", {"name": name, "description": description})
+        return f"Clasificación '{result.get('name')}' creada exitosamente"
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 409:
+            return f"Ya existe una clasificación con el nombre '{name}'"
+        return f"Error HTTP creando clasificación: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error creando clasificación: {str(e)}"
+
+
+@mcp.tool
+def create_tag(classification_name: str, tag_name: str, description: str) -> str:
+    """Crear un nuevo tag dentro de una clasificación en OpenMetadata.
+
+    Args:
+        classification_name: Nombre de la clasificación donde crear el tag
+        tag_name: Nombre del tag (sin espacios, usar guiones)
+        description: Descripción del tag
+
+    Returns:
+        Confirmación de creación o mensaje de error
+    """
+    try:
+        # Verify classification exists
+        try:
+            api_get(f"/classifications/name/{classification_name}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                available = api_get("/classifications", {"limit": 50})
+                names = [c.get("name", "") for c in available.get("data", [])]
+                return (
+                    f"Clasificación '{classification_name}' no encontrada. "
+                    f"Clasificaciones disponibles: {', '.join(names)}"
+                )
+            raise
+
+        payload = {
+            "name": tag_name,
+            "description": description,
+            "classification": classification_name,
+        }
+        result = api_post("/tags", payload)
+        fqn = result.get("fullyQualifiedName", f"{classification_name}.{tag_name}")
+        return f"Tag '{fqn}' creado exitosamente"
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 409:
+            return f"Ya existe un tag '{tag_name}' en la clasificación '{classification_name}'"
+        return f"Error HTTP creando tag: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error creando tag: {str(e)}"
+
+
+@mcp.tool
+def assign_tag(table_name: str, tag_fqn: str) -> str:
+    """Asignar un tag a una tabla en OpenMetadata.
+
+    Args:
+        table_name: Nombre o FQN de la tabla
+        tag_fqn: FQN del tag (ej: "mi-clasificacion.mi-tag")
+
+    Returns:
+        Confirmación de la asignación o mensaje de error
+    """
+    try:
+        # Find table
+        search_result = api_get("/search/query", {"q": table_name, "size": 1})
+        hits = search_result.get("hits", {}).get("hits", [])
+
+        if not hits:
+            return f"No se encontró la tabla '{table_name}'"
+
+        table_id = hits[0]["_source"].get("id")
+        table_fqn = hits[0]["_source"].get("fullyQualifiedName", table_name)
+        if not table_id:
+            return f"No se pudo obtener ID de la tabla '{table_name}'"
+
+        # Verify tag exists
+        try:
+            api_get(f"/tags/name/{tag_fqn}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                return f"Tag '{tag_fqn}' no encontrado. Usa el formato 'clasificacion.tag'."
+            raise
+
+        operations = [{
+            "op": "add",
+            "path": "/tags/0",
+            "value": {
+                "tagFQN": tag_fqn,
+                "source": "Classification",
+                "labelType": "Manual",
+            },
+        }]
+        api_patch(f"/tables/{table_id}", operations)
+
+        return f"Tag '{tag_fqn}' asignado a la tabla '{table_fqn}'"
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP asignando tag: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error asignando tag: {str(e)}"
+
+
+@mcp.tool
+def create_domain(name: str, description: str, domain_type: str = "Aggregate") -> str:
+    """Crear un nuevo dominio de datos en OpenMetadata.
+
+    Args:
+        name: Nombre del dominio (sin espacios, usar guiones)
+        description: Descripción del dominio
+        domain_type: Tipo de dominio: "Aggregate", "Consumer Aligned", o "Source Aligned"
+
+    Returns:
+        Confirmación de creación o mensaje de error
+    """
+    try:
+        valid_types = ("Aggregate", "Consumer Aligned", "Source Aligned")
+        if domain_type not in valid_types:
+            return f"domain_type debe ser uno de: {', '.join(valid_types)}"
+
+        payload = {
+            "name": name,
+            "description": description,
+            "domainType": domain_type,
+        }
+        result = api_post("/domains", payload)
+        fqn = result.get("fullyQualifiedName", name)
+        return f"Dominio '{fqn}' creado exitosamente (tipo: {domain_type})"
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 409:
+            return f"Ya existe un dominio con el nombre '{name}'"
+        return f"Error HTTP creando dominio: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error creando dominio: {str(e)}"
+
+
 if __name__ == "__main__":
     if not OPENMETADATA_TOKEN:
         print("⚠️  ADVERTENCIA: OPENMETADATA_TOKEN no está configurado")

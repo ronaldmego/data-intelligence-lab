@@ -33,8 +33,8 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 - [x] **Link glossary terms to assets** — Associate terms with tables/columns ([#10](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/10))
 
 ### Classification & Organization
-- [ ] **Create/assign tags** — POST tags and PATCH them onto assets
-- [ ] **Create/assign domains** — POST domains and associate assets to them
+- [x] **Create/assign tags** — POST tags and PATCH them onto assets ([#12](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/12))
+- [x] **Create/assign domains** — POST domains; table assignment deferred (OM 1.11.7 PATCH limitation) ([#12](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/12))
 
 ### Safety
 - [x] Confirmation prompt before any write operation ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))

@@ -4,6 +4,15 @@ Todos los cambios notables de este proyecto se documentan aquí.
 
 ---
 
+## [0.8.0] - 2026-03-02
+
+### Added
+- **Classification & tag tools** — `create_classification`, `create_tag`, `assign_tag` allow creating tag categories, tags, and assigning them to tables. ([#12](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/12))
+- **Domain creation tool** — `create_domain` creates data domains (Aggregate, Consumer Aligned, Source Aligned). Domain-to-table assignment deferred due to OM 1.11.7 PATCH limitation. ([#12](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/12))
+- **Tag/domain instructions in SYSTEM_PROMPT** — Agent guided on classification→tag→assign workflow and domain types.
+
+---
+
 ## [0.7.0] - 2026-03-02
 
 ### Added

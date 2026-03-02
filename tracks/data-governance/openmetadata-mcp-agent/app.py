@@ -33,6 +33,10 @@ from server import (
     create_glossary,
     create_glossary_term,
     link_glossary_term,
+    create_classification,
+    create_tag,
+    assign_tag,
+    create_domain,
 )
 
 # Configuración
@@ -44,7 +48,8 @@ TOOLS = [search_catalog, list_tables, get_table_details, list_databases,
          list_glossary_terms, get_lineage, list_domains,
          update_table_description, update_column_description,
          list_users, list_teams, assign_owner,
-         create_glossary, create_glossary_term, link_glossary_term]
+         create_glossary, create_glossary_term, link_glossary_term,
+         create_classification, create_tag, assign_tag, create_domain]
 TOOLS_BY_NAME = {fn.__name__: fn for fn in TOOLS}
 
 SYSTEM_PROMPT = (
@@ -68,7 +73,14 @@ SYSTEM_PROMPT = (
     "1. Para crear un glosario: usa create_glossary con nombre (sin espacios, usar guiones) y descripción.\n"
     "2. Para crear términos: primero verifica que el glosario existe, luego usa create_glossary_term.\n"
     "3. Para vincular un término a una tabla: usa link_glossary_term con el FQN del término (formato: glosario.termino).\n"
-    "4. Si el usuario no recuerda los glosarios disponibles, usa list_glossary_terms para mostrarlos."
+    "4. Si el usuario no recuerda los glosarios disponibles, usa list_glossary_terms para mostrarlos.\n\n"
+    "CLASIFICACIONES Y TAGS:\n"
+    "1. Para crear un tag, primero necesitas una clasificación (categoría). Usa create_classification.\n"
+    "2. Luego crea el tag dentro de la clasificación con create_tag.\n"
+    "3. Asigna el tag a una tabla con assign_tag usando el FQN (formato: clasificacion.tag).\n\n"
+    "DOMINIOS:\n"
+    "1. Usa create_domain para crear dominios de datos. Tipos válidos: Aggregate, Consumer Aligned, Source Aligned.\n"
+    "2. La asignación de dominios a tablas se realiza desde la UI de OpenMetadata."
 )
 
 MAX_TOOL_ITERATIONS = 10
@@ -200,6 +212,12 @@ with st.sidebar:
     - Crea un glosario llamado "negocio" con descripción "Términos de negocio"
     - Agrega el término "cliente" al glosario negocio
     - Vincula el término negocio.cliente a la tabla customers
+
+    **Tags y dominios:**
+    - Crea una clasificación llamada "importancia"
+    - Crea el tag "critico" en la clasificación importancia
+    - Asigna el tag importancia.critico a la tabla orders
+    - Crea un dominio "ventas" de tipo Aggregate
     """)
 
     st.divider()
