@@ -16,7 +16,7 @@
 - [x] Conversational memory ([#2](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/2))
 - [x] Smart error recovery ([#3](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/3))
 - [x] Multi-tool per query — agent chains tools via Gemini's native function calling loop
-- [ ] Expanded API coverage — tools for: data products, policies, pipelines (nice-to-have)
+- [ ] Complete API coverage — remaining read tools to make server.py the full connection layer ([#17](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/17))
 
 ## Phase 2: Write Operations ✅
 
@@ -45,6 +45,8 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 
 Phases 3-6 involve multi-user, authentication, enterprise audit, and production hardening.
 These are **out of scope for this project**, which serves as a single-user MVP/POC.
+
+This project's `server.py` is designed to be the **complete, reusable OpenMetadata connection layer** — once [#17](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/17) is done, the enterprise project inherits it as-is.
 
 A separate enterprise project will take this codebase as a starting point and rearchitect for:
 - Multi-tenancy and per-user sessions
