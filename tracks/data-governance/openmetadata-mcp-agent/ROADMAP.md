@@ -25,7 +25,7 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 ### Metadata Enrichment
 - [x] **Add/edit table descriptions** — PATCH table metadata with natural language ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
 - [x] **Add/edit column descriptions** — PATCH column-level descriptions ([#4](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/4))
-- [ ] **Assign owners** to tables and assets — PATCH owner field
+- [x] **Assign owners** to tables and assets — PATCH owner field ([#8](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/8))
 
 ### Glossary Management
 - [ ] **Create glossary** — POST new glossary

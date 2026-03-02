@@ -433,6 +433,122 @@ def update_column_description(table_name: str, column_name: str, description: st
         return f"Error actualizando descripción de columna: {str(e)}"
 
 
+@mcp.tool
+def list_users(limit: int = 50) -> str:
+    """Listar usuarios registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de usuarios a retornar
+
+    Returns:
+        Lista de usuarios con nombre y email
+    """
+    try:
+        result = api_get("/users", {"limit": limit, "isBot": False})
+        users = result.get("data", [])
+
+        if not users:
+            return "No hay usuarios registrados"
+
+        output = [f"👤 Usuarios registrados ({len(users)}):\n"]
+        for u in users:
+            name = u.get("name", "")
+            display = u.get("displayName", name)
+            email = u.get("email", "")
+            output.append(f"- {display} ({name})\n  Email: {email}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando usuarios: {str(e)}"
+
+
+@mcp.tool
+def list_teams(limit: int = 50) -> str:
+    """Listar equipos registrados en OpenMetadata.
+
+    Args:
+        limit: Máximo de equipos a retornar
+
+    Returns:
+        Lista de equipos con nombre y descripción
+    """
+    try:
+        result = api_get("/teams", {"limit": limit})
+        teams = result.get("data", [])
+
+        if not teams:
+            return "No hay equipos registrados"
+
+        output = [f"👥 Equipos registrados ({len(teams)}):\n"]
+        for t in teams:
+            name = t.get("name", "")
+            display = t.get("displayName", name)
+            desc = strip_html(t.get("description", "Sin descripción"))[:80]
+            team_type = t.get("teamType", "")
+            output.append(f"- {display} ({name})\n  Tipo: {team_type}\n  {desc}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando equipos: {str(e)}"
+
+
+@mcp.tool
+def assign_owner(table_name: str, owner_name: str, owner_type: str = "user") -> str:
+    """Asignar un owner (usuario o equipo) a una tabla en OpenMetadata.
+
+    Args:
+        table_name: Nombre o FQN de la tabla
+        owner_name: Nombre del usuario o equipo a asignar como owner
+        owner_type: Tipo de owner: "user" o "team"
+
+    Returns:
+        Confirmación del cambio o mensaje de error
+    """
+    try:
+        if owner_type not in ("user", "team"):
+            return f"owner_type debe ser 'user' o 'team', recibido: '{owner_type}'"
+
+        # Find owner by name
+        endpoint = "/users" if owner_type == "user" else "/teams"
+        try:
+            owner = api_get(f"{endpoint}/name/{owner_name}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                # List available options for guidance
+                available = api_get(endpoint, {"limit": 50})
+                names = [item.get("name", "") for item in available.get("data", [])]
+                entity_label = "usuarios" if owner_type == "user" else "equipos"
+                return (
+                    f"{owner_type.capitalize()} '{owner_name}' no encontrado. "
+                    f"{entity_label.capitalize()} disponibles: {', '.join(names)}"
+                )
+            raise
+
+        owner_id = owner.get("id")
+
+        # Find table
+        search_result = api_get("/search/query", {"q": table_name, "size": 1})
+        hits = search_result.get("hits", {}).get("hits", [])
+
+        if not hits:
+            return f"No se encontró la tabla '{table_name}'"
+
+        table_id = hits[0]["_source"].get("id")
+        fqn = hits[0]["_source"].get("fullyQualifiedName", table_name)
+        if not table_id:
+            return f"No se pudo obtener ID de la tabla '{table_name}'"
+
+        operations = [{"op": "add", "path": "/owners", "value": [{"id": owner_id, "type": owner_type}]}]
+        api_patch(f"/tables/{table_id}", operations)
+
+        owner_display = owner.get("displayName", owner_name)
+        return f"Owner de '{fqn}' asignado a: {owner_display} ({owner_type})"
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP asignando owner: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error asignando owner: {str(e)}"
+
+
 if __name__ == "__main__":
     if not OPENMETADATA_TOKEN:
         print("⚠️  ADVERTENCIA: OPENMETADATA_TOKEN no está configurado")

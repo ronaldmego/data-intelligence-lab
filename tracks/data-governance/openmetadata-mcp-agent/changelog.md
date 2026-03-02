@@ -4,6 +4,14 @@ Todos los cambios notables de este proyecto se documentan aquí.
 
 ---
 
+## [0.6.0] - 2026-03-02
+
+### Added
+- **Owner assignment tools** — Three new tools: `list_users`, `list_teams`, and `assign_owner` allow the agent to list available users/teams and assign owners to tables via PATCH. ([#8](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/8))
+- **Owner instructions in SYSTEM_PROMPT** — Agent uses `list_users`/`list_teams` to show options when user doesn't specify an owner.
+
+---
+
 ## [0.5.0] - 2026-03-02
 
 ### Added
