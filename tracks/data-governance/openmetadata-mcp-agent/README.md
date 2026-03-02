@@ -2,8 +2,7 @@
 
 > A conversational AI assistant for your data catalog. Ask questions in natural language, get answers from OpenMetadata.
 
-<!-- TODO: Add screenshot of the chat UI here -->
-<!-- ![OpenMetadata Agent Screenshot](docs/screenshot.png) -->
+![OpenMetadata Agent — Table details with columns](docs/screenshots/01-hero.png)
 
 ## The Problem
 
@@ -44,14 +43,8 @@ streamlit run app.py --server.port 4004
 └─────────────────┘     └─────────────────┘     └─────────────────┘
         │                       │
         ▼                       ▼
-   User                 MCP Tools:
-   (browser)            - search_catalog
-                        - list_tables
-                        - get_table_details
-                        - get_lineage
-                        - list_databases
-                        - list_glossary_terms
-                        - list_domains
+   User                 27 MCP Tools
+   (browser)            (17 read + 10 write)
 ```
 
 ## How It Works
@@ -64,7 +57,13 @@ streamlit run app.py --server.port 4004
 
 No manual routing or keyword matching — Gemini's native function calling handles tool selection automatically.
 
+Every tool call is visible in a debug expander below each response:
+
+![Tool trace showing args and raw API result](docs/screenshots/03-tool-trace.png)
+
 ## Available Tools
+
+### Read Tools (17)
 
 | Tool | Description |
 |------|-------------|
@@ -75,8 +74,39 @@ No manual routing or keyword matching — Gemini's native function calling handl
 | `list_databases` | List all registered databases |
 | `list_glossary_terms` | Business glossary terms and definitions |
 | `list_domains` | Data domains and subdomains |
+| `list_stored_procedures` | Stored procedures by schema |
+| `list_policies` | Access policies and rule counts |
+| `list_roles` | Roles with associated policies |
+| `list_services` | Services by type (database, messaging, dashboard, pipeline, mlmodel, storage, search) |
+| `list_pipelines` | Data pipelines and their services |
+| `list_dashboards` | Dashboards and their services |
+| `list_topics` | Kafka/messaging topics |
+| `list_data_products` | Data products and their domains |
+| `list_users` | Registered users |
+| `list_teams` | Registered teams |
 
-> **Note:** All tools are currently read-only. Write operations (add descriptions, manage glossary, assign tags) are planned for Phase 2 — see [ROADMAP.md](./ROADMAP.md).
+### Write Tools (10)
+
+| Tool | Description |
+|------|-------------|
+| `update_table_description` | Update a table's description |
+| `update_column_description` | Update a column's description |
+| `assign_owner` | Assign a user or team as table owner |
+| `create_glossary` | Create a new business glossary |
+| `create_glossary_term` | Add a term to a glossary |
+| `link_glossary_term` | Link a glossary term to a table |
+| `create_classification` | Create a tag classification (category) |
+| `create_tag` | Create a tag within a classification |
+| `assign_tag` | Assign a tag to a table |
+| `create_domain` | Create a data domain |
+
+All write tools require **user confirmation** before execution. The agent shows exactly what will change and asks before proceeding.
+
+### Safety Features
+
+- **Dry-run mode** — Toggle in sidebar to preview write operations without applying changes
+- **Audit log** — All write operations logged with timestamp, tool, args, and result in the sidebar
+- **Confirmation prompt** — Agent always asks before executing any write operation
 
 ## Stack
 
@@ -104,7 +134,7 @@ Copy `.env.example` to `.env` and fill in your values:
 ```
 openmetadata-mcp-agent/
 ├── app.py              # Streamlit UI + agent (Gemini function calling)
-├── server.py           # MCP tool definitions (OpenMetadata API)
+├── server.py           # MCP tool definitions (OpenMetadata API) — 27 tools
 ├── .env.example        # Configuration template
 ├── requirements.txt    # Python dependencies
 ├── ROADMAP.md          # Development roadmap
@@ -132,16 +162,18 @@ python test_agent_gemini.py
 "What databases are registered?"              → list_databases
 "Show me the business glossary"               → list_glossary_terms
 "What data domains exist?"                    → list_domains
+"What roles are configured?"                  → list_roles
+"Show me the stored procedures"               → list_stored_procedures
+"Update the customers table description"      → update_table_description (with confirmation)
+"Assign admin as owner of the orders table"   → assign_owner (with confirmation)
+"Create a glossary called 'business terms'"   → create_glossary (with confirmation)
 ```
 
 ## Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for the full development plan. Key upcoming features:
+See [ROADMAP.md](./ROADMAP.md) for the full development plan.
 
-- **Write operations** — Add descriptions, manage glossary, assign tags and owners
-- **Multi-tool chaining** — Agent chains multiple tools per question
-- **Multi-user sessions** — Per-user history and rate limiting
-- **Authentication** — SSO, roles, granular permissions
+This project is a **single-user MVP/POC** with complete API coverage (27 tools). It serves as the reusable foundation for a future enterprise edition with multi-user sessions, SSO authentication, and production deployment.
 
 ## Contributing
 
