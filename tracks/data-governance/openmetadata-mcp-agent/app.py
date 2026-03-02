@@ -30,6 +30,9 @@ from server import (
     list_users,
     list_teams,
     assign_owner,
+    create_glossary,
+    create_glossary_term,
+    link_glossary_term,
 )
 
 # Configuración
@@ -40,7 +43,8 @@ OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585")
 TOOLS = [search_catalog, list_tables, get_table_details, list_databases,
          list_glossary_terms, get_lineage, list_domains,
          update_table_description, update_column_description,
-         list_users, list_teams, assign_owner]
+         list_users, list_teams, assign_owner,
+         create_glossary, create_glossary_term, link_glossary_term]
 TOOLS_BY_NAME = {fn.__name__: fn for fn in TOOLS}
 
 SYSTEM_PROMPT = (
@@ -59,7 +63,12 @@ SYSTEM_PROMPT = (
     "4. Después de una escritura exitosa, confirma qué se cambió.\n\n"
     "ASIGNACIÓN DE OWNERS:\n"
     "1. Si el usuario pide asignar un owner pero no especifica quién, usa list_users o list_teams para mostrar opciones.\n"
-    "2. El owner puede ser un usuario (type='user') o un equipo (type='team')."
+    "2. El owner puede ser un usuario (type='user') o un equipo (type='team').\n\n"
+    "GESTIÓN DE GLOSARIOS:\n"
+    "1. Para crear un glosario: usa create_glossary con nombre (sin espacios, usar guiones) y descripción.\n"
+    "2. Para crear términos: primero verifica que el glosario existe, luego usa create_glossary_term.\n"
+    "3. Para vincular un término a una tabla: usa link_glossary_term con el FQN del término (formato: glosario.termino).\n"
+    "4. Si el usuario no recuerda los glosarios disponibles, usa list_glossary_terms para mostrarlos."
 )
 
 MAX_TOOL_ITERATIONS = 10
@@ -186,6 +195,11 @@ with st.sidebar:
     - Cambia la descripción de la columna email en customers a "Correo principal del cliente"
     - ¿Qué usuarios hay disponibles?
     - Asigna al usuario admin como owner de la tabla orders
+
+    **Glosario:**
+    - Crea un glosario llamado "negocio" con descripción "Términos de negocio"
+    - Agrega el término "cliente" al glosario negocio
+    - Vincula el término negocio.cliente a la tabla customers
     """)
 
     st.divider()

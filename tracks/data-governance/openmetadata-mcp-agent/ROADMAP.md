@@ -28,9 +28,9 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 - [x] **Assign owners** to tables and assets — PATCH owner field ([#8](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/8))
 
 ### Glossary Management
-- [ ] **Create glossary** — POST new glossary
-- [ ] **Create glossary terms** — POST terms with definitions and synonyms
-- [ ] **Link glossary terms to assets** — Associate terms with tables/columns
+- [x] **Create glossary** — POST new glossary ([#10](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/10))
+- [x] **Create glossary terms** — POST terms with definitions and synonyms ([#10](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/10))
+- [x] **Link glossary terms to assets** — Associate terms with tables/columns ([#10](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/10))
 
 ### Classification & Organization
 - [ ] **Create/assign tags** — POST tags and PATCH them onto assets

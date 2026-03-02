@@ -4,6 +4,15 @@ Todos los cambios notables de este proyecto se documentan aquí.
 
 ---
 
+## [0.7.0] - 2026-03-02
+
+### Added
+- **Glossary management tools** — Three new tools: `create_glossary`, `create_glossary_term`, and `link_glossary_term` allow the agent to create glossaries, add terms with definitions and synonyms, and link terms to tables as tags. ([#10](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/10))
+- **`api_post()` helper** — New HTTP helper in `server.py` for POST requests to create entities.
+- **Glossary instructions in SYSTEM_PROMPT** — Agent guided on glossary creation workflow and term FQN format.
+
+---
+
 ## [0.6.0] - 2026-03-02
 
 ### Added

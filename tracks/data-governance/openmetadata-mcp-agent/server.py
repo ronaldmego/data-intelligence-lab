@@ -54,6 +54,14 @@ def api_patch(endpoint: str, operations: list) -> dict:
     return response.json()
 
 
+def api_post(endpoint: str, payload: dict) -> dict:
+    """Hacer POST request a OpenMetadata API"""
+    url = f"{OPENMETADATA_URL}/api/v1{endpoint}"
+    response = httpx.post(url, headers=get_headers(), json=payload, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+
 def strip_html(text: str) -> str:
     """Remover tags HTML de un string"""
     return re.sub(r"<[^>]+>", "", text).strip()
@@ -547,6 +555,139 @@ def assign_owner(table_name: str, owner_name: str, owner_type: str = "user") -> 
         return f"Error HTTP asignando owner: {e.response.status_code} - {e.response.text}"
     except Exception as e:
         return f"Error asignando owner: {str(e)}"
+
+
+@mcp.tool
+def create_glossary(name: str, description: str, display_name: str = None) -> str:
+    """Crear un nuevo glosario en OpenMetadata.
+
+    Args:
+        name: Nombre del glosario (sin espacios, usar guiones)
+        description: Descripción del glosario
+        display_name: Nombre para mostrar (opcional, usa name si no se especifica)
+
+    Returns:
+        Confirmación de creación o mensaje de error
+    """
+    try:
+        payload = {
+            "name": name,
+            "displayName": display_name or name,
+            "description": description,
+        }
+        result = api_post("/glossaries", payload)
+        fqn = result.get("fullyQualifiedName", name)
+        return f"Glosario '{fqn}' creado exitosamente"
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 409:
+            return f"Ya existe un glosario con el nombre '{name}'"
+        return f"Error HTTP creando glosario: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error creando glosario: {str(e)}"
+
+
+@mcp.tool
+def create_glossary_term(
+    glossary_name: str,
+    term_name: str,
+    description: str,
+    synonyms: list[str] = None,
+) -> str:
+    """Crear un nuevo término en un glosario de OpenMetadata.
+
+    Args:
+        glossary_name: Nombre o FQN del glosario donde agregar el término
+        term_name: Nombre del término (sin espacios, usar guiones)
+        description: Definición del término
+        synonyms: Lista de sinónimos opcionales
+
+    Returns:
+        Confirmación de creación o mensaje de error
+    """
+    try:
+        # Verify glossary exists
+        try:
+            api_get(f"/glossaries/name/{glossary_name}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                available = api_get("/glossaries", {"limit": 50})
+                names = [g.get("name", "") for g in available.get("data", [])]
+                if names:
+                    return (
+                        f"Glosario '{glossary_name}' no encontrado. "
+                        f"Glosarios disponibles: {', '.join(names)}"
+                    )
+                return f"Glosario '{glossary_name}' no encontrado. No hay glosarios creados."
+            raise
+
+        payload = {
+            "name": term_name,
+            "description": description,
+            "glossary": glossary_name,
+        }
+        if synonyms:
+            payload["synonyms"] = synonyms
+
+        result = api_post("/glossaryTerms", payload)
+        fqn = result.get("fullyQualifiedName", term_name)
+        syn_str = f" (sinónimos: {', '.join(synonyms)})" if synonyms else ""
+        return f"Término '{fqn}' creado exitosamente{syn_str}"
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 409:
+            return f"Ya existe un término '{term_name}' en el glosario '{glossary_name}'"
+        return f"Error HTTP creando término: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error creando término de glosario: {str(e)}"
+
+
+@mcp.tool
+def link_glossary_term(table_name: str, term_fqn: str) -> str:
+    """Vincular un término de glosario a una tabla como tag.
+
+    Args:
+        table_name: Nombre o FQN de la tabla
+        term_fqn: FQN del término de glosario (ej: "mi-glosario.mi-termino")
+
+    Returns:
+        Confirmación del vínculo o mensaje de error
+    """
+    try:
+        # Find table
+        search_result = api_get("/search/query", {"q": table_name, "size": 1})
+        hits = search_result.get("hits", {}).get("hits", [])
+
+        if not hits:
+            return f"No se encontró la tabla '{table_name}'"
+
+        table_id = hits[0]["_source"].get("id")
+        table_fqn = hits[0]["_source"].get("fullyQualifiedName", table_name)
+        if not table_id:
+            return f"No se pudo obtener ID de la tabla '{table_name}'"
+
+        # Verify the glossary term exists
+        try:
+            api_get(f"/glossaryTerms/name/{term_fqn}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                return f"Término de glosario '{term_fqn}' no encontrado. Usa el formato 'glosario.termino'."
+            raise
+
+        operations = [{
+            "op": "add",
+            "path": "/tags/0",
+            "value": {
+                "tagFQN": term_fqn,
+                "source": "Glossary",
+                "labelType": "Manual",
+            },
+        }]
+        api_patch(f"/tables/{table_id}", operations)
+
+        return f"Término '{term_fqn}' vinculado a la tabla '{table_fqn}'"
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP vinculando término: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error vinculando término de glosario: {str(e)}"
 
 
 if __name__ == "__main__":
