@@ -6,3 +6,7 @@ venv/
 
 # Agent instructions (internal, not for public repos)
 CLAUDE.md
+
+# Internal diagrams
+*.excalidraw
+*.excalidraw.png
