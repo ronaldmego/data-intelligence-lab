@@ -4,8 +4,14 @@ __pycache__/
 .venv/
 venv/
 
-# Agent instructions (internal, not for public repos)
+# Agent instructions (internal)
 CLAUDE.md
+.claude/
+
+# Internal development files
+tasks/
+technical_notes.md
+quickstart.md
 
 # Internal diagrams
 *.excalidraw

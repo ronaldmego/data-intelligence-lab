@@ -29,6 +29,17 @@ No need to learn the OpenMetadata UI. No need to write API calls. Just ask.
 
 ![Owner query — "Who owns the customers table?"](docs/demos/03-owner.gif)
 
+## Prerequisites
+
+You need a running **OpenMetadata instance** (v1.3+) accessible via its REST API. The agent connects to it — it does not include or install OpenMetadata itself.
+
+Options to get OpenMetadata running:
+- **Docker** (recommended): Follow the [official Docker deployment guide](https://docs.open-metadata.org/deployment/docker)
+- **Bare metal / Kubernetes**: See [OpenMetadata deployment docs](https://docs.open-metadata.org/deployment)
+- **Sandbox**: Use the [OpenMetadata Sandbox](https://sandbox.open-metadata.org/) for testing
+
+You also need a **Google Gemini API key** — get one free at [Google AI Studio](https://aistudio.google.com/apikey).
+
 ## Quick Start
 
 ```bash
@@ -148,7 +159,8 @@ openmetadata-mcp-agent/
 ├── .env.example        # Configuration template
 ├── requirements.txt    # Python dependencies
 ├── ROADMAP.md          # Development roadmap
-├── changelog.md        # Version history
+├── CHANGELOG.md        # Version history
+├── CONTRIBUTING.md     # Contribution guidelines
 └── test_*.py           # Test scripts
 ```
 
@@ -195,4 +207,4 @@ Contributions are welcome! Please open an issue first to discuss what you'd like
 
 ---
 
-Built by [GalacticaIA](https://galacticaia.com)
+Built by [Ronald Mego](https://ronaldmego.com)
