@@ -97,7 +97,11 @@ SYSTEM_PROMPT = (
     "3. Asigna el tag a una tabla con assign_tag usando el FQN (formato: clasificacion.tag).\n\n"
     "DOMINIOS:\n"
     "1. Usa create_domain para crear dominios de datos. Tipos válidos: Aggregate, Consumer Aligned, Source Aligned.\n"
-    "2. La asignación de dominios a tablas se realiza desde la UI de OpenMetadata."
+    "2. La asignación de dominios a tablas se realiza desde la UI de OpenMetadata.\n\n"
+    "CONTEXTO POR DEFECTO:\n"
+    "1. Salvo que el usuario indique lo contrario, enfócate en el schema 'telco_demo'.\n"
+    "2. Si una búsqueda devuelve resultados de múltiples schemas, prioriza y muestra solo los de telco_demo.\n"
+    "3. No menciones otros schemas a menos que el usuario pregunte específicamente por ellos."
 )
 
 MAX_TOOL_ITERATIONS = 10
@@ -211,14 +215,14 @@ def agent_process(query: str, llm, chat_history: list = None, dry_run: bool = Fa
 # ============== STREAMLIT UI ==============
 
 st.set_page_config(
-    page_title="OpenMetadata Agent",
+    page_title="Data Governance AI Agent | MCP + OpenMetadata",
     page_icon="🔍",
     layout="wide"
 )
 
 # Header
-st.title("🔍 OpenMetadata Agent")
-st.caption(f"Asistente conversacional para tu catálogo de datos | Conectado a: `{OPENMETADATA_URL}`")
+st.title("🏛️ Data Governance AI Agent")
+st.subheader("Open Source · 100% Local · 27 MCP Tools · Powered by OpenMetadata + Gemini")
 
 # Sidebar con info
 with st.sidebar:
