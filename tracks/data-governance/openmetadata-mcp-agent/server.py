@@ -162,14 +162,22 @@ def get_table_details(table_name: str) -> str:
         if not table_id:
             return f"No se pudo obtener ID de la tabla '{table_name}'"
         
-        table = api_get(f"/tables/{table_id}")
+        table = api_get(f"/tables/{table_id}", {"fields": "owners,tags,columns"})
+        
+        # Resolve owner(s) — API v1 uses "owners" (list)
+        owners_list = table.get("owners", [])
+        if owners_list:
+            owner_names = ", ".join(o.get("displayName", o.get("name", "?")) for o in owners_list)
+        else:
+            # Fallback to legacy singular "owner"
+            owner_names = table.get("owner", {}).get("displayName", table.get("owner", {}).get("name", "Sin owner"))
         
         # Formatear respuesta
         output = [
             f"📊 Tabla: {table.get('name')}",
             f"FQN: {table.get('fullyQualifiedName')}",
             f"Descripción: {strip_html(table.get('description', 'Sin descripción'))}",
-            f"Owner: {table.get('owner', {}).get('name', 'Sin owner')}",
+            f"Owner: {owner_names}",
             f"",
             f"📋 Columnas ({len(table.get('columns', []))}):"
         ]
