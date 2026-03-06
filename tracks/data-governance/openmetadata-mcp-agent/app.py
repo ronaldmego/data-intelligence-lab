@@ -97,11 +97,7 @@ SYSTEM_PROMPT = (
     "3. Asigna el tag a una tabla con assign_tag usando el FQN (formato: clasificacion.tag).\n\n"
     "DOMINIOS:\n"
     "1. Usa create_domain para crear dominios de datos. Tipos válidos: Aggregate, Consumer Aligned, Source Aligned.\n"
-    "2. La asignación de dominios a tablas se realiza desde la UI de OpenMetadata.\n\n"
-    "CONTEXTO POR DEFECTO:\n"
-    "1. Salvo que el usuario indique lo contrario, enfócate en el schema 'telco_demo'.\n"
-    "2. Si una búsqueda devuelve resultados de múltiples schemas, prioriza y muestra solo los de telco_demo.\n"
-    "3. No menciones otros schemas a menos que el usuario pregunte específicamente por ellos."
+    "2. La asignación de dominios a tablas se realiza desde la UI de OpenMetadata."
 )
 
 MAX_TOOL_ITERATIONS = 10
