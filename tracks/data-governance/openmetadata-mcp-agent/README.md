@@ -2,7 +2,7 @@
 
 > A conversational AI assistant for your data catalog. Ask questions in natural language, get answers from OpenMetadata.
 
-![OpenMetadata Agent — Table details with columns](docs/screenshots/01-hero.png)
+![OpenMetadata Agent — List tables in telco_demo schema](docs/demos/01-list-tables.gif)
 
 ## The Problem
 
@@ -18,6 +18,16 @@ Agent: searches catalog → finds 3 tables → returns details with columns and 
 ```
 
 No need to learn the OpenMetadata UI. No need to write API calls. Just ask.
+
+### See it in action
+
+**Query the business glossary:**
+
+![Glossary lookup — "What does Data Owner mean?"](docs/demos/02-glossary.gif)
+
+**Find table owners:**
+
+![Owner query — "Who owns the customers table?"](docs/demos/03-owner.gif)
 
 ## Quick Start
 
