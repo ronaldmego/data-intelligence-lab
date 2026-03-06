@@ -161,17 +161,17 @@ openmetadata-mcp-agent/
 ├── ROADMAP.md          # Development roadmap
 ├── CHANGELOG.md        # Version history
 ├── CONTRIBUTING.md     # Contribution guidelines
-└── test_*.py           # Test scripts
+└── scripts/            # Test and utility scripts
 ```
 
 ## Testing
 
 ```bash
 # Test OpenMetadata connection and MCP tools
-python test_queries.py
+python scripts/test_queries.py
 
 # Test the full agent pipeline
-python test_agent_gemini.py
+python scripts/test_agent_gemini.py
 ```
 
 ## Conversation Examples

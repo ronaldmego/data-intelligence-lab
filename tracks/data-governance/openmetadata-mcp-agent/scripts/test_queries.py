@@ -4,8 +4,9 @@ Test conversacional del OpenMetadata MCP Server.
 Simula queries que un usuario haría en lenguaje natural.
 """
 
+import os
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from server import (
     search_catalog, 
     list_tables, 

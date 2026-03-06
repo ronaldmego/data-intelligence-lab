@@ -11,14 +11,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Cargar API key desde .env (NUNCA hardcodear!)
-load_dotenv(Path(__file__).parent / ".env")
+load_dotenv(Path(__file__).parent.parent / ".env")
+
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
-
-# Importar funciones del MCP server
-import sys
-sys.path.insert(0, '.')
 from server import (
     search_catalog,
     list_tables,
