@@ -41,6 +41,40 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 - [x] Dry-run mode to preview changes before applying ([#14](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/14))
 - [x] Audit log of all write operations ([#15](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/15))
 
+## Phase 3: Multi-Agent Architecture (Idea 💡)
+
+**Concept:** Multiple specialized agents consuming a single centralized MCP governance server, instead of spinning up separate MCP server instances per user/agent.
+
+### Architecture Vision
+```
+                    ┌─────────────────────┐
+                    │  OpenMetadata MCP    │
+                    │  Server (central)    │
+                    │  server.py via SSE   │
+                    └─────────┬───────────┘
+                              │ MCP Protocol (SSE)
+              ┌───────────────┼───────────────┐
+              │               │               │
+        ┌─────┴─────┐  ┌─────┴─────┐  ┌─────┴─────┐
+        │ Agent: DQ  │  │ Agent:    │  │ Agent:    │
+        │ Steward    │  │ Lineage   │  │ Glossary  │
+        │            │  │ Explorer  │  │ Manager   │
+        └────────────┘  └───────────┘  └───────────┘
+```
+
+### Why
+- Current approach: each `app.py` imports `server.py` functions directly (Python import, no MCP protocol)
+- Problem at scale: N agents = N server instances, each with its own connection to OpenMetadata
+- Solution: One MCP server exposed via SSE, multiple agents connect as clients
+- Agents can be specialized by domain (Data Quality, Lineage, Glossary, Compliance) while sharing the same governance toolset
+- Uses **mcp-use** or equivalent client library for agent ↔ MCP server communication
+
+### Key Decisions (TBD)
+- [ ] SSE vs stdio for multi-client support (SSE preferred for network access)
+- [ ] Auth/session isolation per agent
+- [ ] Tool-level RBAC: which agents can use write tools vs read-only
+- [ ] Orchestrator agent vs independent agents with shared context
+
 ## Future: Enterprise Edition (separate project)
 
 Phases 3-6 involve multi-user, authentication, enterprise audit, and production hardening.
