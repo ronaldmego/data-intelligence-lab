@@ -23,8 +23,12 @@ import httpx
 load_dotenv(Path(__file__).parent / ".env")
 
 # Configuración
-OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585")
+OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585").rstrip("/")
 OPENMETADATA_TOKEN = os.getenv("OPENMETADATA_TOKEN", "")
+VERIFY_SSL = os.getenv("OPENMETADATA_VERIFY_SSL", "true").lower() != "false"
+
+# HTTP client con configuración SSL
+http_client = httpx.Client(verify=VERIFY_SSL, timeout=30)
 
 # Crear servidor MCP
 mcp = FastMCP("OpenMetadata")
@@ -39,7 +43,7 @@ def get_headers():
 def api_get(endpoint: str, params: dict = None) -> dict:
     """Hacer GET request a OpenMetadata API"""
     url = f"{OPENMETADATA_URL}/api/v1{endpoint}"
-    response = httpx.get(url, headers=get_headers(), params=params, timeout=30)
+    response = http_client.get(url, headers=get_headers(), params=params)
     response.raise_for_status()
     return response.json()
 
@@ -49,7 +53,7 @@ def api_patch(endpoint: str, operations: list) -> dict:
     url = f"{OPENMETADATA_URL}/api/v1{endpoint}"
     headers = get_headers()
     headers["Content-Type"] = "application/json-patch+json"
-    response = httpx.patch(url, headers=headers, json=operations, timeout=30)
+    response = http_client.patch(url, headers=headers, json=operations)
     response.raise_for_status()
     return response.json()
 
@@ -57,7 +61,7 @@ def api_patch(endpoint: str, operations: list) -> dict:
 def api_post(endpoint: str, payload: dict) -> dict:
     """Hacer POST request a OpenMetadata API"""
     url = f"{OPENMETADATA_URL}/api/v1{endpoint}"
-    response = httpx.post(url, headers=get_headers(), json=payload, timeout=30)
+    response = http_client.post(url, headers=get_headers(), json=payload)
     response.raise_for_status()
     return response.json()
 
@@ -1110,6 +1114,7 @@ if __name__ == "__main__":
     
     print(f"🚀 Iniciando OpenMetadata MCP Server")
     print(f"   URL: {OPENMETADATA_URL}")
+    print(f"   SSL verify: {'✅ Enabled' if VERIFY_SSL else '⚠️  Disabled'}")
     print(f"   Token: {'✅ Configurado' if OPENMETADATA_TOKEN else '❌ No configurado'}")
     print("")
     mcp.run()
