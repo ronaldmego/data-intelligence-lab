@@ -41,6 +41,38 @@ Enable the agent to **write metadata** to OpenMetadata, not just read it.
 - [x] Dry-run mode to preview changes before applying ([#14](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/14))
 - [x] Audit log of all write operations ([#15](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/15))
 
+## Phase 2.5: Data Quality & Observability ([#19](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/19))
+
+Enable the agent to **surface data quality issues** — the biggest gap in current coverage.
+
+### Read tools (priority)
+- [ ] **`list_test_suites`** — List all test suites with pass/fail/aborted summary counts
+- [ ] **`list_test_cases`** — List test cases, filterable by table FQN, suite, and status (Success/Failed/Aborted)
+- [ ] **`get_test_case_results`** — Historical results for a specific test case (last N days)
+- [ ] **`get_failed_tests`** — Quick view: all currently failing tests across the catalog
+
+### Write tools (future)
+- [ ] **`create_test_suite`** — Create a test suite for a table
+- [ ] **`add_test_case`** — Add a test case (columnValuesNotNull, tableRowCountToBeBetween, etc.)
+
+### Ingestion Pipeline Monitoring ([#20](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/20))
+- [ ] **`list_ingestion_pipelines`** — List ingestion pipelines with last run status, filterable by service and type
+- [ ] **`get_ingestion_pipeline_status`** — Run history for a specific pipeline (last N runs)
+- [ ] **`get_pipeline_filters`** — Inspect table/schema filters and profile sample % of a pipeline
+
+### API endpoints
+- `/api/v1/dataQuality/testSuites` — suites with summary
+- `/api/v1/dataQuality/testCases` — cases filterable by status, entity
+- `/api/v1/dataQuality/testCases/{fqn}/testCaseResult` — historical results
+- `/api/v1/services/ingestionPipelines` — ingestion pipelines (filterable by service, type)
+- `/api/v1/services/ingestionPipelines/{id}/pipelineStatus` — run history
+
+### Why
+- "What tests are failing?" is the most natural question for a data steward
+- "Did the Oracle profiler run ok?" replaces SSH + manual log grepping
+- Currently requires navigating the OM UI or SSH to the server manually
+- Closes the biggest gap vs full OM API coverage (see [yangkyeongmo/mcp-server-openmetadata](https://github.com/yangkyeongmo/mcp-server-openmetadata) for reference)
+
 ## Phase 3: Multi-Agent Architecture (Idea 💡)
 
 **Concept:** Multiple specialized agents consuming a single centralized MCP governance server, instead of spinning up separate MCP server instances per user/agent.
