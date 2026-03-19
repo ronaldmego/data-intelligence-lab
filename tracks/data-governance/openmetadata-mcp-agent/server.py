@@ -1106,6 +1106,213 @@ def create_domain(name: str, description: str, domain_type: str = "Aggregate") -
         return f"Error creando dominio: {str(e)}"
 
 
+# ===========================================================================
+# DATA QUALITY TOOLS
+# ===========================================================================
+
+@mcp.tool
+def list_test_suites(limit: int = 50) -> str:
+    """Listar test suites de calidad de datos con resumen de resultados.
+
+    Args:
+        limit: Máximo de resultados
+
+    Returns:
+        Lista de test suites con conteo de tests passed/failed/aborted
+    """
+    try:
+        result = api_get("/dataQuality/testSuites", {"limit": limit, "fields": "summary"})
+        suites = result.get("data", [])
+        if not suites:
+            return "No se encontraron test suites configurados."
+        output = [f"Test Suites ({len(suites)}):\n"]
+        for s in suites:
+            name = s.get("name", "")
+            description = strip_html(s.get("description", ""))
+            summary = s.get("summary", {})
+            total = summary.get("total", 0)
+            success = summary.get("success", 0)
+            failed = summary.get("failed", 0)
+            aborted = summary.get("aborted", 0)
+            status_icon = "✅" if failed == 0 and total > 0 else ("❌" if failed > 0 else "⚪")
+            line = f"{status_icon} {name}: {total} tests ({success} passed, {failed} failed, {aborted} aborted)"
+            if description:
+                line += f"\n   {description}"
+            output.append(line)
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP listando test suites: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error listando test suites: {str(e)}"
+
+
+@mcp.tool
+def list_test_cases(table_fqn: str = None, status: str = None, limit: int = 50) -> str:
+    """Listar test cases de calidad de datos con su último resultado.
+
+    Args:
+        table_fqn: FQN de la tabla para filtrar (ej: "service.db.schema.table"). Opcional.
+        status: Filtrar por estado: "Success", "Failed", "Aborted". Opcional.
+        limit: Máximo de resultados
+
+    Returns:
+        Lista de test cases con estado, tipo, y última ejecución
+    """
+    try:
+        params = {"limit": limit, "fields": "testDefinition,testSuite,testCaseResult"}
+        if table_fqn:
+            params["entityLink"] = f"<#E::table::{table_fqn}>"
+            params["includeAllTests"] = "true"
+
+        result = api_get("/dataQuality/testCases", params)
+        cases = result.get("data", [])
+
+        if status:
+            cases = [
+                c for c in cases
+                if c.get("testCaseResult", {}).get("testCaseStatus", "").lower() == status.lower()
+            ]
+
+        if not cases:
+            msg = "No se encontraron test cases"
+            if table_fqn:
+                msg += f" para la tabla '{table_fqn}'"
+            if status:
+                msg += f" con estado '{status}'"
+            return msg + "."
+
+        output = [f"Test Cases ({len(cases)}):\n"]
+        for tc in cases:
+            name = tc.get("name", "")
+            test_def = tc.get("testDefinition", {}).get("name", "N/A")
+            tc_result = tc.get("testCaseResult", {})
+            tc_status = tc_result.get("testCaseStatus", "N/A")
+            result_msg = tc_result.get("result", "")
+            ts = tc_result.get("timestamp", 0)
+
+            status_icon = {"Success": "✅", "Failed": "❌", "Aborted": "⚠️"}.get(tc_status, "⚪")
+            line = f"{status_icon} [{tc_status}] {name}\n   Tipo: {test_def}"
+            if result_msg:
+                line += f"\n   Resultado: {result_msg}"
+            if ts:
+                from datetime import datetime, timezone
+                dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+                line += f"\n   Última ejecución: {dt}"
+            output.append(line)
+
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP listando test cases: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error listando test cases: {str(e)}"
+
+
+@mcp.tool
+def get_failed_tests(limit: int = 50) -> str:
+    """Obtener todos los test cases que están fallando actualmente.
+
+    Args:
+        limit: Máximo de resultados
+
+    Returns:
+        Lista de tests fallidos con tabla afectada, tipo de test y mensaje de fallo
+    """
+    try:
+        result = api_get("/dataQuality/testCases", {
+            "limit": limit,
+            "testCaseStatus": "Failed",
+            "fields": "testDefinition,testSuite,testCaseResult",
+        })
+        cases = result.get("data", [])
+
+        if not cases:
+            return "No hay tests fallando actualmente. ✅"
+
+        output = [f"Tests fallando ({len(cases)}):\n"]
+        for tc in cases:
+            name = tc.get("name", "")
+            fqn = tc.get("fullyQualifiedName", "")
+            test_def = tc.get("testDefinition", {}).get("name", "N/A")
+            suite = tc.get("testSuite", {}).get("name", "N/A")
+            tc_result = tc.get("testCaseResult", {})
+            result_msg = tc_result.get("result", "")
+            ts = tc_result.get("timestamp", 0)
+
+            line = f"❌ {name}\n   Tipo: {test_def} | Suite: {suite}"
+            if fqn:
+                # Extraer tabla del FQN (todo menos el último segmento)
+                table_path = ".".join(fqn.split(".")[:-1])
+                line += f"\n   Tabla: {table_path}"
+            if result_msg:
+                line += f"\n   Fallo: {result_msg}"
+            if ts:
+                from datetime import datetime, timezone
+                dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+                line += f"\n   Detectado: {dt}"
+            output.append(line)
+
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP obteniendo tests fallidos: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error obteniendo tests fallidos: {str(e)}"
+
+
+@mcp.tool
+def get_test_case_results(test_case_fqn: str, days: int = 7) -> str:
+    """Obtener el historial de resultados de un test case específico.
+
+    Args:
+        test_case_fqn: FQN del test case (ej: "service.db.schema.table.test_name")
+        days: Días de historial a consultar (default 7)
+
+    Returns:
+        Historial de ejecuciones con estado, resultado y timestamp
+    """
+    try:
+        import time
+        from datetime import datetime, timezone
+
+        end_ts = int(time.time() * 1000)
+        start_ts = end_ts - (days * 86400 * 1000)
+
+        result = api_get(
+            f"/dataQuality/testCases/{test_case_fqn}/testCaseResult",
+            {"startTs": start_ts, "endTs": end_ts, "limit": 30},
+        )
+        results = result.get("data", [])
+
+        if not results:
+            return f"No hay resultados en los últimos {days} días para '{test_case_fqn}'."
+
+        output = [f"Historial de '{test_case_fqn}' (últimos {days} días, {len(results)} ejecuciones):\n"]
+        for r in results:
+            tc_status = r.get("testCaseStatus", "N/A")
+            result_msg = r.get("result", "")
+            ts = r.get("timestamp", 0)
+            test_values = r.get("testResultValue", [])
+
+            status_icon = {"Success": "✅", "Failed": "❌", "Aborted": "⚠️"}.get(tc_status, "⚪")
+            dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC") if ts else "N/A"
+            line = f"{status_icon} {dt} — {tc_status}"
+            if result_msg:
+                line += f"\n   {result_msg}"
+            if test_values:
+                vals = ", ".join(f"{v.get('name')}={v.get('value')}" for v in test_values)
+                line += f"\n   Valores: {vals}"
+            output.append(line)
+
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            return f"Test case no encontrado: '{test_case_fqn}'"
+        if e.response.status_code == 500:
+            return f"El test case '{test_case_fqn}' aún no tiene ejecuciones registradas. Ejecuta el test suite primero."
+        return f"Error HTTP obteniendo resultados: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error obteniendo resultados del test case: {str(e)}"
+
+
 if __name__ == "__main__":
     if not OPENMETADATA_TOKEN:
         print("⚠️  ADVERTENCIA: OPENMETADATA_TOKEN no está configurado")
