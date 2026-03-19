@@ -1158,6 +1158,7 @@ def list_test_cases(table_fqn: str = None, status: str = None, limit: int = 50) 
         params = {"limit": limit, "fields": "testDefinition,testSuite,testCaseResult"}
         if table_fqn:
             params["entityLink"] = f"<#E::table::{table_fqn}>"
+            params["includeAllTests"] = "true"
 
         result = api_get("/dataQuality/testCases", params)
         cases = result.get("data", [])
@@ -1301,6 +1302,8 @@ def get_test_case_results(test_case_fqn: str, days: int = 7) -> str:
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             return f"Test case no encontrado: '{test_case_fqn}'"
+        if e.response.status_code == 500:
+            return f"El test case '{test_case_fqn}' aún no tiene ejecuciones registradas. Ejecuta el test suite primero."
         return f"Error HTTP obteniendo resultados: {e.response.status_code} - {e.response.text}"
     except Exception as e:
         return f"Error obteniendo resultados del test case: {str(e)}"
