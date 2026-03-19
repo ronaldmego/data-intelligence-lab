@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 
 ---
 
+## [1.1.0] - 2026-03-19
+
+### Added
+- **Data Quality tools** — 4 new read tools for querying OpenMetadata's test suites and test cases. Total: 31 tools (21 read + 10 write). ([#19](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/19))
+  - `list_test_suites` — lists all test suites with passed/failed/aborted summary counts
+  - `list_test_cases` — lists test cases filterable by table FQN and/or status (Success/Failed/Aborted)
+  - `get_failed_tests` — quick view of all currently failing tests with failure message and affected table
+  - `get_test_case_results` — historical results for a specific test case over N days
+
+---
+
 ## [1.0.0] - 2026-03-02
 
 ### Added
