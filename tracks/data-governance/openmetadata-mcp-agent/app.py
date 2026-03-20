@@ -46,6 +46,9 @@ from server import (
     create_tag,
     assign_tag,
     create_domain,
+    list_ingestion_pipelines,
+    get_ingestion_pipeline_status,
+    get_pipeline_filters,
     list_test_suites,
     list_test_cases,
     get_failed_tests,
@@ -65,6 +68,7 @@ TOOLS = [search_catalog, list_tables, get_table_details, list_databases,
          list_users, list_teams, assign_owner,
          create_glossary, create_glossary_term, link_glossary_term,
          create_classification, create_tag, assign_tag, create_domain,
+         list_ingestion_pipelines, get_ingestion_pipeline_status, get_pipeline_filters,
          list_test_suites, list_test_cases, get_failed_tests, get_test_case_results]
 TOOLS_BY_NAME = {fn.__name__: fn for fn in TOOLS}
 
