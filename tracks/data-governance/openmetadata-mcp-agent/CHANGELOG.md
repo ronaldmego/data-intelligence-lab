@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 ---
 
+## [1.2.0] - 2026-03-20
+
+### Added
+- **Ingestion Pipeline monitoring tools** — 3 new read tools for querying OpenMetadata's ingestion pipelines. Total: 34 tools (24 read + 10 write). ([#20](https://github.com/ronaldmego/openmetadata-mcp-agent/issues/20))
+  - `list_ingestion_pipelines` — lists all ingestion pipelines with last run state, duration, and record counts. Filterable by service and pipeline type.
+  - `get_ingestion_pipeline_status` — run history for a specific pipeline with per-step detail (records, errors, failures). Falls back to last known run when Airflow history is unavailable.
+  - `get_pipeline_filters` — shows configured schema/table filters, profile sample, and key options for a pipeline. Replaces manual curl + check_pipeline_filters.py workflow.
+
+---
+
 ## [1.1.0] - 2026-03-19
 
 ### Added

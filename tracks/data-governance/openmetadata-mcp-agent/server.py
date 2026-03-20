@@ -1107,6 +1107,234 @@ def create_domain(name: str, description: str, domain_type: str = "Aggregate") -
 
 
 # ===========================================================================
+# INGESTION PIPELINE TOOLS
+# ===========================================================================
+
+@mcp.tool
+def list_ingestion_pipelines(service: str = None, pipeline_type: str = None, limit: int = 50) -> str:
+    """Listar pipelines de ingestion de OpenMetadata con su último estado de ejecución.
+
+    Args:
+        service: Filtrar por nombre de servicio (ej: "Supabase-GalacticaIA"). Opcional.
+        pipeline_type: Filtrar por tipo: metadata, profiler, autoClassification, usage, lineage. Opcional.
+        limit: Máximo de resultados
+
+    Returns:
+        Lista de pipelines con tipo, último estado, fechas de ejecución y errores
+    """
+    try:
+        params = {"limit": limit, "fields": "pipelineStatuses"}
+        if service:
+            params["service"] = service
+        if pipeline_type:
+            params["pipelineType"] = pipeline_type
+
+        result = api_get("/services/ingestionPipelines", params)
+        pipelines = result.get("data", [])
+
+        if not pipelines:
+            msg = "No se encontraron ingestion pipelines"
+            if service:
+                msg += f" para el servicio '{service}'"
+            if pipeline_type:
+                msg += f" de tipo '{pipeline_type}'"
+            return msg + "."
+
+        from datetime import datetime, timezone
+
+        output = [f"Ingestion Pipelines ({len(pipelines)}):\n"]
+        for p in pipelines:
+            name = p.get("displayName") or p.get("name", "")
+            fqn = p.get("fullyQualifiedName", "")
+            p_type = p.get("pipelineType", "")
+            last = p.get("pipelineStatuses") or {}
+
+            state = last.get("pipelineState", "never run")
+            state_icon = {"success": "✅", "failed": "❌", "running": "🔄", "partial_success": "⚠️"}.get(state, "⚪")
+
+            line = f"{state_icon} [{state}] {name} ({p_type})\n   FQN: {fqn}"
+
+            start_ts = last.get("startDate") or last.get("timestamp")
+            end_ts = last.get("endDate")
+            if start_ts:
+                start_dt = datetime.fromtimestamp(start_ts / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+                line += f"\n   Último run: {start_dt}"
+            if start_ts and end_ts:
+                duration = round((end_ts - start_ts) / 1000)
+                line += f" (duración: {duration}s)"
+
+            steps = last.get("status", [])
+            errors = sum(s.get("errors", 0) for s in steps)
+            records = sum(s.get("records", 0) for s in steps)
+            if steps:
+                line += f"\n   Registros: {records} | Errores: {errors}"
+
+            output.append(line)
+
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        return f"Error HTTP listando ingestion pipelines: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error listando ingestion pipelines: {str(e)}"
+
+
+@mcp.tool
+def get_ingestion_pipeline_status(pipeline_fqn: str, days: int = 30) -> str:
+    """Ver historial de ejecuciones de un pipeline de ingestion.
+
+    Args:
+        pipeline_fqn: FQN del pipeline (ej: "Supabase-GalacticaIA.Supabase-GalacticaIA_metadata")
+        days: Días de historial a consultar (default 30)
+
+    Returns:
+        Historial de runs con estado, duración, registros procesados y errores
+    """
+    try:
+        import time
+        from datetime import datetime, timezone
+
+        end_ts = int(time.time() * 1000)
+        start_ts = end_ts - (days * 86400 * 1000)
+
+        result = api_get(
+            f"/services/ingestionPipelines/{pipeline_fqn}/pipelineStatus",
+            {"startTs": start_ts, "endTs": end_ts, "limit": 20},
+        )
+        runs = result.get("data", [])
+
+        if not runs:
+            # Fallback: mostrar al menos el último run del objeto pipeline
+            pipeline = api_get(f"/services/ingestionPipelines/name/{pipeline_fqn}", {"fields": "pipelineStatuses"})
+            last = pipeline.get("pipelineStatuses")
+            if not last:
+                return f"El pipeline '{pipeline_fqn}' no tiene ejecuciones registradas en los últimos {days} días."
+            runs = [last]
+            note = " (solo último run disponible — pipeline aún no ejecutado vía Airflow)"
+        else:
+            note = ""
+
+        output = [f"Historial de '{pipeline_fqn}' (últimos {days} días, {len(runs)} ejecuciones){note}:\n"]
+        for r in runs:
+            state = r.get("pipelineState", "N/A")
+            state_icon = {"success": "✅", "failed": "❌", "running": "🔄", "partial_success": "⚠️"}.get(state, "⚪")
+            start_ts_r = r.get("startDate") or r.get("timestamp", 0)
+            end_ts_r = r.get("endDate", 0)
+
+            dt = datetime.fromtimestamp(start_ts_r / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC") if start_ts_r else "N/A"
+            duration = round((end_ts_r - start_ts_r) / 1000) if start_ts_r and end_ts_r else None
+
+            line = f"{state_icon} {dt} — {state}"
+            if duration is not None:
+                line += f" ({duration}s)"
+
+            steps = r.get("status", [])
+            for s in steps:
+                s_name = s.get("name", "")
+                records = s.get("records", 0)
+                errors = s.get("errors", 0)
+                failures = s.get("failures", [])
+                step_line = f"\n   • {s_name}: {records} registros"
+                if errors:
+                    step_line += f", {errors} errores"
+                if failures:
+                    step_line += f"\n     Fallos: {'; '.join(str(f) for f in failures[:3])}"
+                line += step_line
+
+            output.append(line)
+
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            return f"Pipeline no encontrado: '{pipeline_fqn}'"
+        return f"Error HTTP obteniendo estado del pipeline: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error obteniendo estado del pipeline: {str(e)}"
+
+
+@mcp.tool
+def get_pipeline_filters(pipeline_fqn: str) -> str:
+    """Ver los filtros y configuración de un pipeline de ingestion.
+
+    Muestra schemaFilterPattern, tableFilterPattern, profileSample y otras
+    opciones relevantes. Reemplaza el workflow manual de curl + check_pipeline_filters.py.
+
+    Args:
+        pipeline_fqn: FQN del pipeline (ej: "Supabase-GalacticaIA.Supabase-GalacticaIA_metadata")
+
+    Returns:
+        Filtros configurados: includes/excludes de schemas y tablas, opciones de profiling
+    """
+    try:
+        result = api_get(f"/services/ingestionPipelines/name/{pipeline_fqn}", {"fields": "sourceConfig"})
+
+        name = result.get("displayName") or result.get("name", pipeline_fqn)
+        p_type = result.get("pipelineType", "")
+        config = result.get("sourceConfig", {}).get("config", {})
+
+        if not config:
+            return f"No se encontró configuración para el pipeline '{pipeline_fqn}'."
+
+        output = [f"Configuración del pipeline: {name} ({p_type})\n"]
+
+        # Schema filters
+        schema_filter = config.get("schemaFilterPattern", {})
+        schema_includes = schema_filter.get("includes", [])
+        schema_excludes = schema_filter.get("excludes", [])
+        if schema_includes or schema_excludes:
+            output.append("Filtros de schema:")
+            if schema_includes:
+                output.append(f"  Incluye: {', '.join(schema_includes)}")
+            if schema_excludes:
+                output.append(f"  Excluye: {', '.join(schema_excludes)}")
+
+        # Table filters
+        table_filter = config.get("tableFilterPattern", {})
+        table_includes = table_filter.get("includes", [])
+        table_excludes = table_filter.get("excludes", [])
+        if table_includes or table_excludes:
+            output.append("Filtros de tabla:")
+            if table_includes:
+                output.append(f"  Incluye: {', '.join(table_includes)}")
+            if table_excludes:
+                output.append(f"  Excluye: {', '.join(table_excludes)}")
+
+        # Profile sample (para profiler pipelines)
+        profile_sample = config.get("profileSample")
+        profile_sample_type = config.get("profileSampleType", "")
+        if profile_sample is not None:
+            output.append(f"Profile sample: {profile_sample}% ({profile_sample_type})")
+
+        # Opciones clave
+        options = []
+        for key, label in [
+            ("includeTables", "Incluir tablas"),
+            ("includeViews", "Incluir vistas"),
+            ("includeDDL", "Incluir DDL"),
+            ("includeTags", "Incluir tags"),
+            ("markDeletedTables", "Marcar tablas eliminadas"),
+        ]:
+            val = config.get(key)
+            if val is not None:
+                options.append(f"{label}: {'✅' if val else '❌'}")
+        if options:
+            output.append("Opciones: " + " | ".join(options))
+
+        # Schedule
+        airflow_config = result.get("airflowConfig", {})
+        schedule = airflow_config.get("scheduleInterval", "")
+        if schedule:
+            output.append(f"Cron: {schedule}")
+
+        return "\n".join(output)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            return f"Pipeline no encontrado: '{pipeline_fqn}'"
+        return f"Error HTTP obteniendo configuración del pipeline: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error obteniendo configuración del pipeline: {str(e)}"
+
+
+# ===========================================================================
 # DATA QUALITY TOOLS
 # ===========================================================================
 
