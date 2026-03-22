@@ -214,11 +214,16 @@ ESTRATEGIA MULTI-STEP (best practice):
    - Si el usuario pregunta por tablas y solo tienes databases → list_tables también
    - DONE cuando tengas el inventario completo
 
-4. LINAJE (keywords: de dónde vienen, linaje, upstream, downstream):
+4. CALIDAD DE DATOS (keywords: calidad, quality, nulls, duplicados, problemas, reporte de calidad):
+   - Paso 1: get_table_details (OpenMetadata) → descripción, owner, tags
+   - Paso 2: get_table_profile (SQL) → nulls%, cardinalidad, row count por columna
+   - SOLO después de ambos pasos → DONE
+
+5. LINAJE (keywords: de dónde vienen, linaje, upstream, downstream):
    - Paso 1: get_lineage (OpenMetadata) → grafo de dependencias
    - DONE con el linaje
 
-5. GLOSARIO / NEGOCIO (keywords: qué significa, definición, glosario):
+6. GLOSARIO / NEGOCIO (keywords: qué significa, definición, glosario):
    - Paso 1: list_glossary_terms o search_catalog
    - DONE con las definiciones
 
@@ -315,6 +320,8 @@ Paso actual: {step}/{max_steps}
         is_profile = any(w in query_lower for w in ["perfil", "profile", "describe", "detalles", "estructura", "columnas"])
         is_stats = any(w in query_lower for w in ["estadísticas", "estadisticas", "stats", "distribución", "distribucion"])
         is_viz = any(w in query_lower for w in ["gráfico", "grafico", "chart", "histograma", "barras", "ranking", "distribución visual", "visualiza", "muestra gráfico"])
+        is_quality = any(w in query_lower for w in ["calidad", "quality", "nulls", "nulos", "duplicados", "problemas", "reporte de calidad", "data quality"])
+        is_analysis_detect = any(w in query_lower for w in ["qué análisis", "que analisis", "cómo analizo", "como analizo", "qué puedo hacer", "analizar", "explorar"])
 
         if is_profile:
             classification_section = f"\n{classification_text}\n" if classification_text else ""
@@ -348,7 +355,11 @@ Aplica estas reglas sobre los datos obtenidos — solo menciona los que apliquen
 - **Identificadores** (cardinalidad ~100%): no analizar, solo confirmar unicidad
 
 ### Siguiente paso sugerido
-Basándote en los tipos de variables encontrados, propón UN análisis concreto y el gráfico apropiado.
+Basándote en los tipos de variables y problemas encontrados, propón UN análisis concreto.
+- Si hay columnas con nulls altos o constantes → sugerir reporte de calidad completo
+- Si hay temporales + numéricas → sugerir análisis de tendencia
+- Si hay categóricas + numéricas → sugerir distribución por grupo
+- Si hay 2+ numéricas → sugerir análisis de correlación
 """
         elif is_stats or is_viz:
             format_instructions = """
@@ -392,6 +403,60 @@ Reglas para el bloque viz:
 - boxplot: usa cuando hay distribución numérica sin categorías claras
 - SOLO incluye el bloque si tienes los datos reales — nunca inventes valores
 - Los valores deben venir de los resultados SQL obtenidos en los pasos anteriores
+"""
+        elif is_quality:
+            format_instructions = """
+FORMATO PARA REPORTE DE CALIDAD — sigue esta estructura exacta:
+
+## 🔍 Reporte de Calidad: [nombre tabla]
+
+| Columna | Tipo | Nulls % | Únicos | Estado | Observación |
+|---------|------|---------|--------|--------|-------------|
+| col1    | int  | 0%      | 10,432 | 🟢     | ID único    |
+| col2    | text | 12.3%   | 45     | 🔴     | Nulls altos |
+| col3    | text | 0%      | 1      | 🔴     | Constante   |
+
+**Semáforo:**
+- 🟢 Verde: nulls < 1%, sin anomalías
+- 🟡 Amarillo: nulls 1–10%, o cardinalidad sospechosa
+- 🔴 Rojo: nulls > 10%, columna constante, o 100% nula
+
+### 📋 Problemas detectados
+Lista solo los problemas reales encontrados:
+- 🔴 `col_name`: descripción del problema
+- 🟡 `col_name`: descripción del problema
+
+### 💡 Recomendaciones
+Una recomendación accionable por cada columna en 🔴 o 🟡.
+
+### ✅ Resumen de salud
+> X columnas buenas · Y columnas con advertencia · Z columnas con problemas
+"""
+        elif is_analysis_detect:
+            format_instructions = f"""
+FORMATO PARA DETECCIÓN DE TIPO DE ANÁLISIS:
+
+Después de describir brevemente los datos obtenidos, propón los análisis detectables:
+
+### 🔭 Análisis posibles detectados
+
+Revisa las columnas disponibles y detecta los patrones:
+
+| Patrón detectado | Columnas | Tipo de análisis | Gráfico sugerido |
+|-----------------|----------|-----------------|-----------------|
+| fecha + métrica | created_at + revenue | Tendencia temporal | Line chart |
+| categórica + numérica | segment + revenue | Distribución por grupo | Boxplot |
+| 2 numéricas | age + revenue | Correlación | Scatter plot |
+| categórica sola | status | Composición | Bar chart |
+
+Para cada patrón encontrado en los datos REALES (no inventes columnas):
+1. Describe qué patrón detectaste
+2. Propón el análisis concreto con una pregunta de ejemplo
+3. Indica el gráfico apropiado
+
+⚠️ IMPORTANTE: El agente PROPONE — no ejecuta. Termina con:
+> "¿Quieres que ejecute alguno de estos análisis? Dime cuál y lo hago paso a paso."
+{f"Clasificación de variables disponible: {classification_text}" if classification_text else ""}
 """
         else:
             format_instructions = """

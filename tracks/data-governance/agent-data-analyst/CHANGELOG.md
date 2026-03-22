@@ -1,5 +1,14 @@
 # Changelog - Khipu Analytics
 
+## [0.8.0] - 2026-03-21
+
+### Added
+- Fase 1.7 — Detección automática de tipo de análisis: detecta patrones (fecha+métrica, categórica+numérica, 2 numéricas) y propone análisis con gráfico sugerido ([#11](https://github.com/ronaldmego/khipu-analytics/issues/11))
+- Agente propone análisis pero no ejecuta — termina con invitación al usuario a confirmar ([#11](https://github.com/ronaldmego/khipu-analytics/issues/11))
+- Fase 1.8 — Reporte de calidad de datos: tabla con semáforo 🟢🟡🔴 por columna (nulls%, cardinalidad, constantes), sección de problemas detectados y recomendaciones accionables ([#12](https://github.com/ronaldmego/khipu-analytics/issues/12))
+- Workflow de calidad en decision prompt: get_table_details + get_table_profile → reporte completo ([#12](https://github.com/ronaldmego/khipu-analytics/issues/12))
+- Perfil de tabla sugiere reporte de calidad cuando detecta columnas problemáticas ([#11](https://github.com/ronaldmego/khipu-analytics/issues/11), [#12](https://github.com/ronaldmego/khipu-analytics/issues/12))
+
 ## [0.7.0] - 2026-03-21
 
 ### Added
