@@ -359,7 +359,7 @@ Basándote en los tipos de variables y problemas encontrados, propón UN anális
 - Si hay columnas con nulls altos o constantes → sugerir reporte de calidad completo
 - Si hay temporales + numéricas → sugerir análisis de tendencia
 - Si hay categóricas + numéricas → sugerir distribución por grupo
-- Si hay 2+ numéricas → sugerir análisis de correlación
+- Si hay 2+ numéricas → sugerir scatter plot (distribución bivariada descriptiva)
 """
         elif is_stats or is_viz:
             format_instructions = """
@@ -446,7 +446,7 @@ Revisa las columnas disponibles y detecta los patrones:
 |-----------------|----------|-----------------|-----------------|
 | fecha + métrica | created_at + revenue | Tendencia temporal | Line chart |
 | categórica + numérica | segment + revenue | Distribución por grupo | Boxplot |
-| 2 numéricas | age + revenue | Correlación | Scatter plot |
+| 2 numéricas | age + revenue | Distribución bivariada | Scatter plot |
 | categórica sola | status | Composición | Bar chart |
 
 Para cada patrón encontrado en los datos REALES (no inventes columnas):

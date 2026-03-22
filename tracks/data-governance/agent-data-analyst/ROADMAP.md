@@ -156,36 +156,15 @@ El LLM decide qué MCP y qué tool usar según la pregunta.
 
 ---
 
-## Fase 2: Profiling Avanzado ⏸️
-
-> **NO INICIAR** hasta que toda la Fase 1 esté sólida y validada.
-
-- [ ] Correlaciones entre variables (Pearson, Spearman)
-- [ ] Detección de anomalías
-- [ ] Clustering exploratorio (K-means visual)
-- [ ] Feature importance básica
-- [ ] Comparaciones entre segmentos
-
----
-
-## Fase 3: Análisis Predictivo ⏸️
-
-> **MUY LEJANO.** Lección aprendida: no saltar aquí sin fundamento.
-
-- [ ] Segmentación de clientes
-- [ ] Predicción de churn
-- [ ] Propensity scoring
-- [ ] Revenue analytics
-- [ ] Modelos explicables (SHAP, feature importance)
-
----
-
 ## Principio Rector
 
 ```
-Descriptiva → Inferencial → Predictiva
-   Fase 1         Fase 2        Fase 3
-  (AHORA)       (DESPUÉS)    (MUY DESPUÉS)
+Khipu Analytics = Analista Descriptivo
 ```
 
-Cada fase se valida completamente antes de avanzar a la siguiente.
+**Alcance permanente: estadística descriptiva + visualización.**
+
+Este agente entiende datos, los describe, detecta problemas de calidad y genera gráficos informativos.
+**No hace clustering, predicciones, modelos, ni análisis inferencial.**
+
+> La tentación de saltar a ML existe — resistirla es parte del diseño.

@@ -38,10 +38,10 @@ Khipu Analytics es un agente conversacional que combina:
 
 ### Principios Fundamentales
 
-1. **Paso firme antes del siguiente** — No saltar a ML sin entender los datos
-2. **Estadística antes de Machine Learning** — Descriptiva → Inferencial → Predictiva
+1. **Descriptivo y nada más** — Este agente describe datos, no predice ni modela
+2. **Entender antes de opinar** — Perfil → calidad → distribuciones → insights
 3. **Visualización correcta** — Seguir data-to-viz.com, no gráficos al azar
-4. **Insights con fundamento** — Cada observación tiene base estadística
+4. **Insights con fundamento** — Cada observación tiene base en los datos reales
 
 ### Arquitectura MCP Plug & Play
 
@@ -80,7 +80,8 @@ orientación como best practice.
 
 ### Anti-patrones (NO hacer)
 
-- ❌ Saltar directo a churn/segmentación/ML
+- ❌ Clustering, segmentación, churn, predicciones, ML — fuera de alcance
+- ❌ Análisis inferencial (tests estadísticos, p-values, intervalos de confianza)
 - ❌ Gráficos decorativos sin propósito
 - ❌ Análisis sin entender primero qué datos hay
 - ❌ Reinventar la rueda — usar librerías probadas

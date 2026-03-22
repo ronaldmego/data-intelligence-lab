@@ -13,11 +13,7 @@ Khipu Analytics es un agente conversacional que combina:
 
 ## Filosofía
 
-```
-Descriptiva → Inferencial → Predictiva
-```
-
-Primero entender. Después analizar. Nunca saltar a ML sin fundamento.
+**Analista descriptivo.** Entiende datos, describe distribuciones, detecta problemas de calidad y genera gráficos informativos. No hace predicciones ni modelos.
 
 ## Stack
 
