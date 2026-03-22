@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from fastmcp import FastMCP
 import psycopg2
 import psycopg2.extras
+import psycopg2.errors
 
 # Cargar .env
 load_dotenv(Path(__file__).parent / ".env")
@@ -35,14 +36,25 @@ BLOCKED_KEYWORDS = [
 
 def get_connection():
     """Obtener conexión a PostgreSQL"""
-    return psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        dbname=DB_NAME,
-        connect_timeout=10
-    )
+    try:
+        return psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            dbname=DB_NAME,
+            connect_timeout=10
+        )
+    except psycopg2.OperationalError as e:
+        msg = str(e).strip()
+        if "could not connect" in msg or "Connection refused" in msg:
+            raise ConnectionError(f"No se pudo conectar a PostgreSQL en {DB_HOST}:{DB_PORT} — ¿está corriendo el servidor?")
+        elif "password authentication" in msg:
+            raise ConnectionError("Credenciales incorrectas para PostgreSQL (usuario/contraseña)")
+        elif "database" in msg and "does not exist" in msg:
+            raise ConnectionError(f"La base de datos '{DB_NAME}' no existe")
+        else:
+            raise ConnectionError(f"Error de conexión a PostgreSQL: {msg}")
 
 
 def is_safe_query(sql: str) -> bool:
@@ -87,18 +99,19 @@ def format_results(columns: list, rows: list, max_rows: int = 50) -> str:
 
 
 @sql_mcp.tool
-def execute_query(sql: str) -> str:
+def execute_query(query: str) -> str:
     """Ejecutar una query SQL de solo lectura contra la base de datos.
 
     IMPORTANTE: Solo se permiten queries SELECT. Cualquier operación de
     escritura será bloqueada por seguridad.
 
     Args:
-        sql: Query SQL a ejecutar (solo SELECT)
+        query: Query SQL a ejecutar (solo SELECT)
 
     Returns:
         Resultados de la query en formato tabla
     """
+    sql = query
     if not is_safe_query(sql):
         return "❌ Error: Solo se permiten queries de lectura (SELECT). Operaciones de escritura están bloqueadas."
 
@@ -113,6 +126,14 @@ def execute_query(sql: str) -> str:
 
         result = format_results(columns, rows)
         return f"✅ {len(rows)} filas retornadas\n\n{result}"
+    except ConnectionError as e:
+        return f"❌ Error de conexión: {str(e)}"
+    except psycopg2.errors.UndefinedTable as e:
+        return f"❌ Tabla no encontrada: {str(e).strip()} — verifica el nombre del schema y tabla"
+    except psycopg2.errors.UndefinedColumn as e:
+        return f"❌ Columna no encontrada: {str(e).strip()} — verifica el nombre de la columna"
+    except psycopg2.errors.SyntaxError as e:
+        return f"❌ Error de sintaxis SQL: {str(e).strip()}"
     except Exception as e:
         return f"❌ Error ejecutando query: {str(e)}"
 

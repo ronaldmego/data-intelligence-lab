@@ -12,6 +12,7 @@ Requiere:
 """
 
 import os
+import re
 import json
 from pathlib import Path
 from dotenv import load_dotenv
@@ -28,6 +29,12 @@ OPENMETADATA_TOKEN = os.getenv("OPENMETADATA_TOKEN", "")
 # Crear servidor MCP
 mcp = FastMCP("OpenMetadata")
 
+
+def strip_html(text: str) -> str:
+    """Remover tags HTML de descripciones de OpenMetadata."""
+    return re.sub(r"<[^>]+>", "", text).strip()
+
+
 def get_headers():
     """Headers de autenticación para OpenMetadata API"""
     return {
@@ -38,9 +45,24 @@ def get_headers():
 def api_get(endpoint: str, params: dict = None) -> dict:
     """Hacer GET request a OpenMetadata API"""
     url = f"{OPENMETADATA_URL}/api/v1{endpoint}"
-    response = httpx.get(url, headers=get_headers(), params=params, timeout=30)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = httpx.get(url, headers=get_headers(), params=params, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPStatusError as e:
+        status = e.response.status_code
+        if status == 404:
+            raise ValueError(f"No encontrado en OpenMetadata (404): {endpoint}")
+        elif status == 401:
+            raise ValueError("Token de autenticación inválido o expirado (401)")
+        elif status == 500:
+            raise ValueError(f"Error interno del servidor OpenMetadata (500)")
+        else:
+            raise ValueError(f"Error HTTP {status}: {e.response.text[:200]}")
+    except httpx.TimeoutException:
+        raise ValueError(f"Timeout: OpenMetadata tardó más de 30 segundos ({url})")
+    except httpx.ConnectError:
+        raise ValueError(f"No se pudo conectar a OpenMetadata en {OPENMETADATA_URL}")
 
 
 @mcp.tool
@@ -67,7 +89,7 @@ def search_catalog(query: str, limit: int = 10) -> str:
             name = source.get("name", "Sin nombre")
             entity_type = source.get("entityType", "unknown")
             fqn = source.get("fullyQualifiedName", "")
-            desc = source.get("description", "Sin descripción")[:100]
+            desc = strip_html(source.get("description", "Sin descripción"))[:100]
             output.append(f"- [{entity_type}] {name}\n  FQN: {fqn}\n  {desc}")
         
         return "\n".join(output)
@@ -106,7 +128,7 @@ def list_tables(database: str = None, schema: str = None, limit: int = 20) -> st
         for t in tables:
             name = t.get("name", "")
             fqn = t.get("fullyQualifiedName", "")
-            desc = t.get("description", "Sin descripción")[:80]
+            desc = strip_html(t.get("description", "Sin descripción"))[:80]
             columns = len(t.get("columns", []))
             output.append(f"- {name} ({columns} columnas)\n  FQN: {fqn}\n  {desc}")
         
@@ -141,11 +163,19 @@ def get_table_details(table_name: str) -> str:
         table = api_get(f"/tables/{table_id}")
         
         # Formatear respuesta
+        # Resolver owner: OM reciente usa "owners" (lista), versiones legacy usan "owner" (singular)
+        owners_list = table.get("owners", [])
+        if owners_list:
+            owner_str = ", ".join(o.get("displayName", o.get("name", "?")) for o in owners_list)
+        else:
+            legacy = table.get("owner", {})
+            owner_str = legacy.get("displayName", legacy.get("name", "Sin owner"))
+
         output = [
             f"📊 Tabla: {table.get('name')}",
             f"FQN: {table.get('fullyQualifiedName')}",
-            f"Descripción: {table.get('description', 'Sin descripción')}",
-            f"Owner: {table.get('owner', {}).get('name', 'Sin owner')}",
+            f"Descripción: {strip_html(table.get('description', 'Sin descripción'))}",
+            f"Owner: {owner_str}",
             f"",
             f"📋 Columnas ({len(table.get('columns', []))}):"
         ]
@@ -153,7 +183,7 @@ def get_table_details(table_name: str) -> str:
         for col in table.get("columns", [])[:20]:  # Limitar a 20 columnas
             col_name = col.get("name", "")
             col_type = col.get("dataType", "")
-            col_desc = col.get("description", "")[:50]
+            col_desc = strip_html(col.get("description", ""))[:50]
             output.append(f"  - {col_name} ({col_type}): {col_desc}")
         
         if len(table.get("columns", [])) > 20:
@@ -288,7 +318,7 @@ def list_glossary_terms(glossary: str = None, limit: int = 20) -> str:
         output = [f"📖 Términos de glosario ({len(terms)}):\n"]
         for term in terms:
             name = term.get("name", "")
-            definition = term.get("description", "Sin definición")[:100]
+            definition = strip_html(term.get("description", "Sin definición"))[:100]
             synonyms = term.get("synonyms", [])
             syn_str = f" (sinónimos: {', '.join(synonyms)})" if synonyms else ""
             output.append(f"- {name}{syn_str}\n  {definition}")

@@ -169,6 +169,9 @@ PARAMS: param1=valor1, param2=valor2
 Opción B - Tengo suficiente información para responder al usuario:
 DONE
 
+⚠️ IMPORTANTE: Sé exhaustivo. Si el usuario pregunta por tablas, no basta con listar databases — también lista schemas/tablas.
+Si obtuviste metadata de una tabla, complementa con estadísticas SQL. Busca dar respuestas completas.
+
 Paso actual: {step}/{max_steps}
 
 Ejemplos de decisiones:
@@ -193,7 +196,9 @@ Ejemplos de decisiones:
                 for line in decision.split("\n"):
                     line = line.strip()
                     if line.startswith("TOOL:"):
-                        tool_name = line.split("TOOL:")[1].strip().split(",")[0].strip()
+                        raw_tool = line.split("TOOL:")[1].strip().split(",")[0].strip()
+                        # Strip MCP prefix if LLM adds it (e.g. "openmetadata.list_tables" → "list_tables")
+                        tool_name = raw_tool.split(".")[-1] if "." in raw_tool else raw_tool
                     elif line.startswith("PARAMS:"):
                         params_str = line.split("PARAMS:")[1].strip()
                         if params_str.lower() != "none":
