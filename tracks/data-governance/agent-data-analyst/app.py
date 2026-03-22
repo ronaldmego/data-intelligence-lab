@@ -12,6 +12,7 @@ import asyncio
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
+from viz import parse_viz_request, render_viz
 
 # Cargar configuración
 load_dotenv(Path(__file__).parent / ".env")
@@ -105,7 +106,22 @@ if prompt := st.chat_input("Pregunta sobre tus datos..."):
         with st.spinner("Analizando datos..."):
             try:
                 response = asyncio.run(st.session_state.agent.process(prompt))
-                st.markdown(response)
+
+                # Detectar y renderizar bloque viz si existe
+                viz_params = parse_viz_request(response)
+                if viz_params:
+                    # Mostrar texto sin el bloque viz
+                    import re
+                    clean_response = re.sub(r"```viz.*?```", "", response, flags=re.DOTALL).strip()
+                    st.markdown(clean_response)
+                    fig = render_viz(viz_params)
+                    if fig:
+                        st.pyplot(fig)
+                        import matplotlib.pyplot as plt
+                        plt.close(fig)
+                else:
+                    st.markdown(response)
+
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
                 error_msg = f"❌ Error: {str(e)}"

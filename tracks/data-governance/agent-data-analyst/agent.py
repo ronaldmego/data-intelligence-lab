@@ -314,6 +314,7 @@ Paso actual: {step}/{max_steps}
         query_lower = query.lower()
         is_profile = any(w in query_lower for w in ["perfil", "profile", "describe", "detalles", "estructura", "columnas"])
         is_stats = any(w in query_lower for w in ["estadísticas", "estadisticas", "stats", "distribución", "distribucion"])
+        is_viz = any(w in query_lower for w in ["gráfico", "grafico", "chart", "histograma", "barras", "ranking", "distribución visual", "visualiza", "muestra gráfico"])
 
         if is_profile:
             classification_section = f"\n{classification_text}\n" if classification_text else ""
@@ -341,13 +342,31 @@ FORMATO PARA PERFIL DE TABLA — sigue esta estructura exacta:
 ### Siguiente paso sugerido
 Basándote en los tipos de variables encontrados, propón UN análisis concreto y el gráfico apropiado.
 """
-        elif is_stats:
+        elif is_stats or is_viz:
             format_instructions = """
-FORMATO PARA ESTADÍSTICAS:
-- Muestra las métricas en formato estructurado (lista o tabla)
+FORMATO PARA ESTADÍSTICAS Y VISUALIZACIÓN:
+- Muestra las métricas en formato estructurado (lista o tabla markdown)
 - Resalta insights clave: outliers, concentración, distribución sesgada
 - Compara con lo esperado si tienes contexto de OpenMetadata
-- Propón siguiente análisis si corresponde
+
+IMPORTANTE — Si tienes datos suficientes para un gráfico, incluye al final un bloque viz:
+```viz
+type: bar_chart | histogram | line_chart | boxplot
+col_name: nombre_columna
+categories: val1,val2,val3        (solo para bar_chart)
+values: 100,200,300               (frecuencias para bar_chart, o datos para histogram)
+x_values: ene,feb,mar             (solo para line_chart)
+y_values: 10,20,30                (solo para line_chart)
+title: Título del gráfico en español
+```
+
+Reglas para el bloque viz:
+- bar_chart: usa cuando hay categorías con frecuencias (categórica, numérica_discreta, booleana)
+- histogram: usa cuando hay lista de valores numéricos continuos
+- line_chart: usa cuando hay serie temporal (fecha + métrica)
+- boxplot: usa cuando hay distribución numérica sin categorías claras
+- SOLO incluye el bloque si tienes los datos reales — nunca inventes valores
+- Los valores deben venir de los resultados SQL obtenidos en los pasos anteriores
 """
         else:
             format_instructions = """

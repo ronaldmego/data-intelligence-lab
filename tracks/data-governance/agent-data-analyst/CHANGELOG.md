@@ -1,5 +1,15 @@
 # Changelog - Khipu Analytics
 
+## [0.6.0] - 2026-03-21
+
+### Added
+- `viz.py` — módulo de visualización con 4 funciones: `plot_histogram`, `plot_bar_chart`, `plot_line_chart`, `plot_boxplot` ([#9](https://github.com/ronaldmego/khipu-analytics/issues/9))
+- Gráficos siguen principios de Wilke: ejes desde 0, sin 3D, paleta colorblind-friendly, data-ink maximizado ([#9](https://github.com/ronaldmego/khipu-analytics/issues/9))
+- `parse_viz_request()` y `render_viz()` — detectan bloque ```viz en respuesta del agente y generan figura ([#9](https://github.com/ronaldmego/khipu-analytics/issues/9))
+- `app.py` renderiza figuras con `st.pyplot()` cuando el agente incluye un bloque viz ([#9](https://github.com/ronaldmego/khipu-analytics/issues/9))
+- Format prompt actualizado: agente incluye bloque viz para preguntas de distribución, ranking, gráficos ([#9](https://github.com/ronaldmego/khipu-analytics/issues/9))
+- `matplotlib` agregado a `requirements.txt` ([#9](https://github.com/ronaldmego/khipu-analytics/issues/9))
+
 ## [0.5.0] - 2026-03-21
 
 ### Added
