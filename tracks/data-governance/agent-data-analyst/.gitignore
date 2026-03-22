@@ -49,3 +49,6 @@ build/
 
 # Generated output
 output/
+
+# Claude agent instructions (internal, not for public repos)
+CLAUDE.md

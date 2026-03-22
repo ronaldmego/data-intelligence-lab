@@ -9,6 +9,8 @@
 - [Configuración](#configuración)
 - [Comandos Frecuentes](#comandos-frecuentes)
 - [Filosofía de Desarrollo](#filosofía-de-desarrollo)
+- [Boris Dev Principles](#boris-dev-principles)
+- [Skills Relevantes](#skills-relevantes)
 - [Referencias Teóricas](#referencias-teóricas)
 - [Deploy](#deploy)
 - [Seguridad](#seguridad)
@@ -125,8 +127,10 @@ khipu-analytics/
 ├── .env                # Configuración local (no commitear)
 ├── .env.example        # Template de configuración
 ├── requirements.txt    # Dependencias Python
-├── CLAUDE.md           # Este archivo — visión y estándares
+├── CLAUDE.md           # Este archivo — visión y estándares (gitignored)
 ├── ROADMAP.md          # Roadmap progresivo con subfases
+├── ARCHITECTURE.md     # Diseño del sistema y flujo de datos
+├── KNOWN_ISSUES.md     # Limitaciones conocidas y workarounds
 └── README.md           # Documentación pública
 ```
 
@@ -206,6 +210,66 @@ pip install -r requirements.txt
 - Agente orquesta LLM + tools
 - `app.py` solo capa de presentación
 - Respuestas siempre en español
+
+---
+
+## Boris Dev Principles
+
+### Non-Negotiable Directives
+
+**Planning:**
+- Plan antes de cualquier tarea multi-paso (3+ pasos o decisiones arquitectónicas). Escribir en `tasks/todo.md`.
+- Si algo falla, STOP y re-planificar. No seguir empujando un enfoque que falla.
+
+**Quality:**
+- Probar que el trabajo está hecho — tests, logs, o screenshots. Nunca decir "funciona" sin evidencia.
+- Resolver bugs autónomamente — leer logs, encontrar causa raíz, arreglar. Sin hand-holding.
+- Después de CUALQUIER corrección del usuario, actualizar `tasks/lessons.md` inmediatamente.
+- Revisar `tasks/lessons.md` al inicio de sesión. Nunca repetir un error documentado.
+
+**Traceability:**
+- Todo feature, fix o mejora empieza como GitHub Issue. Sin issue, sin trabajo.
+- Actualizar `CHANGELOG.md` en cada cambio significativo. Referenciar el Issue (`#N`).
+- Todo PR debe incluir `Closes #N` para auto-cerrar el issue al mergear.
+
+**Skills (uso obligatorio):**
+- Revisar `~/.claude/skills/` al inicio de sesión. Usar skills existentes.
+- Invocar `supabase-local` antes de cualquier operación DDL en Supabase.
+- Invocar `vps-admin` para permisos de servidor, redes Docker, operaciones sudo.
+- Si una tarea se repite 3+ veces o tiene 3+ pasos, proponer nueva skill via GitHub Issue con label `global-standard`.
+
+**Governance:**
+- Puerto asignado o liberado → actualizar `~/.claude/port-registry.md`
+- Proyecto creado, pausado o eliminado → actualizar `~/.claude/project-registry.md`
+
+### Self-Check Questions
+
+> **¿Es esta la mejor solución o solo la primera que funcionó?**
+> ¿Lo escribiría así si 1000 personas van a leer el código?
+> ¿El fix es quirúrgico o estoy aplicando duct tape?
+
+> **¿Estoy usando bien mis recursos?**
+> ¿Puedo delegar a un subagente para mantener el contexto limpio?
+> ¿Estoy resolviendo demasiadas cosas a la vez? → Una tarea por subagente.
+
+> **¿Hay una forma más simple?** Si la hay, ¿por qué no la uso?
+
+> **¿Síntoma o causa?** Si apostara dinero a que esto no va a volver, ¿lo haría?
+
+> **Antes de merge:**
+> ¿Funciona, o solo no rompe? (No es lo mismo.)
+> ¿Lo probé como usuario, no solo como desarrollador?
+> ¿Si este cambio sale mal, puedo revertirlo limpiamente?
+
+---
+
+## Skills Relevantes
+
+| Skill | Cuándo usar |
+|-------|-------------|
+| `supabase-local` | Antes de cualquier DDL en Supabase (schemas, tablas, RLS) |
+| `vps-admin` | Permisos de servidor, redes Docker, operaciones sudo, health checks |
+| `openmetadata-ops` | Operaciones sobre OpenMetadata REST API (tags, descripciones, ingestion) |
 
 ---
 

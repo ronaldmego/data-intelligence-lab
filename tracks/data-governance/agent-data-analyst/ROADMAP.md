@@ -2,6 +2,75 @@
 
 > Evolución progresiva: paso firme antes del siguiente.
 
+---
+
+## Arquitectura MCP — Principios
+
+### No duplicar, consumir
+
+Khipu NO reimplementa MCPs que ya existen en otros proyectos. Los consume como servidores externos.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Khipu Agent (cerebro)                 │
+│                   Orquesta LLM + MCPs                   │
+└──────┬──────────────────┬───────────────────┬───────────┘
+       │                  │                   │
+       ▼                  ▼                   ▼
+┌──────────────┐  ┌───────────────┐  ┌────────────────────┐
+│ OpenMetadata │  │  SQL / DB     │  │  Futuro: más MCPs  │
+│ MCP Server   │  │  MCP Server   │  │  (plug & play)     │
+│              │  │               │  │                    │
+│ EXTERNO:     │  │ Opciones:     │  │ - Snowflake        │
+│ Viene de     │  │ a) sql_server │  │ - BigQuery         │
+│ openmetadata-│  │    (custom)   │  │ - S3/GCS           │
+│ mcp-agent    │  │ b) Google MCP │  │ - APIs REST        │
+│ (repo separ.)│  │    Toolbox    │  │ - ...              │
+└──────────────┘  └───────────────┘  └────────────────────┘
+```
+
+**Regla:** `openmetadata-mcp-agent` es el proyecto que evoluciona el MCP de gobierno.
+Khipu lo consume — no lo copia. Un MCP, una fuente de verdad.
+
+### Conexión a databases — Estrategia
+
+**Hoy:** `sql_server.py` custom (FastMCP + psycopg2, READ-ONLY). Funciona para PostgreSQL.
+
+**Futuro evaluado:** [Google MCP Toolbox for Databases](https://github.com/googleapis/genai-toolbox)
+- MCP server open source especializado en databases
+- Connection pooling, auth integrada, seguridad out-of-the-box
+- Soporta múltiples databases con un solo servidor (PostgreSQL, MySQL, Spanner, AlloyDB, etc.)
+- Configuración via YAML (`tools.yaml`), no código
+- OpenTelemetry integrado (métricas + tracing)
+- Versión actual: v0.28.0 (beta, pre-1.0)
+
+**Decisión pendiente:** ¿Migrar `sql_server.py` a Google MCP Toolbox o mantener custom?
+- **A favor de Toolbox:** escalabilidad a múltiples DBs sin escribir código, connection pooling pro, seguridad enterprise
+- **A favor de custom:** control total, sin dependencia externa, ya funciona
+- **Plan:** Evaluar Toolbox cuando se necesite agregar una segunda database. Para PostgreSQL solo, el custom es suficiente.
+
+### Escalabilidad — Cómo agregar un MCP nuevo
+
+```python
+# En agent.py — 1 línea por MCP
+agent.register_mcp("openmetadata", openmetadata_mcp)  # gobierno
+agent.register_mcp("sql", sql_mcp)                    # queries PostgreSQL
+# agent.register_mcp("bigquery", bq_mcp)              # futuro
+# agent.register_mcp("toolbox", toolbox_mcp)           # Google MCP Toolbox (multi-DB)
+```
+
+Cada MCP es independiente. El agente descubre tools automáticamente via `discover_tools()`.
+El LLM decide qué MCP y qué tool usar según la pregunta.
+
+### Pendiente arquitectura
+
+- [ ] Consumir OpenMetadata MCP como servidor externo (hoy es in-process, viene de `server.py` copiado)
+- [ ] Evaluar Google MCP Toolbox for Databases cuando se necesite segunda DB
+- [ ] Migrar orquestador de prompts de texto a function calling nativo (Gemini `google-genai`)
+- [ ] Soporte para MCPs remotos (stdio → SSE/HTTP transport)
+
+---
+
 ## Fase 1: Conocer y Describir los Datos
 
 ### 1.0 Setup ✅ (2026-02-13)

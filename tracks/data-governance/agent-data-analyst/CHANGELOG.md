@@ -1,5 +1,14 @@
 # Changelog - Khipu Analytics
 
+## [0.4.0] - 2026-03-21
+
+### Added
+- Decision prompt con workflows explícitos por tipo de pregunta: perfil, stats, descubrimiento, linaje, glosario ([#7](https://github.com/ronaldmego/khipu-analytics/issues/7))
+- Para perfil de tabla: exige 2 pasos mínimos (OpenMetadata + SQL), nunca responde con datos incompletos ([#7](https://github.com/ronaldmego/khipu-analytics/issues/7))
+- Format prompt con detección de tipo de pregunta (`is_profile`, `is_stats`) y plantilla de respuesta específica ([#7](https://github.com/ronaldmego/khipu-analytics/issues/7))
+- Perfil genera tabla markdown estructurada: columna | tipo | nulls% | únicos | observación ([#7](https://github.com/ronaldmego/khipu-analytics/issues/7))
+- Instrucción explícita para extraer schema/table del FQN de OpenMetadata ([#7](https://github.com/ronaldmego/khipu-analytics/issues/7))
+
 ## [0.3.0] - 2026-03-21
 
 ### Fixed

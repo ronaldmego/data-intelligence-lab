@@ -150,15 +150,29 @@ CONTEXTO PREVIO (pasos ya ejecutados):
 {context_summary if context_summary else "NINGUNO - Este es el primer paso"}
 
 ESTRATEGIA MULTI-STEP (best practice):
-1. SIEMPRE empieza por OpenMetadata cuando el usuario pregunta sobre una tabla:
-   - OpenMetadata da la visión gobernada (descripción, tags, owner, linaje, glosario)
-   - Es tu fuente de verdad de contexto, independiente del motor de base de datos
-2. Usa SQL para datos REALES: estadísticas, conteos, distribuciones, valores concretos
-3. Lo ideal es combinar: primero contexto (OpenMetadata), luego datos reales (SQL)
-4. Para análisis complejos, múltiples pasos:
-   - "Describe tabla customers" → OpenMetadata (contexto) + SQL (estadísticas reales)
-   - "Relaciones entre tablas" → OpenMetadata lineage + SQL para validar FKs
-   - "Análisis por grupo" → OpenMetadata (entender columnas) + SQL (GROUP BY)
+
+1. PERFIL DE TABLA (keywords: perfil, profile, describe, detalles, columnas, estructura):
+   - Paso 1: get_table_details (OpenMetadata) → descripción, owner, tags, columnas con sus tipos
+   - Paso 2: get_table_profile (SQL) → row count, nulls%, cardinalidad, min/max/avg por columna
+   - SOLO después de ambos pasos → DONE
+
+2. ESTADÍSTICAS DE COLUMNA (keywords: estadísticas, distribución, stats de columna X):
+   - Paso 1: get_table_details (OpenMetadata) → contexto de la tabla
+   - Paso 2: get_column_stats (SQL) → estadísticas detalladas de la columna específica
+   - SOLO después de ambos pasos → DONE
+
+3. DESCUBRIMIENTO (keywords: qué tablas, listar, schemas, qué datos):
+   - Paso 1: list_databases o list_tables (OpenMetadata) → inventario
+   - Si el usuario pregunta por tablas y solo tienes databases → list_tables también
+   - DONE cuando tengas el inventario completo
+
+4. LINAJE (keywords: de dónde vienen, linaje, upstream, downstream):
+   - Paso 1: get_lineage (OpenMetadata) → grafo de dependencias
+   - DONE con el linaje
+
+5. GLOSARIO / NEGOCIO (keywords: qué significa, definición, glosario):
+   - Paso 1: list_glossary_terms o search_catalog
+   - DONE con las definiciones
 
 DECISIÓN - Responde con UNA de estas opciones:
 
@@ -169,16 +183,13 @@ PARAMS: param1=valor1, param2=valor2
 Opción B - Tengo suficiente información para responder al usuario:
 DONE
 
-⚠️ IMPORTANTE: Sé exhaustivo. Si el usuario pregunta por tablas, no basta con listar databases — también lista schemas/tablas.
-Si obtuviste metadata de una tabla, complementa con estadísticas SQL. Busca dar respuestas completas.
+⚠️ REGLAS:
+- Para PERFIL o DESCRIBE: NUNCA hagas DONE con solo 1 paso — necesitas OpenMetadata Y SQL
+- Para get_table_profile y get_column_stats necesitas: schema_name y table_name exactos
+- Si OpenMetadata te dio el FQN (ej: service.db.schema.table), extrae schema y table de ahí
+- Si el usuario no especificó schema, usa el que encontraste en OpenMetadata
 
 Paso actual: {step}/{max_steps}
-
-Ejemplos de decisiones:
-- Si no tengo contexto de la tabla → TOOL: get_table_details (OpenMetadata primero)
-- Si tengo contexto pero necesito estadísticas → TOOL: get_table_profile (SQL después)
-- Si tengo todo lo necesario → DONE
-- Si usuario pregunta por relaciones → TOOL: get_lineage luego SQL para validar
 """
 
             decision_response = self.llm.invoke([HumanMessage(content=decision_prompt)])
@@ -248,6 +259,53 @@ Ejemplos de decisiones:
             for ctx in accumulated_context
         ])
         
+        # Detectar tipo de pregunta para guiar el formato de respuesta
+        query_lower = query.lower()
+        is_profile = any(w in query_lower for w in ["perfil", "profile", "describe", "detalles", "estructura", "columnas"])
+        is_stats = any(w in query_lower for w in ["estadísticas", "estadisticas", "stats", "distribución", "distribucion"])
+
+        if is_profile:
+            format_instructions = """
+FORMATO PARA PERFIL DE TABLA — sigue esta estructura exacta:
+
+## 📊 Perfil: [nombre de la tabla]
+
+### Contexto (OpenMetadata)
+- **Descripción:** ...
+- **Owner:** ...
+- **Tags:** ...
+- **FQN:** ...
+
+### Estructura y Estadísticas
+
+| Columna | Tipo | Nulos % | Valores únicos | Observación |
+|---------|------|---------|----------------|-------------|
+| col1    | int  | 0%      | 1,234          | ID principal |
+| col2    | text | 5.2%    | 45             | Categórica |
+...
+
+> **Resumen:** X filas · Y columnas · [observación clave sobre la tabla]
+
+### Siguiente paso sugerido
+Propón un análisis concreto basado en los datos que encontraste.
+"""
+        elif is_stats:
+            format_instructions = """
+FORMATO PARA ESTADÍSTICAS:
+- Muestra las métricas en formato estructurado (lista o tabla)
+- Resalta insights clave: outliers, concentración, distribución sesgada
+- Compara con lo esperado si tienes contexto de OpenMetadata
+- Propón siguiente análisis si corresponde
+"""
+        else:
+            format_instructions = """
+FORMATO GENERAL:
+- Responde de forma estructurada con markdown
+- Si hay listas de tablas/schemas, usa formato de lista o tabla
+- Resalta los datos más relevantes
+- Sé conciso pero completo
+"""
+
         format_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
 
 Pregunta original: "{query}"
@@ -255,15 +313,11 @@ Pregunta original: "{query}"
 Datos obtenidos en {len(accumulated_context)} pasos:
 {all_results}
 
-Instrucciones para la respuesta final:
-- Responde en español
-- Sintetiza toda la información de los múltiples pasos ejecutados
-- Sé conciso pero informativo
-- Si hay datos numéricos, resalta insights (Top 3, %, anomalías)
-- Interpreta los datos: no solo números, sino qué significan
-- Usa formato markdown
-- Si los datos sugieren un siguiente paso de análisis, proponlo
-- Menciona brevemente qué pasos seguiste para obtener la información (transparencia del proceso)
+INSTRUCCIONES:
+- Responde siempre en español
+- Interpreta los datos: no solo números, sino qué significan para el negocio
+- Si hay anomalías (muchos nulls, cardinalidad inesperada, outliers), menciónalas
+{format_instructions}
 """
 
         final_response = self.llm.invoke([HumanMessage(content=format_prompt)])
