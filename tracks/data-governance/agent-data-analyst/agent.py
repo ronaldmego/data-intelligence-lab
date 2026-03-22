@@ -12,11 +12,13 @@ Arquitectura plug & play:
 
 import os
 import json
+import re
 import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
 from fastmcp import Client
 from langchain_core.messages import HumanMessage
+from classifier import classify_column, classifications_to_prompt
 
 load_dotenv(Path(__file__).parent / ".env")
 
@@ -110,6 +112,52 @@ class KhipuAgent:
         async with Client(server) as client:
             result = await client.call_tool(tool_name, params)
             return result.data if hasattr(result, 'data') and result.data else str(result)
+
+    def _extract_classifications(self, accumulated_context: list) -> str:
+        """
+        Extraer clasificaciones de variables del resultado de get_table_profile.
+        Parsea el output de texto del MCP SQL para clasificar las columnas.
+        """
+        profile_result = None
+        total_rows = 0
+
+        for ctx in accumulated_context:
+            if ctx["tool_name"] == "get_table_profile":
+                profile_result = ctx["result"]
+                # Extraer row count del resultado (formato: "Filas: X,XXX")
+                match = re.search(r"Filas:\s*([\d,]+)", profile_result)
+                if match:
+                    total_rows = int(match.group(1).replace(",", ""))
+                break
+
+        if not profile_result or total_rows == 0:
+            return ""
+
+        # Parsear líneas de columnas (formato: "  col_name (type): N únicos, X% nulls")
+        classifications = []
+        pattern = re.compile(
+            r"^\s{2}(\S+)\s+\(([^)]+)\):\s*(\d[\d,]*)\s+únicos,\s*([\d.]+)%\s+nulls",
+            re.MULTILINE,
+        )
+        for match in pattern.finditer(profile_result):
+            col_name = match.group(1)
+            sql_type = match.group(2).strip()
+            cardinality = int(match.group(3).replace(",", ""))
+            null_pct = float(match.group(4))
+
+            c = classify_column(
+                column_name=col_name,
+                sql_type=sql_type,
+                cardinality=cardinality,
+                total_rows=total_rows,
+                null_pct=null_pct,
+            )
+            classifications.append(c)
+
+        if not classifications:
+            return ""
+
+        return classifications_to_prompt(classifications)
 
     async def process(self, query: str) -> str:
         """Procesar pregunta del usuario con razonamiento multi-step."""
@@ -258,14 +306,18 @@ Paso actual: {step}/{max_steps}
             f"PASO {ctx['step']}: {ctx['tool_name']}({ctx['params']})\nResultado:\n{ctx['result']}"
             for ctx in accumulated_context
         ])
-        
+
+        # Extraer clasificación de variables si hay un get_table_profile en el contexto
+        classification_text = self._extract_classifications(accumulated_context)
+
         # Detectar tipo de pregunta para guiar el formato de respuesta
         query_lower = query.lower()
         is_profile = any(w in query_lower for w in ["perfil", "profile", "describe", "detalles", "estructura", "columnas"])
         is_stats = any(w in query_lower for w in ["estadísticas", "estadisticas", "stats", "distribución", "distribucion"])
 
         if is_profile:
-            format_instructions = """
+            classification_section = f"\n{classification_text}\n" if classification_text else ""
+            format_instructions = f"""
 FORMATO PARA PERFIL DE TABLA — sigue esta estructura exacta:
 
 ## 📊 Perfil: [nombre de la tabla]
@@ -278,16 +330,16 @@ FORMATO PARA PERFIL DE TABLA — sigue esta estructura exacta:
 
 ### Estructura y Estadísticas
 
-| Columna | Tipo | Nulos % | Valores únicos | Observación |
-|---------|------|---------|----------------|-------------|
-| col1    | int  | 0%      | 1,234          | ID principal |
-| col2    | text | 5.2%    | 45             | Categórica |
+| Columna | Tipo estadístico | Tipo SQL | Nulos % | Valores únicos | Observación |
+|---------|-----------------|----------|---------|----------------|-------------|
+| col1    | numérica_continua | integer | 0%   | 1,234          | min/max/avg |
+| col2    | categórica       | text    | 5.2%  | 45             | top valores |
 ...
-
-> **Resumen:** X filas · Y columnas · [observación clave sobre la tabla]
+{classification_section}
+> **Resumen:** X filas · Y columnas · [observación clave]
 
 ### Siguiente paso sugerido
-Propón un análisis concreto basado en los datos que encontraste.
+Basándote en los tipos de variables encontrados, propón UN análisis concreto y el gráfico apropiado.
 """
         elif is_stats:
             format_instructions = """
@@ -316,7 +368,8 @@ Datos obtenidos en {len(accumulated_context)} pasos:
 INSTRUCCIONES:
 - Responde siempre en español
 - Interpreta los datos: no solo números, sino qué significan para el negocio
-- Si hay anomalías (muchos nulls, cardinalidad inesperada, outliers), menciónalas
+- Usa el tipo estadístico de cada columna para dar contexto (numérica_continua → hablar de distribución; categórica → hablar de concentración)
+- Si hay anomalías (muchos nulls, columna constante, alta cardinalidad inesperada), menciónalas explícitamente
 {format_instructions}
 """
 

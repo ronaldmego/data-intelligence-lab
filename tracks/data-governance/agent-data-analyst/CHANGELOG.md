@@ -1,5 +1,14 @@
 # Changelog - Khipu Analytics
 
+## [0.5.0] - 2026-03-21
+
+### Added
+- `classifier.py` — clasificador de variables con `classify_column()` y `classify_table()` ([#8](https://github.com/ronaldmego/khipu-analytics/issues/8))
+- Tipos detectados: numérica_continua, numérica_discreta, categórica, temporal, booleana, identificador, constante, texto_libre, vacía ([#8](https://github.com/ronaldmego/khipu-analytics/issues/8))
+- Cada clasificación incluye gráfico recomendado y estadísticas sugeridas según data-to-viz.com ([#8](https://github.com/ronaldmego/khipu-analytics/issues/8))
+- `_extract_classifications()` en el agente: parsea output de `get_table_profile` y clasifica columnas automáticamente ([#8](https://github.com/ronaldmego/khipu-analytics/issues/8))
+- Clasificaciones inyectadas en el format prompt para que el LLM mencione tipos estadísticos en sus respuestas ([#8](https://github.com/ronaldmego/khipu-analytics/issues/8))
+
 ## [0.4.0] - 2026-03-21
 
 ### Added
