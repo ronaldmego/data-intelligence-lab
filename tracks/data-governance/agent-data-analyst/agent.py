@@ -339,6 +339,14 @@ FORMATO PARA PERFIL DE TABLA — sigue esta estructura exacta:
 {classification_section}
 > **Resumen:** X filas · Y columnas · [observación clave]
 
+### 💡 Insights automáticos
+Aplica estas reglas sobre los datos obtenidos — solo menciona los que apliquen:
+- **Columnas con nulls altos** (>10%): mencionar como alerta 🔴
+- **Columna constante** (1 único valor): alertar como posible problema de calidad
+- **Columna dominante** (1 valor >50%): "El X% de los registros tiene valor Y"
+- **Regla de Pareto**: si el 80% está en pocas categorías, mencionarlo
+- **Identificadores** (cardinalidad ~100%): no analizar, solo confirmar unicidad
+
 ### Siguiente paso sugerido
 Basándote en los tipos de variables encontrados, propón UN análisis concreto y el gráfico apropiado.
 """
@@ -346,8 +354,25 @@ Basándote en los tipos de variables encontrados, propón UN análisis concreto 
             format_instructions = """
 FORMATO PARA ESTADÍSTICAS Y VISUALIZACIÓN:
 - Muestra las métricas en formato estructurado (lista o tabla markdown)
-- Resalta insights clave: outliers, concentración, distribución sesgada
-- Compara con lo esperado si tienes contexto de OpenMetadata
+
+### 💡 Insights automáticos (incluir siempre que aplique)
+Revisa los datos y menciona los insights que encuentres:
+
+**Para variables categóricas:**
+- Top 3 valores con conteo y % del total
+- Regla de Pareto: si el 80% está en pocas categorías → "El 80% de los registros se concentra en X categorías"
+- Valor dominante: si un valor supera el 50% → "Y representa el Z% de todos los registros"
+- Diversidad: si hay muchas categorías con distribución uniforme, mencionarlo
+
+**Para variables numéricas:**
+- Rango (min → max) e interpretación
+- Sesgo: si media >> mediana → distribución sesgada a la derecha (outliers altos)
+- Outliers: si P75 + 1.5×IQR < max, hay outliers potenciales → mencionar
+- Percentil 90: "El 90% de los valores está por debajo de X"
+
+**Para cualquier columna:**
+- Nulls altos (>10%): alerta 🔴
+- Columna constante (1 único): alerta de calidad
 
 IMPORTANTE — Si tienes datos suficientes para un gráfico, incluye al final un bloque viz:
 ```viz
@@ -384,11 +409,13 @@ Pregunta original: "{query}"
 Datos obtenidos en {len(accumulated_context)} pasos:
 {all_results}
 
-INSTRUCCIONES:
+INSTRUCCIONES GLOBALES:
 - Responde siempre en español
 - Interpreta los datos: no solo números, sino qué significan para el negocio
-- Usa el tipo estadístico de cada columna para dar contexto (numérica_continua → hablar de distribución; categórica → hablar de concentración)
-- Si hay anomalías (muchos nulls, columna constante, alta cardinalidad inesperada), menciónalas explícitamente
+- Usa el tipo estadístico de cada columna para dar contexto (numérica_continua → distribución; categórica → concentración)
+- Siempre que tengas frecuencias o conteos, calcula el % sobre el total y menciona si hay concentración
+- Si hay anomalías (>10% nulls, columna constante, outliers evidentes), menciónalas con 🔴
+- No inventes datos — si no tienes la información, dilo y propón obtenerla
 {format_instructions}
 """
 

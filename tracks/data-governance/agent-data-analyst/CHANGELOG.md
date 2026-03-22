@@ -1,5 +1,12 @@
 # Changelog - Khipu Analytics
 
+## [0.7.0] - 2026-03-21
+
+### Added
+- Insights automáticos en perfiles de tabla: nulls altos 🔴, columnas constantes, valor dominante (>50%), regla de Pareto ([#10](https://github.com/ronaldmego/khipu-analytics/issues/10))
+- Insights para estadísticas: top 3 con %, detección de sesgo (media vs mediana), outliers por IQR, percentil 90 ([#10](https://github.com/ronaldmego/khipu-analytics/issues/10))
+- Format prompt global: calcula % sobre total siempre que hay frecuencias, alerta anomalías con 🔴 ([#10](https://github.com/ronaldmego/khipu-analytics/issues/10))
+
 ## [0.6.0] - 2026-03-21
 
 ### Added
