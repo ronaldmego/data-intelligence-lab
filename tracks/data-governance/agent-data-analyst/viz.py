@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Khipu Analytics - Visualization Module
+DataGov Analyst - Visualization Module
 Genera figuras matplotlib según el tipo de variable (data-to-viz.com).
 
 Principios de Wilke (Fundamentals of Data Visualization):

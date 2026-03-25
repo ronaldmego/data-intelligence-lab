@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Khipu Analytics - Super Analista de Datos con IA
+DataGov Analyst - Super Analista de Datos con IA
 UI conversacional con arquitectura MCP plug & play.
 
 Cada fuente de datos es un MCP independiente.
@@ -25,20 +25,20 @@ OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585")
 # ============== STREAMLIT UI ==============
 
 st.set_page_config(
-    page_title="Khipu Analytics",
+    page_title="DataGov Analyst",
     page_icon="📊",
     layout="wide"
 )
 
 # Header
-st.title("📊 Khipu Analytics")
+st.title("📊 DataGov Analyst")
 st.caption(f"Super Analista de Datos con IA | Arquitectura MCP plug & play")
 
 # Sidebar
 with st.sidebar:
     st.header("ℹ️ Acerca de")
     st.markdown("""
-    **Khipu Analytics** — Super Analista de Datos con IA.
+    **DataGov Analyst** — Super Analista de Datos con IA.
     
     Arquitectura MCP (Model Context Protocol):
     cada fuente de datos es un plugin independiente.

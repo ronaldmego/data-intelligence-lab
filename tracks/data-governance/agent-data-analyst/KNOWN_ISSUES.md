@@ -1,4 +1,4 @@
-# Known Issues - Khipu Analytics
+# Known Issues - DataGov Analyst
 
 ## Active Limitations
 

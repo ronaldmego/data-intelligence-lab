@@ -1,6 +1,6 @@
-# MODEL-BENCHMARKS.md - Khipu Analytics
+# MODEL-BENCHMARKS.md - DataGov Analyst
 
-Comparativo de modelos probados con el agente multi-tool de Khipu.
+Comparativo de modelos probados con el agente multi-tool de DataGov Analyst.
 
 ## Fecha: 2026-02-17
 

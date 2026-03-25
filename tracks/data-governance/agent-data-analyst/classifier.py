@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Khipu Analytics - Variable Type Classifier
+DataGov Analyst - Variable Type Classifier
 Clasifica columnas según su tipo estadístico para guiar análisis y visualización.
 
 Árbol de decisión basado en data-to-viz.com:

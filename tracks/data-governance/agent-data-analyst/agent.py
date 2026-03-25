@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Khipu Analytics - Agent Core
+DataGov Analyst - Agent Core
 Cerebro del agente: conecta a MCPs como plugins y orquesta con un LLM.
 
 Arquitectura plug & play:
@@ -50,7 +50,7 @@ def create_llm():
         ), OPENROUTER_MODEL
 
 
-class KhipuAgent:
+class DataGovAgent:
     """Agente que conecta a múltiples MCPs y orquesta con un LLM."""
 
     def __init__(self):
@@ -186,7 +186,7 @@ class KhipuAgent:
                 ])
             
             # Decidir próximo paso
-            decision_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos con IA.
+            decision_prompt = f"""Eres DataGov Analyst, un Super Analista de Datos con IA.
 Tienes acceso a múltiples fuentes de datos via MCP (Model Context Protocol).
 
 Tools disponibles:
@@ -467,7 +467,7 @@ FORMATO GENERAL:
 - Sé conciso pero completo
 """
 
-        format_prompt = f"""Eres Khipu Analytics, un Super Analista de Datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
+        format_prompt = f"""Eres DataGov Analyst, un Super Analista de Datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
 
 Pregunta original: "{query}"
 
@@ -488,12 +488,12 @@ INSTRUCCIONES GLOBALES:
         return final_response.content
 
 
-def create_agent() -> KhipuAgent:
+def create_agent() -> DataGovAgent:
     """Crear agente con los MCPs configurados."""
     import sys
     sys.path.insert(0, str(Path(__file__).parent))
 
-    agent = KhipuAgent()
+    agent = DataGovAgent()
 
     # Registrar MCPs disponibles
     from server import mcp as openmetadata_mcp

@@ -1,4 +1,4 @@
-# Khipu Analytics 📊
+# DataGov Analyst 📊
 
 > Super Analista de Datos con IA — entiende tus datos antes de analizarlos.
 
@@ -6,7 +6,7 @@
 
 ## Qué es
 
-Khipu Analytics es un agente conversacional que combina:
+DataGov Analyst es un agente conversacional que combina:
 - **OpenMetadata** (catálogo de datos gobernado) — sabe qué datos existen y cómo están organizados
 - **SQL directo** — puede ejecutar queries para explorar los datos reales
 - **Visualización inteligente** — elige el gráfico correcto según el tipo de dato

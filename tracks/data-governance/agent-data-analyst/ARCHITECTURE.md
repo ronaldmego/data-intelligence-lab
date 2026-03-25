@@ -1,8 +1,8 @@
-# Architecture - Khipu Analytics
+# Architecture - DataGov Analyst
 
 ## Overview
 
-Khipu Analytics is a conversational data analyst agent built on a **MCP Plug & Play** architecture. The agent (brain) connects to data sources as independent plugins via the Model Context Protocol (MCP). Adding a new data source = one new MCP server + one `register_mcp()` call.
+DataGov Analyst is a conversational data analyst agent built on a **MCP Plug & Play** architecture. The agent (brain) connects to data sources as independent plugins via the Model Context Protocol (MCP). Adding a new data source = one new MCP server + one `register_mcp()` call.
 
 ## Component Diagram
 

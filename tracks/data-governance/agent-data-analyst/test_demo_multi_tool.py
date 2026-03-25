@@ -8,7 +8,7 @@ from agent import create_agent
 
 async def demo_multi_tool():
     """Demo de capacidad multi-tool"""
-    print("🚀 DEMO: Multi-Tool Reasoning en Khipu Analytics")
+    print("🚀 DEMO: Multi-Tool Reasoning en DataGov Analyst")
     print("=" * 60)
     
     agent = create_agent()

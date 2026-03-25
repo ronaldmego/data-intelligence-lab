@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SQL MCP Server for Khipu Analytics
+SQL MCP Server for DataGov Analyst
 Ejecuta queries READ-ONLY contra PostgreSQL/Supabase.
 
 Seguridad: Solo permite SELECT. Bloquea INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE.

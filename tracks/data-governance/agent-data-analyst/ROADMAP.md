@@ -1,4 +1,4 @@
-# Roadmap - Khipu Analytics
+# Roadmap - DataGov Analyst
 
 > Evolución progresiva: paso firme antes del siguiente.
 
@@ -8,11 +8,11 @@
 
 ### No duplicar, consumir
 
-Khipu NO reimplementa MCPs que ya existen en otros proyectos. Los consume como servidores externos.
+DataGov Analyst NO reimplementa MCPs que ya existen en otros proyectos. Los consume como servidores externos.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                   Khipu Agent (cerebro)                 │
+│              DataGov Analyst Agent (cerebro)             │
 │                   Orquesta LLM + MCPs                   │
 └──────┬──────────────────┬───────────────────┬───────────┘
        │                  │                   │
@@ -30,7 +30,7 @@ Khipu NO reimplementa MCPs que ya existen en otros proyectos. Los consume como s
 ```
 
 **Regla:** `openmetadata-mcp-agent` es el proyecto que evoluciona el MCP de gobierno.
-Khipu lo consume — no lo copia. Un MCP, una fuente de verdad.
+DataGov Analyst lo consume — no lo copia. Un MCP, una fuente de verdad.
 
 ### Conexión a databases — Estrategia
 
@@ -116,50 +116,50 @@ El LLM decide qué MCP y qué tool usar según la pregunta.
 - [x] Safety limit de 5 tool calls máximo para evitar loops infinitos
 - [x] Permite análisis complejos como: "describe tabla + estadísticas" o "relaciones + JOINs"
 
-### 1.4 Clasificación de variables ⬜
-- [ ] Clasificar automáticamente: numérica continua, discreta, categórica, temporal, ordinal, booleana, texto
-- [ ] La clasificación guía qué gráficos y análisis aplicar
-- [ ] Seguir árbol de decisión de data-to-viz.com
+### 1.4 Clasificación de variables ✅
+- [x] Clasificar automáticamente: numérica continua, discreta, categórica, temporal, ordinal, booleana, texto
+- [x] La clasificación guía qué gráficos y análisis aplicar
+- [x] Seguir árbol de decisión de data-to-viz.com
 
-### 1.5 Estadísticas descriptivas + visualización ⬜
-- [ ] Numéricas: min, max, avg, median, std, percentiles
-- [ ] Categóricas: frecuencias, moda, distribución
-- [ ] Gráficos con matplotlib según tipo de variable:
+### 1.5 Estadísticas descriptivas + visualización ✅
+- [x] Numéricas: min, max, avg, median, std, percentiles
+- [x] Categóricas: frecuencias, moda, distribución
+- [x] Gráficos con matplotlib según tipo de variable:
   - 1 numérica → histogram / density
   - 2 numéricas → scatter / boxplot
   - Categórica → bar chart
   - Numérica + Categórica → violin / boxplot por grupo
   - Temporal → line chart / connected scatter
-- [ ] Principios de Wilke: no distorsionar, proporción correcta
+- [x] Principios de Wilke: no distorsionar, proporción correcta
 
-### 1.6 Top N e insights rápidos ⬜
-- [ ] Top 3 valores más frecuentes por categórica
-- [ ] Valor más/menos repetido
-- [ ] "El 80% de X está en Y categorías"
-- [ ] Distribución de percentiles
-- [ ] Insights automáticos, solo estadística descriptiva
+### 1.6 Top N e insights rápidos ✅
+- [x] Top 3 valores más frecuentes por categórica
+- [x] Valor más/menos repetido
+- [x] "El 80% de X está en Y categorías"
+- [x] Distribución de percentiles
+- [x] Insights automáticos, solo estadística descriptiva
 
-### 1.7 Detección de tipo de análisis ⬜
-- [ ] Fecha + métrica → "Es análisis de tendencia"
-- [ ] Categórica vs numérica → "Es análisis de distribución por grupo"
-- [ ] 2 numéricas → "Es análisis de correlación"
-- [ ] Seguir árbol data-to-viz.com
-- [ ] El agente PROPONE qué tipo de análisis hacer
+### 1.7 Detección de tipo de análisis ✅
+- [x] Fecha + métrica → "Es análisis de tendencia"
+- [x] Categórica vs numérica → "Es análisis de distribución por grupo"
+- [x] 2 numéricas → "Es análisis de correlación"
+- [x] Seguir árbol data-to-viz.com
+- [x] El agente PROPONE qué tipo de análisis hacer
 
-### 1.8 Data quality report ⬜
-- [ ] % nulls por columna con semáforo (verde/amarillo/rojo)
-- [ ] Duplicados detectados
-- [ ] Outliers obvios (>3σ o 1.5*IQR)
-- [ ] Consistencia referencial entre tablas
-- [ ] Tipos de datos inconsistentes
-- [ ] Recomendaciones actionables
+### 1.8 Data quality report ✅
+- [x] % nulls por columna con semáforo (verde/amarillo/rojo)
+- [x] Duplicados detectados
+- [x] Outliers obvios (>3σ o 1.5*IQR)
+- [x] Consistencia referencial entre tablas
+- [x] Tipos de datos inconsistentes
+- [x] Recomendaciones actionables
 
 ---
 
 ## Principio Rector
 
 ```
-Khipu Analytics = Analista Descriptivo
+DataGov Analyst = Analista Descriptivo
 ```
 
 **Alcance permanente: estadística descriptiva + visualización.**
