@@ -1,4 +1,4 @@
-# Khipu Analytics - Super Analista de Datos con IA
+# DataGov Analyst - Super Analista de Datos con IA
 
 ## Tabla de Contenidos
 
@@ -32,7 +32,7 @@
 
 **Un Super Analista de Datos que primero ENTIENDE antes de opinar.**
 
-Khipu Analytics es un agente conversacional que combina:
+DataGov Analyst es un agente conversacional que combina:
 1. **Conocimiento del catálogo** (OpenMetadata MCP) — qué datos existen, cómo están gobernados, documentados, con linaje
 2. **Capacidad de exploración** (SQL MCP) — ejecutar queries para describir los datos reales
 
@@ -119,7 +119,7 @@ orientación como best practice.
 ### Estructura del Proyecto
 
 ```
-khipu-analytics/
+agent-data-analyst/
 ├── app.py              # Streamlit UI (chat + visualizaciones)
 ├── server.py           # OpenMetadata MCP tools
 ├── sql_server.py       # SQL MCP tools (Fase 1.2)
@@ -140,7 +140,7 @@ khipu-analytics/
 ## Quick Start
 
 ```bash
-cd ~/projects/khipu-analytics
+cd ~/projects/agent-data-analyst
 
 # Configurar
 cp .env.example .env
@@ -331,4 +331,4 @@ pip install -r requirements.txt
 
 Este proyecto evolucionó desde `openmetadata-mcp-client` (agente conversacional para OpenMetadata). El patrón Streamlit + Gemini + FastMCP está probado y funciona.
 
-Repositorio: https://github.com/ronaldmego/khipu-analytics
+Repositorio: https://github.com/ronaldmego/agent-data-analyst
