@@ -1,0 +1,105 @@
+# Agent Manifest
+# GitAgent Specification v1.0
+# https://github.com/open-gitagent/gitagent
+
+name: openmetadata-mcp-agent
+description: |
+  Conversational AI agent for OpenMetadata data catalog operations.
+  Exposes 27 tools (17 read + 10 write) via natural language.
+  Built for governance, discovery, and metadata management.
+
+version: 1.0.0
+author: Ronald Mego <ronaldmego@galacticaia.com>
+license: MIT
+repository: https://github.com/ronaldmego/openmetadata-mcp-agent
+
+# Model Configuration
+model:
+  provider: google
+  model: gemini-2.5-pro
+  temperature: 0.1
+  max_tokens: 8192
+
+# Framework Runtime
+runtime:
+  type: mcp-server
+  entrypoint: skills/openmetadata/server.py
+  port: 4004
+  host: <vps-host>
+
+# Compliance & Segregation of Duties
+# Critical for enterprise/banking clients
+compliance:
+  framework: FINRA-compliant
+  segregation_of_duties:
+    enabled: true
+    roles:
+      - id: catalog_viewer
+        description: Can search, discover, and read metadata
+        permissions: [read, search, list, get]
+      - id: metadata_editor
+        description: Can update descriptions, tags, glossary
+        permissions: [write, update, create, link]
+      - id: owner_assigner
+        description: Can assign/reassign asset ownership
+        permissions: [assign, transfer]
+      - id: auditor
+        description: Read-only access to audit logs and lineage
+        permissions: [audit, lineage, read]
+    conflicts:
+      - [metadata_editor, auditor]  # Cannot audit own changes
+      - [owner_assigner, catalog_viewer]  # Separation of duties
+    enforcement: strict
+    approval_required_for:
+      - write_operations
+      - ownership_changes
+      - glossary_modifications
+
+# Skills (MCP-compatible modules)
+skills:
+  openmetadata:
+    path: skills/openmetadata
+    description: OpenMetadata REST API integration
+    tools_count: 27
+    read_tools: 17
+    write_tools: 10
+
+# Sub-agents (composition)
+# This agent can delegate to specialized sub-agents
+agents:
+  # Example: Could delegate lineage analysis to a specialized agent
+  lineage_analyzer:
+    path: agents/lineage-analyzer
+    enabled: false  # Future extension
+
+# Environment & Secrets
+environment:
+  required:
+    - GOOGLE_API_KEY
+    - OPENMETADATA_URL
+    - OPENMETADATA_TOKEN
+  optional:
+    - DRY_RUN_MODE
+    - AUDIT_LOG_LEVEL
+
+# Lifecycle hooks
+hooks:
+  bootstrap: hooks/bootstrap.md
+  teardown: hooks/teardown.md
+
+# Workflows (deterministic multi-step procedures)
+workflows:
+  metadata_update:
+    description: Safe metadata update with approval
+    approval_required: true
+  data_discovery:
+    description: Multi-step data asset discovery
+
+# Tags & Categorization
+tags:
+  - data-governance
+  - openmetadata
+  - mcp
+  - catalog
+  - enterprise
+  - compliance
