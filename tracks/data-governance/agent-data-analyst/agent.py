@@ -227,6 +227,27 @@ ESTRATEGIA MULTI-STEP (best practice):
    - Paso 1: list_glossary_terms o search_catalog
    - DONE con las definiciones
 
+7. DISTRIBUCIÓN / AGRUPACIÓN (keywords: distribución, distribuyen, cuántos, ranking, por canal, por tipo):
+   - Paso 1: search_catalog o get_table_details (OpenMetadata) → identificar tabla y columnas
+   - Paso 2: execute_query con SQL completo → agrupar y contar TODOS los valores (NO usar LIMIT)
+   - Paso 3 (si aplica): execute_query para contar nulls en la columna agrupada
+   - Ejemplo de execute_query para distribución:
+     TOOL: execute_query
+     PARAMS: query=SELECT channel, COUNT(*) as n FROM telco_demo.recharges GROUP BY channel ORDER BY n DESC
+   - Ejemplo para contar nulls:
+     TOOL: execute_query
+     PARAMS: query=SELECT COUNT(*) FILTER (WHERE channel IS NULL) as nulls, COUNT(*) as total FROM telco_demo.recharges
+   - ⚠️ NUNCA uses LIMIT en queries de distribución — necesitas TODOS los valores
+   - SOLO después de estos pasos → DONE
+
+8. EVOLUCIÓN TEMPORAL (keywords: evolución, tendencia, cómo ha cambiado, por fecha):
+   - Paso 1: get_table_details (OpenMetadata) → contexto
+   - Paso 2: execute_query con SQL de agregación por fecha (SIN LIMIT, incluir TODAS las fechas)
+   - Ejemplo:
+     TOOL: execute_query
+     PARAMS: query=SELECT usage_date, SUM(data_mb) as total_mb, AVG(data_mb) as avg_mb FROM telco_demo.usage_daily GROUP BY usage_date ORDER BY usage_date
+   - SOLO después de ambos pasos → DONE
+
 DECISIÓN - Responde con UNA de estas opciones:
 
 Opción A - Hacer otro tool call:
@@ -241,6 +262,10 @@ DONE
 - Para get_table_profile y get_column_stats necesitas: schema_name y table_name exactos
 - Si OpenMetadata te dio el FQN (ej: service.db.schema.table), extrae schema y table de ahí
 - Si el usuario no especificó schema, usa el que encontraste en OpenMetadata
+- Para execute_query: SIEMPRE escribe SQL completo con FROM y schema. Ejemplo:
+  TOOL: execute_query
+  PARAMS: query=SELECT col1, COUNT(*) as n FROM schema.tabla GROUP BY col1 ORDER BY n DESC
+  NUNCA escribas solo "SELECT col" sin FROM — eso da error
 
 Paso actual: {step}/{max_steps}
 """
@@ -266,18 +291,23 @@ Paso actual: {step}/{max_steps}
                     elif line.startswith("PARAMS:"):
                         params_str = line.split("PARAMS:")[1].strip()
                         if params_str.lower() != "none":
-                            for pair in params_str.split(","):
-                                pair = pair.strip()
-                                if "=" in pair:
-                                    key, val = pair.split("=", 1)
-                                    key = key.strip()
-                                    val = val.strip()
-                                    # Try to convert numeric
-                                    try:
-                                        val = int(val)
-                                    except ValueError:
-                                        pass
-                                    params[key] = val
+                            # For execute_query, the query param may contain commas
+                            # so take everything after "query=" as the value
+                            if params_str.startswith("query="):
+                                params["query"] = params_str.split("query=", 1)[1].strip()
+                            else:
+                                for pair in params_str.split(","):
+                                    pair = pair.strip()
+                                    if "=" in pair:
+                                        key, val = pair.split("=", 1)
+                                        key = key.strip()
+                                        val = val.strip()
+                                        # Try to convert numeric
+                                        try:
+                                            val = int(val)
+                                        except ValueError:
+                                            pass
+                                        params[key] = val
 
                 if not tool_name:
                     # Si no se pudo parsear, terminar con lo que tenemos
@@ -318,10 +348,12 @@ Paso actual: {step}/{max_steps}
         # Detectar tipo de pregunta para guiar el formato de respuesta
         query_lower = query.lower()
         is_profile = any(w in query_lower for w in ["perfil", "profile", "describe", "detalles", "estructura", "columnas"])
-        is_stats = any(w in query_lower for w in ["estadísticas", "estadisticas", "stats", "distribución", "distribucion"])
-        is_viz = any(w in query_lower for w in ["gráfico", "grafico", "chart", "histograma", "barras", "ranking", "distribución visual", "visualiza", "muestra gráfico"])
+        is_stats = any(w in query_lower for w in ["estadísticas", "estadisticas", "stats"])
+        is_viz = any(w in query_lower for w in ["gráfico", "grafico", "chart", "histograma", "barras", "distribución visual", "visualiza", "muestra gráfico"])
         is_quality = any(w in query_lower for w in ["calidad", "quality", "nulls", "nulos", "duplicados", "problemas", "reporte de calidad", "data quality"])
         is_analysis_detect = any(w in query_lower for w in ["qué análisis", "que analisis", "cómo analizo", "como analizo", "qué puedo hacer", "analizar", "explorar"])
+        is_distribution = any(w in query_lower for w in ["distribuyen", "distribución", "distribucion", "ranking", "por canal", "por tipo", "por ciudad", "cuántos", "cuantos", "composición", "composicion", "segmento", "qué canal", "que canal", "más recargas", "mas recargas", "por qué canal", "por que canal"])
+        is_temporal = any(w in query_lower for w in ["evolucion", "evolución", "tendencia", "cómo ha cambiado", "como ha cambiado", "por fecha", "temporal", "a lo largo"])
 
         if is_profile:
             classification_section = f"\n{classification_text}\n" if classification_text else ""
@@ -360,6 +392,74 @@ Basándote en los tipos de variables y problemas encontrados, propón UN anális
 - Si hay temporales + numéricas → sugerir análisis de tendencia
 - Si hay categóricas + numéricas → sugerir distribución por grupo
 - Si hay 2+ numéricas → sugerir scatter plot (distribución bivariada descriptiva)
+"""
+        elif is_distribution:
+            format_instructions = """
+FORMATO PARA DISTRIBUCIÓN / AGRUPACIÓN:
+
+### Distribución de [columna] en [tabla]
+
+Muestra los resultados en tabla markdown con conteo y porcentaje:
+
+| Valor | Conteo | % del Total |
+|-------|--------|-------------|
+| val1  | 150    | 45.5%       |
+| val2  | 100    | 30.3%       |
+| ...   | ...    | ...         |
+
+### 💡 Insights automáticos
+- Top 3 valores con % del total
+- Regla de Pareto: si el 80% está en pocas categorías, mencionarlo
+- Valor dominante: si un valor supera el 50%
+- Si hay nulls en la columna agrupada, reportarlos como alerta 🔴
+- Concentración geográfica o por segmento si aplica
+
+OBLIGATORIO — Incluye al final un bloque viz con los datos reales:
+```viz
+type: bar_chart
+col_name: nombre_columna
+categories: val1,val2,val3
+values: 150,100,80
+title: Distribución de [columna]
+```
+
+Reglas:
+- Usa bar_chart para categóricas (frecuencias)
+- Incluye TODOS los valores, no solo el top 1
+- Los valores deben venir de los resultados SQL — nunca inventes
+"""
+        elif is_temporal:
+            format_instructions = """
+FORMATO PARA EVOLUCIÓN TEMPORAL:
+
+### Evolución de [métrica] en [tabla]
+
+Muestra los datos por fecha en tabla markdown:
+
+| Fecha | Valor | Variación vs anterior |
+|-------|-------|-----------------------|
+| 2026-03-21 | 1,234 | — |
+| 2026-03-22 | 1,456 | +18.0% |
+
+### 💡 Insights automáticos
+- Tendencia general (crecimiento, decrecimiento, estable)
+- Punto más alto y más bajo del período
+- Variaciones significativas entre períodos consecutivos
+- Si hay estacionalidad o patrones semanales
+
+OBLIGATORIO — Incluye al final un bloque viz:
+```viz
+type: line_chart
+col_name: nombre_metrica
+x_values: 2026-03-21,2026-03-22,2026-03-23
+y_values: 1234,1456,1300
+x_label: Fecha
+title: Evolución de [métrica]
+```
+
+Reglas:
+- Usa line_chart para series temporales
+- Los valores deben venir de los resultados SQL — nunca inventes
 """
         elif is_stats or is_viz:
             format_instructions = """

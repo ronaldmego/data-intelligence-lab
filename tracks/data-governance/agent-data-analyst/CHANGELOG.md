@@ -1,5 +1,20 @@
 # Changelog - DataGov Analyst
 
+## [0.8.1] - 2026-03-28
+
+### Fixed
+- Param parser now handles SQL queries containing commas (e.g., `SELECT a, b FROM t`) without breaking ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Decision prompt includes concrete SQL examples for distribution/grouping and temporal queries, preventing incomplete SQL generation ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Updated expired Gemini API key from central secrets inventory ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+
+### Added
+- Strategies 7 (distribution/grouping) and 8 (temporal evolution) in decision prompt with execute_query examples ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Dedicated format instructions for distribution queries (bar_chart viz) and temporal queries (line_chart viz) — viz generation improved from 1/6 to 4/6 tests ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Query type detection for `is_distribution` and `is_temporal` with comprehensive keyword matching ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Null detection strategy in distribution queries — prompt now guides LLM to check nulls in grouped columns ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Explicit "NO LIMIT" rule in distribution/temporal strategies to prevent truncated results ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+- Test script `test_issue20.py` for running the 6 validation cases from #20 ([#20](https://github.com/ronaldmego/agent-data-analyst/issues/20))
+
 ## [0.8.0] - 2026-03-21
 
 ### Added

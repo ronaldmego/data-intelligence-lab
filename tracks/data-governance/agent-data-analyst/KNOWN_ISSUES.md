@@ -27,6 +27,20 @@
 - **Workaround**: Use `LIMIT` clauses in freeform queries. The `get_column_stats` tool uses sampling internally.
 - **Status**: Deferred — add `statement_timeout` to DB connection string in future.
 
+### LLM May Occasionally Skip Viz Blocks
+- **Issue**: Despite explicit instructions, the LLM may occasionally omit `\`\`\`viz` blocks. After prompt improvements, 4/6 test cases now generate viz (up from 1/6).
+- **Workaround**: Ask explicitly for a chart (e.g., "muéstrame un gráfico de barras").
+- **Status**: Mostly resolved in #20 — added dedicated format instructions for distribution (bar_chart) and temporal (line_chart) queries. Remaining edge cases depend on LLM compliance.
+- **Discovered**: #20
+
 ## Resolved Issues
 
-_(none yet — track resolutions here with reference to the closing GitHub Issue)_
+### Param Parser Broke SQL with Commas (#20)
+- **Issue**: The PARAMS parser in `agent.py` split on commas to separate key=value pairs. This broke any `execute_query` call where the SQL contained commas (e.g., `SELECT col1, col2 FROM ...`).
+- **Fix**: Added special handling for `query=` params — takes entire string after `query=` without splitting on commas.
+- **Resolved**: #20
+
+### Decision Prompt Lacked SQL Examples (#20)
+- **Issue**: The LLM generated incomplete SQL (e.g., `SELECT col` without FROM) because the decision prompt had no examples for `execute_query`.
+- **Fix**: Added distribution/grouping and temporal evolution strategies with concrete SQL examples to the decision prompt.
+- **Resolved**: #20
