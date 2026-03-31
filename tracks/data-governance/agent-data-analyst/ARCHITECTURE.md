@@ -88,9 +88,8 @@ Configurable via `LLM_PROVIDER` in `.env`:
 ## Infrastructure
 
 - **Runtime**: Python 3.10+, Streamlit
-- **Port**: 4005 (Tailscale only, bind `<vps-host>`)
-- **VPS**: GalacticaIA VPS
-- **Access**: http://<vps-host>:4005
+- **Port**: 4005 (configurable)
+- **Access**: `http://localhost:4005` (default)
 
 ## Future Extensions (Plug & Play)
 

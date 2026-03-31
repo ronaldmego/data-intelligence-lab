@@ -35,7 +35,7 @@ Comparativo de modelos probados con el agente multi-tool de DataGov Analyst.
 
 ### Bugs encontrados durante testing
 
-1. **DB Host:** `localhost` no alcanza Supabase (bindeada a Tailscale `<vps-host>`)
+1. **DB Host:** `localhost` may not reach the database if it's bound to a private network interface
 2. **Param naming:** `execute_query(sql:str)` → LLMs siempre envían `query`. Renombrado a `query`.
 3. **Intermitencia tool parsing:** Modelos más pequeños a veces no parsean correctamente `TOOL: / PARAMS:`. No es bug de código, es limitación del modelo.
 

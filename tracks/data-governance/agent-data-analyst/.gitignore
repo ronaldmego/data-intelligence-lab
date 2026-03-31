@@ -52,3 +52,9 @@ output/
 
 # Claude agent instructions (internal, not for public repos)
 CLAUDE.md
+
+# Internal docs
+test_results/
+docs/social/
+PHASE_1_3_BASIC_PROFILE.md
+prompting-lab.md

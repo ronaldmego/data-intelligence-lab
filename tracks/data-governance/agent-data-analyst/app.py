@@ -31,8 +31,8 @@ st.set_page_config(
 )
 
 # Header
-st.title("📊 DataGov Analyst")
-st.caption(f"Super Analista de Datos con IA | Arquitectura MCP plug & play")
+st.title("📊 DataGov SQL AI Analyst")
+st.caption("Open Source · Self-Hosted · Powered by OpenMetadata · LangChain · MCP")
 
 # Sidebar
 with st.sidebar:
