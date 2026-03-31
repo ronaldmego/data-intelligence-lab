@@ -32,7 +32,7 @@ Conversational AI agent that exposes OpenMetadata data catalog operations via na
 └────────────────────┬────────────────────────────┘
                      │ REST API + Bearer token
 ┌────────────────────▼────────────────────────────┐
-│       OpenMetadata  (http://<vps-host>:8585)  │
+│       OpenMetadata  (OPENMETADATA_URL)           │
 │  - Tables, databases, schemas                    │
 │  - Glossaries, tags, domains                     │
 │  - Pipelines, dashboards, topics                 │
