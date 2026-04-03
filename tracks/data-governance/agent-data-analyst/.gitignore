@@ -57,7 +57,9 @@ CLAUDE.md
 test_results/
 docs/social/
 docs/*.excalidraw
-docs/*.png
+docs/*.excalidraw
+!docs/logo.png
+!docs/datagov-demo.gif
 PHASE_1_3_BASIC_PROFILE.md
 prompting-lab.md
 DEMO_PROMPTS.md
