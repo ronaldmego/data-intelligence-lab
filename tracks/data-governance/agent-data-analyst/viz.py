@@ -12,12 +12,13 @@ Principios de Wilke (Fundamentals of Data Visualization):
 """
 
 import matplotlib
+
 matplotlib.use("Agg")  # backend sin display, compatible con Streamlit
+
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
-from typing import Optional
 
 # Paleta accesible (colorblind-friendly, basada en Wong 2011)
 PALETTE = ["#0072B2", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#CC79A7", "#999999"]
@@ -39,7 +40,7 @@ def plot_histogram(
     values: list[float],
     col_name: str,
     bins: int = 20,
-    title: Optional[str] = None,
+    title: str | None = None,
 ) -> plt.Figure:
     """
     Histograma para variables numéricas continuas.
@@ -75,7 +76,7 @@ def plot_bar_chart(
     categories: list[str],
     values: list[float],
     col_name: str,
-    title: Optional[str] = None,
+    title: str | None = None,
     max_categories: int = 20,
     show_pct: bool = True,
 ) -> plt.Figure:
@@ -92,8 +93,8 @@ def plot_bar_chart(
         show_pct: Mostrar porcentaje en las barras
     """
     # Ordenar y truncar
-    pairs = sorted(zip(values, categories), reverse=True)[:max_categories]
-    vals, cats = zip(*pairs) if pairs else ([], [])
+    pairs = sorted(zip(values, categories, strict=False), reverse=True)[:max_categories]
+    vals, cats = zip(*pairs, strict=False) if pairs else ([], [])
 
     fig, ax = plt.subplots(figsize=(8, max(3, len(cats) * 0.45)))
 
@@ -102,7 +103,7 @@ def plot_bar_chart(
 
     # Labels en las barras
     total = sum(values)
-    for bar, val in zip(bars, vals):
+    for bar, val in zip(bars, vals, strict=False):
         pct = val / total * 100 if total > 0 else 0
         label = f" {val:,} ({pct:.1f}%)" if show_pct else f" {val:,}"
         ax.text(bar.get_width(), bar.get_y() + bar.get_height() / 2,
@@ -127,7 +128,7 @@ def plot_line_chart(
     y_values: list[float],
     col_name: str,
     x_label: str = "Fecha",
-    title: Optional[str] = None,
+    title: str | None = None,
 ) -> plt.Figure:
     """
     Line chart para series temporales.
@@ -162,8 +163,8 @@ def plot_line_chart(
 def plot_boxplot(
     data: dict[str, list[float]],
     col_name: str,
-    group_col: Optional[str] = None,
-    title: Optional[str] = None,
+    group_col: str | None = None,
+    title: str | None = None,
 ) -> plt.Figure:
     """
     Boxplot para numérica + categórica (distribución por grupo).
@@ -183,7 +184,7 @@ def plot_boxplot(
     bp = ax.boxplot(values, patch_artist=True, notch=False,
                     medianprops=dict(color="white", linewidth=2))
 
-    for patch, color in zip(bp["boxes"], [PALETTE[i % len(PALETTE)] for i in range(len(groups))]):
+    for patch, color in zip(bp["boxes"], [PALETTE[i % len(PALETTE)] for i in range(len(groups))], strict=False):
         patch.set_facecolor(color)
         patch.set_alpha(0.7)
 
@@ -200,7 +201,7 @@ def plot_boxplot(
     return fig
 
 
-def parse_viz_request(response_text: str) -> Optional[dict]:
+def parse_viz_request(response_text: str) -> dict | None:
     """
     Detectar si el agente incluyó una solicitud de visualización en su respuesta.
     El agente puede señalar un gráfico con un bloque especial:
@@ -233,7 +234,7 @@ def parse_viz_request(response_text: str) -> Optional[dict]:
     return params
 
 
-def render_viz(params: dict) -> Optional[plt.Figure]:
+def render_viz(params: dict) -> plt.Figure | None:
     """
     Renderizar un gráfico a partir de los parámetros parseados por parse_viz_request.
 

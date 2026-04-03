@@ -10,15 +10,16 @@ Arquitectura plug & play:
 - LLM configurable: Gemini (enterprise) o cualquier modelo via OpenRouter (dev/testing)
 """
 
-import os
-import json
-import re
 import asyncio
+import os
+import re
 from pathlib import Path
+
 from dotenv import load_dotenv
 from fastmcp import Client
 from langchain_core.messages import HumanMessage
-from classifier import classify_column, classifications_to_prompt
+
+from classifier import classifications_to_prompt, classify_column
 
 load_dotenv(Path(__file__).parent / ".env")
 
@@ -33,7 +34,7 @@ OPENROUTER_API_KEY = os.getenv("OPEN_ROUTER_API_KEY", "")
 
 def create_llm():
     """Crear LLM según el provider configurado.
-    
+
     - gemini: Google Gemini via API key (enterprise/production)
     - openrouter: Cualquier modelo via OpenRouter (dev/testing, modelos gratis disponibles)
     """
@@ -61,7 +62,7 @@ class DataGovAgent:
 
     def register_mcp(self, name: str, server):
         """Registrar un MCP server como plugin.
-        
+
         Args:
             name: Nombre del MCP (ej: 'openmetadata', 'sql', 'snowflake')
             server: FastMCP server object
@@ -93,9 +94,9 @@ class DataGovAgent:
                                 p_type = p_info.get("type", "string")
                                 param_list.append(f"{p_name}({p_type})")
                             params = f"({', '.join(param_list)})"
-                    
+
                     tool_lines.append(f"  - {tool.name}{params}: {(tool.description or '')[:80]}")
-                
+
                 sections.append(f"🔌 MCP: {mcp_name} ({len(tools)} tools)\n" + "\n".join(tool_lines))
 
         self.tools_info = "\n\n".join(sections)
@@ -165,17 +166,17 @@ class DataGovAgent:
 
     async def process_multi_step(self, query: str, max_steps: int = 5) -> str:
         """Procesar pregunta del usuario con múltiples tool calls en secuencia.
-        
+
         Flujo: pregunta → step1 (tool call) → resultado1 → step2 (tool call con contexto) → ... → DONE → respuesta final
-        
+
         Args:
             query: Pregunta del usuario
             max_steps: Máximo número de tool calls permitidos (safety limit)
         """
-        
+
         accumulated_context = []
         step = 1
-        
+
         while step <= max_steps:
             # Crear contexto acumulativo
             context_summary = ""
@@ -184,7 +185,7 @@ class DataGovAgent:
                     f"PASO {i+1} PREVIO:\n- Tool usado: {ctx['tool_name']}\n- Parámetros: {ctx['params']}\n- Resultado: {ctx['result'][:500]}..."
                     for i, ctx in enumerate(accumulated_context)
                 ])
-            
+
             # Decidir próximo paso
             decision_prompt = f"""Eres DataGov Analyst, un Super Analista de Datos con IA.
 Tienes acceso a múltiples fuentes de datos via MCP (Model Context Protocol).
@@ -272,11 +273,11 @@ Paso actual: {step}/{max_steps}
 
             decision_response = self.llm.invoke([HumanMessage(content=decision_prompt)])
             decision = decision_response.content.strip()
-            
+
             # Verificar si el LLM decide terminar
             if "DONE" in decision.upper():
                 break
-                
+
             # Parsear y ejecutar tool call
             try:
                 tool_name = ""
@@ -312,10 +313,10 @@ Paso actual: {step}/{max_steps}
                 if not tool_name:
                     # Si no se pudo parsear, terminar con lo que tenemos
                     break
-                    
+
                 # Ejecutar tool
                 result = await self.call_tool(tool_name, params)
-                
+
                 # Guardar en contexto acumulativo
                 accumulated_context.append({
                     "step": step,
@@ -323,7 +324,7 @@ Paso actual: {step}/{max_steps}
                     "params": params,
                     "result": result
                 })
-                
+
                 step += 1
 
             except Exception as e:
@@ -335,7 +336,7 @@ Paso actual: {step}/{max_steps}
                     "result": f"Error: {str(e)}"
                 })
                 break
-        
+
         # Generar respuesta final basada en todo el contexto acumulado
         all_results = "\n\n".join([
             f"PASO {ctx['step']}: {ctx['tool_name']}({ctx['params']})\nResultado:\n{ctx['result']}"

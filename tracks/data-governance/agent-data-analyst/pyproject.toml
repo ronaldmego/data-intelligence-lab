@@ -1,0 +1,31 @@
+[project]
+name = "agent-data-analyst"
+version = "0.8.1"
+description = "AI-powered data analyst agent that understands your data before analyzing it"
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+    "B904",  # raise from in except clauses (noise for MCP tools with user-facing errors)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"app.py" = ["E402"]  # load_dotenv must run before imports
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

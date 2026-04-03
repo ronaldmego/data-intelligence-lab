@@ -14,8 +14,6 @@ Clasifica columnas según su tipo estadístico para guiar análisis y visualizac
 """
 
 from dataclasses import dataclass
-from typing import Optional
-
 
 # Tipos SQL que se consideran numéricos
 NUMERIC_TYPES = {
@@ -73,7 +71,7 @@ def classify_column(
     cardinality: int,
     total_rows: int,
     null_pct: float,
-    sample_values: Optional[list] = None,
+    sample_values: list | None = None,
 ) -> ColumnClassification:
     """
     Clasificar el tipo estadístico de una columna.

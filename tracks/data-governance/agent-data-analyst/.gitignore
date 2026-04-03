@@ -53,8 +53,22 @@ output/
 # Claude agent instructions (internal, not for public repos)
 CLAUDE.md
 
-# Internal docs
+# Internal docs and dev artifacts
 test_results/
 docs/social/
+docs/*.excalidraw
+docs/*.png
 PHASE_1_3_BASIC_PROFILE.md
 prompting-lab.md
+DEMO_PROMPTS.md
+MODEL-BENCHMARKS.md
+
+# Dev/integration test scripts (not pytest)
+test_demo_*.py
+test_issue*.py
+test_multi_*.py
+
+# Local directories
+memory/
+skills/
+agents/

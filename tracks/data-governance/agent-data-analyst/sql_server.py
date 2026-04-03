@@ -8,11 +8,12 @@ Seguridad: Solo permite SELECT. Bloquea INSERT/UPDATE/DELETE/DROP/ALTER/TRUNCATE
 
 import os
 from pathlib import Path
+
+import psycopg2
+import psycopg2.errors
+import psycopg2.extras
 from dotenv import load_dotenv
 from fastmcp import FastMCP
-import psycopg2
-import psycopg2.extras
-import psycopg2.errors
 
 # Cargar .env
 load_dotenv(Path(__file__).parent / ".env")
@@ -149,11 +150,11 @@ def list_schemas() -> str:
         conn = get_connection()
         cur = conn.cursor()
         cur.execute("""
-            SELECT schema_name, 
-                   (SELECT COUNT(*) FROM information_schema.tables t 
+            SELECT schema_name,
+                   (SELECT COUNT(*) FROM information_schema.tables t
                     WHERE t.table_schema = s.schema_name AND t.table_type = 'BASE TABLE') as table_count
             FROM information_schema.schemata s
-            WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast', 
+            WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast',
                                        'storage', 'vault', 'pgsodium', 'pgsodium_masks',
                                        'extensions', 'graphql', 'graphql_public', 'realtime',
                                        'supabase_functions', 'supabase_migrations', 'auth',
@@ -194,7 +195,7 @@ def describe_table(schema_name: str, table_name: str) -> str:
         conn = get_connection()
         cur = conn.cursor()
         cur.execute("""
-            SELECT column_name, data_type, is_nullable, 
+            SELECT column_name, data_type, is_nullable,
                    column_default, character_maximum_length,
                    numeric_precision
             FROM information_schema.columns
@@ -222,7 +223,7 @@ def describe_table(schema_name: str, table_name: str) -> str:
             ""
         ]
 
-        for col_name, data_type, nullable, default, max_len, precision in columns:
+        for col_name, data_type, nullable, _default, max_len, precision in columns:
             type_str = data_type
             if max_len:
                 type_str += f"({max_len})"
@@ -273,7 +274,7 @@ def get_column_stats(schema_name: str, table_name: str, column_name: str) -> str
 
         # Stats básicas (para cualquier tipo)
         cur.execute(f"""
-            SELECT 
+            SELECT
                 COUNT(*) as total,
                 COUNT({col}) as non_null,
                 COUNT(*) - COUNT({col}) as nulls,
@@ -299,7 +300,7 @@ def get_column_stats(schema_name: str, table_name: str, column_name: str) -> str
                          'double precision', 'decimal', 'float']
         if data_type in numeric_types:
             cur.execute(f"""
-                SELECT 
+                SELECT
                     MIN({col})::numeric as min_val,
                     MAX({col})::numeric as max_val,
                     AVG({col})::numeric(15,2) as avg_val,
@@ -397,7 +398,7 @@ def get_table_profile(schema_name: str, table_name: str) -> str:
         numeric_types = ['integer', 'bigint', 'smallint', 'numeric', 'real',
                          'double precision', 'decimal', 'float']
 
-        for col_name, data_type, nullable in columns:
+        for col_name, data_type, _nullable in columns:
             col = f'"{col_name}"'
 
             # Basic stats
@@ -415,7 +416,7 @@ def get_table_profile(schema_name: str, table_name: str) -> str:
             # Quick stats for numeric
             if data_type in numeric_types and non_null > 0:
                 cur.execute(f"""
-                    SELECT MIN({col})::numeric, MAX({col})::numeric, 
+                    SELECT MIN({col})::numeric, MAX({col})::numeric,
                            AVG({col})::numeric(12,2)
                     FROM {fqn} WHERE {col} IS NOT NULL
                 """)
@@ -444,7 +445,7 @@ def get_table_profile(schema_name: str, table_name: str) -> str:
 
 
 if __name__ == "__main__":
-    print(f"🚀 SQL MCP Server")
+    print("🚀 SQL MCP Server")
     print(f"   Host: {DB_HOST}:{DB_PORT}")
     print(f"   DB: {DB_NAME}")
     sql_mcp.run()

@@ -7,17 +7,19 @@ Cada fuente de datos es un MCP independiente.
 Agregar un nuevo MCP = agregar una línea en agent.py
 """
 
-import os
 import asyncio
-import streamlit as st
+import os
 from pathlib import Path
+
+import streamlit as st
 from dotenv import load_dotenv
+
 from viz import parse_viz_request, render_viz
 
 # Cargar configuración
 load_dotenv(Path(__file__).parent / ".env")
 
-from agent import create_agent, LLM_PROVIDER
+from agent import LLM_PROVIDER, create_agent
 
 # Configuración
 OPENMETADATA_URL = os.getenv("OPENMETADATA_URL", "http://localhost:8585")
@@ -39,10 +41,10 @@ with st.sidebar:
     st.header("ℹ️ Acerca de")
     st.markdown("""
     **DataGov Analyst** — Super Analista de Datos con IA.
-    
+
     Arquitectura MCP (Model Context Protocol):
     cada fuente de datos es un plugin independiente.
-    
+
     **Ejemplos de preguntas:**
     - ¿Qué tablas tenemos?
     - Dame el perfil de la tabla customers
@@ -51,27 +53,27 @@ with st.sidebar:
     - ¿De dónde vienen los datos de orders?
     - ¿Cuántos clientes activos hay?
     """)
-    
+
     st.divider()
-    
+
     st.header("🔌 MCPs Conectados")
     if "agent" in st.session_state and st.session_state.agent:
         for mcp_name in st.session_state.agent.mcp_servers:
-            tools_count = sum(1 for t in st.session_state.agent.tools_registry.values() 
+            tools_count = sum(1 for t in st.session_state.agent.tools_registry.values()
                             if t["mcp_name"] == mcp_name)
             st.success(f"✅ {mcp_name} ({tools_count} tools)")
-    
+
     st.divider()
-    
+
     st.header("⚙️ Configuración")
     if "agent" in st.session_state:
         provider_label = "🟢 Gemini (enterprise)" if LLM_PROVIDER == "gemini" else "🔵 OpenRouter (dev)"
         st.text(f"Provider: {provider_label}")
         st.text(f"Modelo: {st.session_state.agent.model_name}")
     st.text(f"OpenMetadata: {OPENMETADATA_URL}")
-    
+
     st.divider()
-    
+
     if st.button("🗑️ Limpiar chat"):
         st.session_state.messages = []
         st.rerun()
@@ -101,7 +103,7 @@ if prompt := st.chat_input("Pregunta sobre tus datos..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-    
+
     with st.chat_message("assistant"):
         with st.spinner("Analizando datos..."):
             try:
