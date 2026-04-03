@@ -18,12 +18,6 @@
 
 ---
 
-<p align="center">
-  <img src="docs/screenshots/01-hero.png" alt="OpenMetadata Agent in action" width="800"/>
-</p>
-
----
-
 ## The Problem
 
 Data catalogs like OpenMetadata are powerful, but most business users never open them. They don't know the UI, don't know where to look, and definitely don't write API calls. The metadata stays locked behind a tool that only engineers use.
@@ -43,9 +37,12 @@ No need to learn the OpenMetadata UI. No API calls. Just ask.
 
 ## See It in Action
 
-**List and explore tables:**
+<p align="center">
+  <img src="docs/demos/01-list-tables.gif" alt="OpenMetadata Agent — exploring tables in natural language" width="800"/>
+</p>
 
-![OpenMetadata Agent — List tables in telco_demo schema](docs/demos/01-list-tables.gif)
+<details>
+<summary>More demos</summary>
 
 **Query the business glossary:**
 
@@ -54,6 +51,8 @@ No need to learn the OpenMetadata UI. No API calls. Just ask.
 **Find table owners:**
 
 ![Owner query — "Who owns the customers table?"](docs/demos/03-owner.gif)
+
+</details>
 
 ---
 
