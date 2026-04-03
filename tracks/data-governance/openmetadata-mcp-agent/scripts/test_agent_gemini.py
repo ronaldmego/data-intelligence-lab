@@ -8,23 +8,20 @@ Requiere: .env con GOOGLE_API_KEY configurada
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Cargar API key desde .env (NUNCA hardcodear!)
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
-from server import (
-    search_catalog,
-    list_tables,
-    get_table_details,
-    list_databases,
-    get_lineage
-)
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+from server import get_lineage, get_table_details, list_databases, list_tables, search_catalog
 
 # Mapeo de intenciones a funciones
 TOOLS_INFO = """
@@ -38,7 +35,7 @@ Herramientas disponibles:
 
 def agent_decide_and_execute(query: str, llm) -> str:
     """El LLM decide qué herramienta usar y la ejecutamos."""
-    
+
     # Paso 1: El LLM decide qué hacer
     decision_prompt = f"""Eres un asistente de Data Governance. Analiza esta pregunta y decide qué herramienta usar.
 
@@ -57,9 +54,9 @@ Si necesitas detalles de tabla, usa: FUNCTION: get_table_details, PARAMS: table_
 
     response = llm.invoke([HumanMessage(content=decision_prompt)])
     decision = response.content.strip()
-    
+
     print(f"   🧠 Decisión del LLM: {decision}")
-    
+
     # Paso 2: Parsear y ejecutar
     try:
         if "list_tables" in decision:
@@ -91,7 +88,7 @@ Si necesitas detalles de tabla, usa: FUNCTION: get_table_details, PARAMS: table_
             result = "No pude determinar qué herramienta usar."
     except Exception as e:
         result = f"Error ejecutando herramienta: {e}"
-    
+
     # Paso 3: El LLM formatea la respuesta
     format_prompt = f"""Eres un asistente de Data Governance amigable. Basándote en los datos obtenidos del catálogo, responde la pregunta del usuario de forma clara y útil.
 
@@ -115,34 +112,34 @@ def main():
     print("\n" + "="*60)
     print("🤖 Agente OpenMetadata con Gemini")
     print("="*60)
-    
+
     # Verificar API key
     if not os.getenv("GOOGLE_API_KEY"):
         print("❌ Error: GOOGLE_API_KEY no está configurada en .env")
         return
-    
+
     # Inicializar LLM
     model = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
     llm = ChatGoogleGenerativeAI(model=model, temperature=0)
-    
+
     # Test queries
     queries = [
         "¿Cuántas tablas tenemos?",
         "¿Qué columnas tiene la tabla assessment_results?",
         "Busca tablas de leads"
     ]
-    
+
     for query in queries:
         print(f"\n{'='*60}")
         print(f"🗣️  Usuario: {query}")
         print("-"*60)
-        
+
         try:
             result = agent_decide_and_execute(query, llm)
             print(f"\n🤖 Respuesta:\n{result}")
         except Exception as e:
             print(f"❌ Error: {e}")
-    
+
     print("\n" + "="*60)
     print("✅ Test completado!")
     print("="*60)

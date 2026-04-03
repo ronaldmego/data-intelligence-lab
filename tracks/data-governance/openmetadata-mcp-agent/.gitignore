@@ -1,10 +1,33 @@
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Claude Desktop config (keep .example)
 claude_desktop_config*.json
 !claude_desktop_config.example.json
+
+# Python
 __pycache__/
 *.pyc
+*.py[cod]
 .venv/
 venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
 
 # Agent instructions (internal)
 CLAUDE.md
@@ -14,7 +37,14 @@ CLAUDE.md
 tasks/
 technical_notes.md
 quickstart.md
+docs/internal/
 
-# Internal diagrams
+# Internal diagrams and media
 *.excalidraw
 *.excalidraw.png
+docs/*.mp4
+
+# Local directories
+memory/
+skills/
+agents/
