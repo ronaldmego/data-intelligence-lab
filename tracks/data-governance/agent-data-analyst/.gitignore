@@ -54,21 +54,12 @@ output/
 CLAUDE.md
 
 # Internal docs and dev artifacts
-test_results/
+docs/internal/
 docs/social/
 docs/*.excalidraw
-docs/*.excalidraw
+docs/*.mp4
 !docs/logo.png
 !docs/datagov-demo.gif
-PHASE_1_3_BASIC_PROFILE.md
-prompting-lab.md
-DEMO_PROMPTS.md
-MODEL-BENCHMARKS.md
-
-# Dev/integration test scripts (not pytest)
-test_demo_*.py
-test_issue*.py
-test_multi_*.py
 
 # Local directories
 memory/
