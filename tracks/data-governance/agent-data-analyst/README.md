@@ -18,6 +18,19 @@
 
 ---
 
+## Compatibility
+
+**Tested against:** OpenMetadata `1.11.7`  
+**Target instances:**
+- `demo-openmetadata` (OM 1.11.7 vanilla) — instancia de referencia
+- `gov-galacticaia` (OM 1.12.0-SNAPSHOT fork) — producto propio
+
+> **⚠️ Version Dependency:** This agent was built and tested against OpenMetadata 1.11.7. Before upgrading the target OM instance, verify API compatibility.
+>
+> **MCP Tools:** OpenMetadata MCP (6 tools) + SQL MCP (5 tools, read-only)
+
+---
+
 <p align="center">
   <img src="docs/datagov-demo.gif" alt="DataGov Analyst Demo" width="800"/>
 </p>
