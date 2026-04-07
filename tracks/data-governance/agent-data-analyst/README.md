@@ -20,12 +20,12 @@
 
 ## Compatibility
 
-**Tested against:** OpenMetadata `1.11.7`  
+**Tested against:** OpenMetadata `1.11.7` and `1.12.0`  
 **Target instances:**
 - `demo-openmetadata` (OM 1.11.7 vanilla) — instancia de referencia
-- `gov-galacticaia` (OM 1.12.0-SNAPSHOT fork) — producto propio
+- `gov-galacticaia` (OM 1.12.0 fork) — producto propio
 
-> **⚠️ Version Dependency:** This agent was built and tested against OpenMetadata 1.11.7. Before upgrading the target OM instance, verify API compatibility.
+> **✅ Version Compatibility:** This agent works with both OM 1.11.7 and 1.12.0. The REST API is compatible between these versions.
 >
 > **MCP Tools:** OpenMetadata MCP (6 tools) + SQL MCP (5 tools, read-only)
 
