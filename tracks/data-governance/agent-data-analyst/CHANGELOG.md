@@ -1,5 +1,10 @@
 # Changelog - DataGov Analyst
 
+## [0.8.2] - 2026-05-02
+
+### Fixed
+- Agente ahora mantiene memoria de conversación entre turnos. Antes cada pregunta se procesaba aislada, así que "describe customers" → "ahora analízala" arrancaba de cero (incluso saludando). `DataGovAgent.process` acepta `chat_history` y lo inyecta en `decision_prompt` y `format_prompt` como bloque de contexto. `app.py` propaga `st.session_state.messages[:-1]`. Replica el patrón ya probado en `openmetadata-mcp-agent` ([#25](https://github.com/ronaldmego/agent-data-analyst/issues/25))
+
 ## [0.8.1] - 2026-03-28
 
 ### Fixed

@@ -160,11 +160,37 @@ class DataGovAgent:
 
         return classifications_to_prompt(classifications)
 
-    async def process(self, query: str) -> str:
-        """Procesar pregunta del usuario con razonamiento multi-step."""
-        return await self.process_multi_step(query)
+    @staticmethod
+    def _format_history(chat_history: list | None, max_turns: int = 10, max_chars: int = 1000) -> str:
+        """Formatear los últimos mensajes de la conversación como bloque de texto.
 
-    async def process_multi_step(self, query: str, max_steps: int = 5) -> str:
+        Mantiene contexto entre turnos sin explotar el prompt: trunca cada mensaje
+        a max_chars y conserva sólo los últimos max_turns mensajes.
+        """
+        if not chat_history:
+            return ""
+
+        recent = chat_history[-max_turns:]
+        lines = []
+        for msg in recent:
+            role = msg.get("role", "")
+            content = (msg.get("content") or "").strip()
+            if not content:
+                continue
+            if len(content) > max_chars:
+                content = content[:max_chars] + "…"
+            label = "Usuario" if role == "user" else "Analista"
+            lines.append(f"{label}: {content}")
+
+        return "\n".join(lines)
+
+    async def process(self, query: str, chat_history: list | None = None) -> str:
+        """Procesar pregunta del usuario con razonamiento multi-step."""
+        return await self.process_multi_step(query, chat_history=chat_history)
+
+    async def process_multi_step(
+        self, query: str, max_steps: int = 5, chat_history: list | None = None
+    ) -> str:
         """Procesar pregunta del usuario con múltiples tool calls en secuencia.
 
         Flujo: pregunta → step1 (tool call) → resultado1 → step2 (tool call con contexto) → ... → DONE → respuesta final
@@ -172,7 +198,15 @@ class DataGovAgent:
         Args:
             query: Pregunta del usuario
             max_steps: Máximo número de tool calls permitidos (safety limit)
+            chat_history: Lista opcional de mensajes previos [{role, content}, ...]
+                para mantener contexto entre turnos. Se inyecta como texto en los prompts.
         """
+        history_text = self._format_history(chat_history)
+        history_block = (
+            f"HISTORIAL DE CONVERSACIÓN PREVIA (para mantener contexto entre turnos):\n{history_text}\n\n"
+            if history_text
+            else ""
+        )
 
         accumulated_context = []
         step = 1
@@ -193,7 +227,9 @@ Tienes acceso a múltiples fuentes de datos via MCP (Model Context Protocol).
 Tools disponibles:
 {self.tools_info}
 
-Pregunta original del usuario: "{query}"
+{history_block}Pregunta actual del usuario: "{query}"
+Si la pregunta hace referencia a algo mencionado antes (p. ej. "esa tabla", "ahora analízala"),
+úsalo del HISTORIAL DE CONVERSACIÓN PREVIA para resolverlo.
 
 CONTEXTO PREVIO (pasos ya ejecutados):
 {context_summary if context_summary else "NINGUNO - Este es el primer paso"}
@@ -570,7 +606,7 @@ FORMATO GENERAL:
 
         format_prompt = f"""Eres DataGov Analyst, un Super Analista de Datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
 
-Pregunta original: "{query}"
+{history_block}Pregunta actual: "{query}"
 
 Datos obtenidos en {len(accumulated_context)} pasos:
 {all_results}

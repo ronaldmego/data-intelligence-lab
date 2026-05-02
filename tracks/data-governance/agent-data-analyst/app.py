@@ -107,7 +107,12 @@ if prompt := st.chat_input("Pregunta sobre tus datos..."):
     with st.chat_message("assistant"):
         with st.spinner("Analizando datos..."):
             try:
-                response = asyncio.run(st.session_state.agent.process(prompt))
+                response = asyncio.run(
+                    st.session_state.agent.process(
+                        prompt,
+                        chat_history=st.session_state.messages[:-1],
+                    )
+                )
 
                 # Detectar y renderizar bloque viz si existe
                 viz_params = parse_viz_request(response)
