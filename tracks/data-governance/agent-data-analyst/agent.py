@@ -248,7 +248,8 @@ P&L mensual — receta canónica (la `Classification PL` en OM mapea cada línea
   COGS              = interconnect_costs_daily.total_cost + network_costs_monthly.total_cost
   OpEx              = marketing_spend.spend + payroll_monthly.total_cost
                       + 8% × Revenue (G&A modelado)
-                      + chargebacks.amount (del mes) + 5% del bucket 61-90+ días de accounts_receivable
+                      + chargebacks.amount (del mes, filtrar amount > 0 AND amount < 10000)
+                      + 5% del bucket 61-90+ días de accounts_receivable
                         AT snapshot_date = MAX(snapshot_date) AND total_due > 0 AND total_due < 10000
                         (Bad Debt provision)
   EBITDA            = Revenue − COGS − OpEx
@@ -256,8 +257,9 @@ P&L mensual — receta canónica (la `Classification PL` en OM mapea cada línea
                             − 1.5% × Revenue (Intereses modelado)
                             − 25% × max(pre-tax, 0) (Tax Panamá)
 
-⚠️ La data tiene outliers DQ intencionales ($99,999 en ~1% de filas en recharges/payments/invoices/accounts_receivable).
-   SIEMPRE filtrar con los rangos arriba o los números se inflan absurdamente.
+⚠️ La data tiene outliers DQ intencionales ($99,999 en ~1% de filas en recharges/payments/invoices/accounts_receivable
+   Y TAMBIÉN en chargebacks). SIEMPRE filtrar con los rangos arriba o los números se inflan absurdamente — sin el filtro
+   de chargebacks el opex_bad_debt salta a $107K-$321K en algunos meses (vs cifras reales $283-$777).
 
 ⚠️ TABLA SNAPSHOT (accounts_receivable): es una foto diaria del estado de cobranzas. Una fila
    por cliente por día. Para cualquier pregunta sobre "estado actual de AR", "cuánto está vencido",
