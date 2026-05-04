@@ -313,8 +313,12 @@ Paso actual: {step}/{max_steps}
             decision_response = self.llm.invoke([HumanMessage(content=decision_prompt)])
             decision = decision_response.content.strip()
 
-            # Verificar si el LLM decide terminar
-            if "DONE" in decision.upper():
+            # Verificar si el LLM decide terminar.
+            # Match estricto: "DONE" como única palabra de la última línea no vacía
+            # (un substring match aceptaría "el paso anterior está done…" y cortaría
+            # el loop antes de ejecutar el tool, llevando a alucinaciones).
+            non_empty_lines = [ln.strip() for ln in decision.splitlines() if ln.strip()]
+            if non_empty_lines and non_empty_lines[-1].upper() == "DONE":
                 break
 
             # Parsear y ejecutar tool call
