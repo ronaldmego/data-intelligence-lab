@@ -248,14 +248,25 @@ P&L mensual — receta canónica (la `Classification PL` en OM mapea cada línea
   COGS              = interconnect_costs_daily.total_cost + network_costs_monthly.total_cost
   OpEx              = marketing_spend.spend + payroll_monthly.total_cost
                       + 8% × Revenue (G&A modelado)
-                      + chargebacks.amount + 5% del bucket 61-90+ días de accounts_receivable (Bad Debt)
+                      + chargebacks.amount (del mes) + 5% del bucket 61-90+ días de accounts_receivable
+                        AT snapshot_date = MAX(snapshot_date) AND total_due > 0 AND total_due < 10000
+                        (Bad Debt provision)
   EBITDA            = Revenue − COGS − OpEx
   Net Income        = EBITDA − 12% × Revenue (Depreciación modelada)
                             − 1.5% × Revenue (Intereses modelado)
                             − 25% × max(pre-tax, 0) (Tax Panamá)
 
-⚠️ La data tiene outliers DQ intencionales ($99,999 en ~1% de filas en recharges/payments/invoices/AR).
+⚠️ La data tiene outliers DQ intencionales ($99,999 en ~1% de filas en recharges/payments/invoices/accounts_receivable).
    SIEMPRE filtrar con los rangos arriba o los números se inflan absurdamente.
+
+⚠️ TABLA SNAPSHOT (accounts_receivable): es una foto diaria del estado de cobranzas. Una fila
+   por cliente por día. Para cualquier pregunta sobre "estado actual de AR", "cuánto está vencido",
+   "morosidad", "bad debt", FILTRAR siempre al snapshot más reciente:
+     WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM telco_demo.accounts_receivable)
+       AND total_due > 0 AND total_due < 10000
+   Si NO filtrás, agregás todos los snapshots históricos (4,400 filas) y double-counteás al
+   mismo cliente N veces — los montos se inflan ~50x. Esto vale para cualquier tabla con
+   columnas tipo `snapshot_date`, `as_of_date`, `effective_date` (patrón SCD/snapshot).
 La tabla `pl_monthly` ya tiene el P&L precomputado y filtrado — para la pregunta "muéstrame el P&L"
 preferí `SELECT * FROM telco_demo.pl_monthly ORDER BY month` antes que recomputar de fuentes.
 Insight CFO esperado al final: la MVNO necesita ~30% más revenue al costo actual, o ~25% menos payroll, para break-even.
