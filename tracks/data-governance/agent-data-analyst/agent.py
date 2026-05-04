@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DataGov Analyst - Agent Core
+DataGov Analyst - Agente de gobierno de datos
 Cerebro del agente: conecta a MCPs como plugins y orquesta con un LLM.
 
 Arquitectura plug & play:
@@ -221,7 +221,7 @@ class DataGovAgent:
                 ])
 
             # Decidir próximo paso
-            decision_prompt = f"""Eres DataGov Analyst, un Super Analista de Datos con IA.
+            decision_prompt = f"""Eres DataGov Analyst, un agente de gobierno de datos.
 Tienes acceso a múltiples fuentes de datos via MCP (Model Context Protocol).
 
 Tools disponibles:
@@ -260,8 +260,11 @@ ESTRATEGIA MULTI-STEP (best practice):
    - Paso 1: get_lineage (OpenMetadata) → grafo de dependencias
    - DONE con el linaje
 
-6. GLOSARIO / NEGOCIO (keywords: qué significa, definición, glosario):
-   - Paso 1: list_glossary_terms o search_catalog
+6. GLOSARIO / NEGOCIO (keywords: qué significa, definición, glosario, dominio, jerarquía):
+   - Paso 1: list_glossaries → ver glosarios raíz disponibles (NO inventar nombres como "Glosario de Negocio")
+   - Paso 2: list_glossary_terms → ver términos jerárquicos. La salida agrupa por raíz y anida hijos bajo parent terms.
+   - Lee el FQN para entender la jerarquía: TelcoLATAM.Finanzas.ARPU significa que ARPU es hijo del parent term Finanzas dentro del glosario raíz TelcoLATAM.
+   - Si un término tiene marca "[parent term, N hijos]", úsalo como categoría/dominio en tu respuesta.
    - DONE con las definiciones
 
 7. DISTRIBUCIÓN / AGRUPACIÓN (keywords: distribución, distribuyen, cuántos, ranking, por canal, por tipo):
@@ -604,7 +607,7 @@ FORMATO GENERAL:
 - Sé conciso pero completo
 """
 
-        format_prompt = f"""Eres DataGov Analyst, un Super Analista de Datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
+        format_prompt = f"""Eres DataGov Analyst, un agente de gobierno de datos. Has ejecutado {len(accumulated_context)} pasos para responder la pregunta del usuario.
 
 {history_block}Pregunta actual: "{query}"
 
@@ -613,6 +616,8 @@ Datos obtenidos en {len(accumulated_context)} pasos:
 
 INSTRUCCIONES GLOBALES:
 - Responde siempre en español
+- Si HISTORIAL DE CONVERSACIÓN PREVIA tiene contenido, NO te presentes ni saludes — responde directo al follow-up del usuario
+- Tono sobrio y profesional: nada de "¡Hola!", "Soy tu Super Analista", ni adjetivos marketineros. Si te presentas (solo en el primer turno), una línea: "Soy DataGov Analyst, agente de gobierno de datos."
 - Interpreta los datos: no solo números, sino qué significan para el negocio
 - Usa el tipo estadístico de cada columna para dar contexto (numérica_continua → distribución; categórica → concentración)
 - Siempre que tengas frecuencias o conteos, calcula el % sobre el total y menciona si hay concentración

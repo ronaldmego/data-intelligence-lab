@@ -298,30 +298,126 @@ def list_databases() -> str:
 
 
 @mcp.tool
-def list_glossary_terms(glossary: str = None, limit: int = 20) -> str:
-    """Listar términos del glosario de negocio.
+def list_glossaries(limit: int = 20) -> str:
+    """Listar glosarios raíz disponibles en el catálogo.
 
     Args:
-        glossary: Nombre del glosario específico (opcional)
+        limit: Máximo de glosarios a retornar
+
+    Returns:
+        Lista de glosarios con su nombre, descripción y conteo de términos
+    """
+    try:
+        result = api_get("/glossaries", {"limit": limit})
+        glossaries = result.get("data", [])
+
+        if not glossaries:
+            return "No hay glosarios disponibles"
+
+        output = [f"📚 Glosarios disponibles ({len(glossaries)}):\n"]
+        for g in glossaries:
+            name = g.get("name", "")
+            fqn = g.get("fullyQualifiedName", name)
+            definition = strip_html(g.get("description", ""))[:120] or "Sin descripción"
+            term_count = g.get("termCount") or len(g.get("children", []) or [])
+            output.append(f"- {name} (FQN: {fqn}, {term_count} términos)\n  {definition}")
+
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error listando glosarios: {str(e)}"
+
+
+@mcp.tool
+def list_glossary_terms(glossary: str = None, limit: int = 50) -> str:
+    """Listar términos del glosario de negocio mostrando jerarquía completa.
+
+    La salida agrupa términos por glosario raíz y, dentro de cada uno, muestra
+    parent terms (con sus hijos anidados) y leaf terms (sin hijos).
+
+    Args:
+        glossary: Filtrar por nombre o FQN de glosario raíz (opcional)
         limit: Máximo de términos a retornar
 
     Returns:
-        Lista de términos con su definición
+        Árbol jerárquico de términos con FQN, definición y sinónimos
     """
     try:
-        result = api_get("/glossaryTerms", {"limit": limit})
+        params = {
+            "limit": limit,
+            "fields": "parent,glossary,children,fullyQualifiedName",
+        }
+        result = api_get("/glossaryTerms", params)
         terms = result.get("data", [])
+
+        # Filtrar por nombre o FQN del glosario raíz (client-side, evita resolver UUID)
+        if glossary:
+            terms = [
+                t for t in terms
+                if (t.get("glossary") or {}).get("name") == glossary
+                or (t.get("glossary") or {}).get("fullyQualifiedName") == glossary
+            ]
 
         if not terms:
             return "No hay términos de glosario"
 
-        output = [f"📖 Términos de glosario ({len(terms)}):\n"]
-        for term in terms:
-            name = term.get("name", "")
-            definition = strip_html(term.get("description", "Sin definición"))[:100]
-            synonyms = term.get("synonyms", [])
-            syn_str = f" (sinónimos: {', '.join(synonyms)})" if synonyms else ""
-            output.append(f"- {name}{syn_str}\n  {definition}")
+        # Indexar por FQN para resolver hijos
+        by_fqn = {t.get("fullyQualifiedName"): t for t in terms if t.get("fullyQualifiedName")}
+
+        # Agrupar por glosario raíz; separar parent terms (sin parent) de leaf
+        by_root: dict[str, list] = {}
+        for t in terms:
+            root = (t.get("glossary") or {}).get("name") or "Sin glosario"
+            by_root.setdefault(root, []).append(t)
+
+        def format_term(t: dict, indent: int = 0) -> list[str]:
+            pad = "  " * indent
+            name = t.get("name", "")
+            fqn = t.get("fullyQualifiedName", name)
+            definition = strip_html(t.get("description", ""))[:100] or "Sin definición"
+            synonyms = t.get("synonyms", []) or []
+            syn_str = f" — sinónimos: {', '.join(synonyms)}" if synonyms else ""
+            children_refs = t.get("children", []) or []
+            child_count = len(children_refs)
+            child_label = f" [parent term, {child_count} hijos]" if child_count else ""
+            lines = [f"{pad}- {name} (FQN: {fqn}){child_label}{syn_str}"]
+            lines.append(f"{pad}  {definition}")
+            # Anidar hijos si están presentes en el batch
+            for ref in children_refs:
+                child = by_fqn.get(ref.get("fullyQualifiedName"))
+                if child:
+                    lines.extend(format_term(child, indent + 1))
+            return lines
+
+        output = [f"📖 Términos de glosario ({len(terms)}, agrupados por raíz):\n"]
+        for root, root_terms in sorted(by_root.items()):
+            output.append(f"\n📚 {root}")
+            # Solo formatear top-level (sin parent term) para no duplicar
+            for t in root_terms:
+                if not t.get("parent"):
+                    output.extend(format_term(t, indent=1))
+            # Términos huérfanos (parent fuera del batch): mostrarlos al final
+            top_fqns = {t.get("fullyQualifiedName") for t in root_terms if not t.get("parent")}
+            shown_children = set()
+            def collect_children(t: dict):
+                for ref in (t.get("children") or []):
+                    fqn = ref.get("fullyQualifiedName")
+                    if fqn:
+                        shown_children.add(fqn)
+                        child = by_fqn.get(fqn)
+                        if child:
+                            collect_children(child)
+            for t in root_terms:
+                if not t.get("parent"):
+                    collect_children(t)
+            orphans = [
+                t for t in root_terms
+                if t.get("fullyQualifiedName") not in top_fqns
+                and t.get("fullyQualifiedName") not in shown_children
+            ]
+            if orphans:
+                output.append("  (huérfanos — parent fuera del batch:)")
+                for t in orphans:
+                    output.extend(format_term(t, indent=1))
 
         return "\n".join(output)
     except Exception as e:

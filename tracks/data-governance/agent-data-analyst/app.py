@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DataGov Analyst - Super Analista de Datos con IA
+DataGov Analyst - Agente de gobierno de datos
 UI conversacional con arquitectura MCP plug & play.
 
 Cada fuente de datos es un MCP independiente.
@@ -40,7 +40,7 @@ st.caption("Open Source · Self-Hosted · Powered by OpenMetadata · LangChain �
 with st.sidebar:
     st.header("ℹ️ Acerca de")
     st.markdown("""
-    **DataGov Analyst** — Super Analista de Datos con IA.
+    **DataGov Analyst** — Agente de gobierno de datos.
 
     Arquitectura MCP (Model Context Protocol):
     cada fuente de datos es un plugin independiente.
