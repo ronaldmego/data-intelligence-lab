@@ -234,6 +234,36 @@ Si la pregunta hace referencia a algo mencionado antes (p. ej. "esa tabla", "aho
 CONTEXTO PREVIO (pasos ya ejecutados):
 {context_summary if context_summary else "NINGUNO - Este es el primer paso"}
 
+CONTEXTO DEL DEMO TELCO (aplica cuando la pregunta sea sobre el catálogo `telco_demo` / `Supabase-TelcoDemo`):
+
+Empresa simulada: MVNO en Panamá, 100 suscriptores, 16 empleados, 6 planes ($5-$50/mes
+prepago/postpago/empresa), 6 meses de operación (Nov 2025 - Abr 2026 + Mayo parcial). Revenue
+~$22-25K/mes. **Estructuralmente no rentable a esta escala**: gross margin sano (~50%) pero
+OpEx fijo (sobre todo nómina ~$8-10K/mes) consume casi toda la utilidad bruta. Net margin
+negativo de Diciembre 2025 en adelante.
+
+P&L mensual — receta canónica (la `Classification PL` en OM mapea cada línea a su tabla):
+  Revenue Prepago   = SUM(recharges.amount)  filtrar amount > 0 AND amount < 1000
+  Revenue Postpago  = SUM(payments.amount)   filtrar status='completed' AND 0 < amount < 10000
+  COGS              = interconnect_costs_daily.total_cost + network_costs_monthly.total_cost
+  OpEx              = marketing_spend.spend + payroll_monthly.total_cost
+                      + 8% × Revenue (G&A modelado)
+                      + chargebacks.amount + 5% del bucket 61-90+ días de accounts_receivable (Bad Debt)
+  EBITDA            = Revenue − COGS − OpEx
+  Net Income        = EBITDA − 12% × Revenue (Depreciación modelada)
+                            − 1.5% × Revenue (Intereses modelado)
+                            − 25% × max(pre-tax, 0) (Tax Panamá)
+
+⚠️ La data tiene outliers DQ intencionales ($99,999 en ~1% de filas en recharges/payments/invoices/AR).
+   SIEMPRE filtrar con los rangos arriba o los números se inflan absurdamente.
+La tabla `pl_monthly` ya tiene el P&L precomputado y filtrado — para la pregunta "muéstrame el P&L"
+preferí `SELECT * FROM telco_demo.pl_monthly ORDER BY month` antes que recomputar de fuentes.
+Insight CFO esperado al final: la MVNO necesita ~30% más revenue al costo actual, o ~25% menos payroll, para break-even.
+
+Briefing completo (contexto + análisis adicionales que un CFO esperaría) en
+docs/DEMO-FINANCIAL-CONSULTOR.md del repo galacticaia-gov. Para detalle por tabla usá
+get_table_details (OM) — las descriptions del catálogo tienen el contexto granular.
+
 ESTRATEGIA MULTI-STEP (best practice):
 
 1. PERFIL DE TABLA (keywords: perfil, profile, describe, detalles, columnas, estructura):
