@@ -168,3 +168,13 @@ Este agente entiende datos, los describe, detecta problemas de calidad y genera 
 **No hace clustering, predicciones, modelos, ni análisis inferencial.**
 
 > La tentación de saltar a ML existe — resistirla es parte del diseño.
+
+## Backlog congelado (2026-06-16 — proyecto en pausa)
+
+> Issues cerrados para reducir ruido de tareas; retomar al reanudar el proyecto.
+> El detalle completo vive en cada issue cerrado.
+
+- [ ] **#23 [Epic] Enterprise Readiness for GalacticaGov Integration** — épica de readiness enterprise.
+- [ ] **#24 Soporte multi-database vía MCP Toolbox (Google)** — conectar múltiples bases vía MCP Toolbox.
+- [ ] **#32 Feedback CFO consultor sobre el briefing del demo telco** — tracking de ajustes pedidos.
+- [ ] **#35 Migrar default LLM de Gemini 2.5 Pro a Kimi K2-0905** — cambio de modelo por defecto.
