@@ -120,3 +120,11 @@ A separate enterprise project will take this codebase as a starting point and re
 - Persistent audit logs with IT manager dashboards
 - Integrations (Microsoft Teams, Slack webhooks)
 - Production deployment (Docker, health checks, rate limiting)
+
+## Frozen backlog (2026-06-16 — public demo, not actively maintained)
+
+> Issues closed to reduce task noise. This repo is a public demo of how to build
+> agents on top of OpenMetadata; revisit these if maintenance resumes.
+
+- [ ] **#26 Expose glossary hierarchy in `list_glossary_terms`** — surface parent/child terms, not only root glossary.
+- [ ] **#27 Configurable `LLM_PROVIDER` + recommend Kimi K2** — make the LLM backend swappable.
