@@ -92,7 +92,9 @@ database document what they need in their own `.env.example` — never real valu
 Stated plainly rather than hidden behind a green badge:
 
 - **No test suite yet** in any track. CI runs the linter; the pytest job activates itself
-  the moment the first test lands.
+  the moment a `tracks/<track>/<project>/tests/` directory appears. The `test_*.py` files
+  under some `scripts/` folders are **manual integration scripts** — they need a live
+  catalog, a database and credentials — so CI deliberately does not collect them.
 - `customer-analytics/` and `data-privacy/` are empty.
 - Dependencies in the migrated projects are declared with ranges, not pinned. A fresh
   install today may not resolve to what the author ran.

@@ -31,19 +31,27 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      # Todavía no hay suite de tests en ningún track — es un gap conocido y
-      # está declarado como tal en el README, no disimulado con un badge verde.
-      # Este job corre pytest en cuanto exista el primer test y falla si rompe.
-      - name: Discover tests
+      # Convención: una suite de verdad vive en `tracks/<track>/<proyecto>/tests/`.
+      #
+      # Deliberadamente NO se colecta cualquier `test_*.py` suelto: varios
+      # proyectos traen scripts de integración manual bajo `scripts/`
+      # (`test_queries.py`, `test_load.py`) que exigen un catálogo vivo, una base
+      # de datos y credenciales. Correrlos en CI no prueba nada — solo falla por
+      # ImportError y entrena a todos a ignorar el rojo.
+      #
+      # Hoy no existe ninguna suite: es un gap declarado en el README, no
+      # disimulado con un badge verde. Este job se activa solo en cuanto aparezca
+      # el primer directorio `tests/`.
+      - name: Discover test suites
         id: discover
         run: |
-          if find tracks -name 'test_*.py' -o -name '*_test.py' | grep -q .; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
+          suites=$(find tracks -type d -name tests -not -path '*/node_modules/*' | tr '\n' ' ')
+          if [ -n "$suites" ]; then
+            echo "suites=$suites" >> "$GITHUB_OUTPUT"
           else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No test files found yet — skipping pytest."
+            echo "::notice::No tests/ directory in any track yet — skipping pytest."
           fi
 
       - name: Pytest
-        if: steps.discover.outputs.found == 'true'
-        run: uvx pytest tracks -q
+        if: steps.discover.outputs.suites != ''
+        run: uvx pytest ${{ steps.discover.outputs.suites }} -q
