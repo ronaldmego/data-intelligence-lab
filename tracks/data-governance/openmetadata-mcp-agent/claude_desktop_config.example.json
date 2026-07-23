@@ -1,0 +1,44 @@
+{
+  "_comment": "Copy the option that matches your setup into Claude Desktop settings (Developer > Edit Config)",
+
+  "_option_A_ip": "Direct IP connection (simplest, no SSL issues)",
+  "mcpServers_option_A": {
+    "openmetadata": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://YOUR_SERVER_IP:8585/mcp",
+        "--allow-http",
+        "--header",
+        "Authorization:${AUTH_HEADER}",
+        "--verbose",
+        "--clean"
+      ],
+      "env": {
+        "AUTH_HEADER": "Bearer YOUR_JWT_TOKEN"
+      }
+    }
+  },
+
+  "_option_B_https": "DNS with HTTPS (if your instance has a domain + SSL certificate)",
+  "mcpServers_option_B": {
+    "openmetadata": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://openmetadata.example.com/mcp",
+        "--header",
+        "Authorization:${AUTH_HEADER}",
+        "--verbose",
+        "--clean"
+      ],
+      "env": {
+        "AUTH_HEADER": "Bearer YOUR_JWT_TOKEN",
+        "_comment": "Add the line below only if using self-signed or corporate certificates",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}
