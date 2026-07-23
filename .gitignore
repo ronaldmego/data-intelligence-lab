@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+
+# Node
+node_modules/
+dist/
+
+# Environment — never commit real values
+.env
+.env.local
+.env.*.local
+.env.*.bak
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Tooling caches
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / build
+*.log
+logs/
+build/
+output/
+
+# Claude agent instructions (internal — this repo is destined to be public)
+CLAUDE.md
+.claude/
+
+# Playwright artifacts
+.playwright-mcp/
