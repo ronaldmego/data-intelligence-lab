@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+.eggs/
+*.egg-info/
+*.egg
+
+# Node
+node_modules/
+.next/
+out/
+.turbo/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.*.bak
+
+# Playwright MCP test artifacts
+.playwright-mcp/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build
+build/
+*.whl
+
+# Generated output
+output/
+
+# Claude agent instructions (internal, not for public repos)
+CLAUDE.md
+
+# Internal docs and dev artifacts
+docs/internal/
+docs/social/
+docs/*.excalidraw
+docs/*.mp4
+!docs/logo.png
+!docs/datagov-demo.gif
+
+# Local directories
+memory/
+skills/
+agents/

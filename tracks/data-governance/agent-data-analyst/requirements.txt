@@ -1,0 +1,9 @@
+fastmcp>=3.0.0b2
+httpx>=0.25.0
+python-dotenv>=1.0.0
+streamlit>=1.30.0
+langchain-google-genai>=1.0.0
+langchain-core>=0.2.0
+psycopg2-binary>=2.9.0
+langchain-openai>=0.1.0
+matplotlib==3.10.8
