@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      # El baseline del monorepo es de CORRECCIÓN, no de estilo (ver
+      # pyproject.toml): los snapshots archivados se conservan como se
+      # archivaron y no se reescriben para complacer al linter de hoy.
+      - name: Ruff
+        run: uvx ruff check .
+
+  test:
+    name: Tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      # Todavía no hay suite de tests en ningún track — es un gap conocido y
+      # está declarado como tal en el README, no disimulado con un badge verde.
+      # Este job corre pytest en cuanto exista el primer test y falla si rompe.
+      - name: Discover tests
+        id: discover
+        run: |
+          if find tracks -name 'test_*.py' -o -name '*_test.py' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No test files found yet — skipping pytest."
+          fi
+
+      - name: Pytest
+        if: steps.discover.outputs.found == 'true'
+        run: uvx pytest tracks -q

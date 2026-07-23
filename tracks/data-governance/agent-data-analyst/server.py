@@ -398,17 +398,22 @@ def list_glossary_terms(glossary: str = None, limit: int = 50) -> str:
             # Términos huérfanos (parent fuera del batch): mostrarlos al final
             top_fqns = {t.get("fullyQualifiedName") for t in root_terms if not t.get("parent")}
             shown_children = set()
-            def collect_children(t: dict):
+            # `seen` se pasa explícito: esta función se redefine en cada vuelta
+            # del loop de raíces, y capturar `shown_children` por closure haría
+            # que todas las definiciones compartieran el set de la última
+            # iteración si alguna vez se guardara la función en lugar de
+            # llamarla al toque (ruff B023).
+            def collect_children(t: dict, seen: set) -> None:
                 for ref in (t.get("children") or []):
                     fqn = ref.get("fullyQualifiedName")
                     if fqn:
-                        shown_children.add(fqn)
+                        seen.add(fqn)
                         child = by_fqn.get(fqn)
                         if child:
-                            collect_children(child)
+                            collect_children(child, seen)
             for t in root_terms:
                 if not t.get("parent"):
-                    collect_children(t)
+                    collect_children(t, shown_children)
             orphans = [
                 t for t in root_terms
                 if t.get("fullyQualifiedName") not in top_fqns

@@ -1,0 +1,38 @@
+[project]
+name = "data-intelligence-lab"
+version = "0.1.0"
+description = "Reproducible data & AI demos across governance, customer analytics, privacy and governed AI"
+requires-python = ">=3.10"
+
+# Lint del monorepo — baseline de CORRECCIÓN, no de estilo.
+#
+# La raíz solo exige que el código no esté roto (errores de sintaxis, nombres
+# indefinidos, imports sin usar). El estilo NO se impone globalmente: varios
+# tracks son `archived snapshot` de 2025 que se conservan como evidencia
+# histórica, y reescribirlos para complacer al linter de hoy falsearía la fecha
+# del trabajo.
+#
+# Un track activo sube su propio listón: basta con que traiga su
+# `pyproject.toml` con [tool.ruff] (ruff usa el config más cercano al archivo).
+# `tracks/data-governance/agent-data-analyst/` ya lo hace, con E/W/F/I/B/UP.
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E4",  # imports
+    "E7",  # statements
+    "E9",  # errores de runtime/sintaxis
+    "F",   # pyflakes
+]
+
+# Los snapshots de 2025 se conservan **byte a byte** como se archivaron: quien
+# quiera auditarlos puede diffearlos contra el repo original y comprobar que
+# nadie los retocó. Por eso sus hallazgos se silencian acá en vez de parchearse
+# —`except:` desnudo, imports sin usar, un import fuera del tope—: son smells de
+# estilo de la época, no fallos que rompan nada, y editarlos falsearía la fecha
+# del trabajo. Un snapshot que se "arregla" deja de ser evidencia.
+[tool.ruff.lint.per-file-ignores]
+"tracks/governed-ai/agent-sql-khipu_ai/**" = ["E402", "E722", "F401", "F541", "F841"]
+"tracks/governed-ai/agent_text_classification/**" = ["E402", "E722", "F401", "F541", "F841"]
