@@ -30,7 +30,7 @@ something under active maintenance.
 |---|---|
 | [`data-governance/`](tracks/data-governance) | Catalog-aware agents: reading metadata, and using it as context before touching data |
 | [`governed-ai/`](tracks/governed-ai) | LLM agents with grounded access to data — SQL, RAG, classification |
-| [`customer-analytics/`](tracks/customer-analytics) | *(empty)* segmentation, churn, next-best-offer, ARPU, incrementality |
+| [`customer-analytics/`](tracks/customer-analytics) | Segmentation, churn, next-best-offer, ARPU, incrementality — on one synthetic, causal, reproducible telco data model |
 | [`data-privacy/`](tracks/data-privacy) | *(empty)* consent, minimisation, subject rights |
 
 ## Projects
@@ -41,6 +41,7 @@ something under active maintenance.
 | [`agent-data-analyst`](tracks/data-governance/agent-data-analyst) | data-governance | Analyses the *data* using the catalog as governance context: who owns the table, did it pass quality, what the codes mean | `reference` · paused | 47 commits · 2026-02 → 2026-06 |
 | [`agent-sql-khipu_ai`](tracks/governed-ai/agent-sql-khipu_ai) | governed-ai | LLM agent with SQL access and a RAG knowledge base, local models | `archived snapshot` | 8 commits · 2025-01 → 2025-11 |
 | [`agent_text_classification`](tracks/governed-ai/agent_text_classification) | governed-ai | Sentiment classification with a local LLM | `archived snapshot` | 8 commits · 2025-02 |
+| [`telco-customer-intelligence`](tracks/customer-analytics/telco-customer-intelligence) | customer-analytics | Synthetic, causal, reproducible telco data model + the analytics cases it feeds (segmentation, churn, NBO, ARPU, incrementality) | `work in progress` | data model built & tested; cases in progress |
 
 **The two agents in `data-governance/` are a progression, not a duplicate.**
 `openmetadata-mcp-agent` talks *to the catalog*. `agent-data-analyst` analyses *the data*,
@@ -91,13 +92,17 @@ database document what they need in their own `.env.example` — never real valu
 
 Stated plainly rather than hidden behind a green badge:
 
-- **No test suite yet** in any track. CI runs the linter; the pytest job activates itself
-  the moment a `tracks/<track>/<project>/tests/` directory appears. The `test_*.py` files
+- **Tests exist only for `telco-customer-intelligence`** so far (schema, referential
+  integrity, no-leakage, causal signal — standard-library only, so CI runs them without
+  installing anything). The migrated agent tracks still have none; CI's pytest job collects
+  every `tracks/<track>/<project>/tests/` directory as it appears. The `test_*.py` files
   under some `scripts/` folders are **manual integration scripts** — they need a live
   catalog, a database and credentials — so CI deliberately does not collect them.
-- `customer-analytics/` and `data-privacy/` are empty.
-- Dependencies in the migrated projects are declared with ranges, not pinned. A fresh
-  install today may not resolve to what the author ran.
+- `data-privacy/` is empty; `customer-analytics/` has its data model built and its cases
+  in progress (see [#64](https://github.com/ronaldmego/site-ronaldmego/issues/64)).
+- Dependencies in the migrated agent projects are declared with ranges, not pinned. A fresh
+  install today may not resolve to what the author ran. (The customer-analytics data model
+  has no third-party dependencies — standard library only.)
 
 ## License
 
