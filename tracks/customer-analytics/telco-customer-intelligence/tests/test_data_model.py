@@ -103,6 +103,55 @@ def test_no_leakage_facts_are_pre_cutoff(tables):
             assert date.fromisoformat(r["churn_date"]) > cutoff
 
 
+def test_prior_cutoff_is_earlier_and_its_outcome_window_is_disjoint(tables):
+    """The two cutoffs must be far enough apart that the 90-day outcome windows
+    do not overlap — otherwise training on one and scoring the other is not
+    out-of-time validation, it is the same period twice."""
+    _, t = tables
+    prior_cutoff = date.fromisoformat(t["churn_labels_prior"][0]["observation_cutoff"])
+    final_cutoff = date.fromisoformat(t["churn_labels"][0]["observation_cutoff"])
+    assert prior_cutoff < final_cutoff
+
+    prior_dates = [date.fromisoformat(r["churn_date"])
+                   for r in t["churn_labels_prior"] if r["churned_next_90d"] == 1]
+    assert prior_dates, "prior cutoff produced no churn events at all"
+    assert all(d > prior_cutoff for d in prior_dates), "a prior churn event predates its own cutoff"
+    assert max(prior_dates) < final_cutoff, "the two outcome windows overlap"
+
+
+def test_prior_labels_only_cover_customers_alive_at_that_cutoff(tables):
+    """A customer who had not signed up yet cannot be scored. They must be
+    absent from the earlier label — not present with a fabricated zero."""
+    cfg, t = tables
+    prior_cutoff = date.fromisoformat(t["churn_labels_prior"][0]["observation_cutoff"])
+    signup = {r["customer_id"]: date.fromisoformat(r["signup_date"]) for r in t["customers"]}
+    labelled = {r["customer_id"] for r in t["churn_labels_prior"]}
+
+    assert labelled, "prior label table is empty"
+    assert labelled <= set(signup), "prior label references an unknown customer"
+    for cid in labelled:
+        assert signup[cid] <= prior_cutoff, f"{cid} is labelled before it signed up"
+    for cid, when in signup.items():
+        if when > prior_cutoff:
+            assert cid not in labelled, f"{cid} signed up after the cutoff yet has a label"
+
+
+def test_prior_label_is_a_fresh_draw_not_a_copy(tables):
+    """The earlier label is re-derived from the state of the world at that
+    cutoff, with its own noise. If it were a copy of the final label, an
+    out-of-time backtest built on it would be circular and flatter itself."""
+    _, t = tables
+    final = {r["customer_id"]: r["churned_next_90d"] for r in t["churn_labels"]}
+    prior = {r["customer_id"]: r["churned_next_90d"] for r in t["churn_labels_prior"]}
+    shared = set(prior) & set(final)
+    agreement = sum(1 for c in shared if prior[c] == final[c]) / len(shared)
+    # Correlated (same customers, same latent traits) but far from identical.
+    assert 0.60 < agreement < 0.98, f"prior/final label agreement {agreement:.1%} looks like a copy"
+
+    rate = sum(prior.values()) / len(prior)
+    assert 0.05 < rate < 0.25, f"implausible prior churn base rate {rate:.1%}"
+
+
 def test_consent_covers_every_customer_and_channel(tables):
     _, t = tables
     n_customers = len(t["customers"])

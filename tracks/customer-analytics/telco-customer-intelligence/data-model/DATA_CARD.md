@@ -19,7 +19,9 @@ kind of work the author has done; the *data* is fabricated on purpose.
 - **History:** configurable (default 24 months) of usage, billing, digital
   engagement, support and campaign exposure — all before a single observation
   cutoff.
-- **Target:** a 90-day churn label living *after* the cutoff.
+- **Target:** a 90-day churn label living *after* the cutoff, emitted at **two**
+  cutoffs (the final month, and one 6 months earlier) so out-of-time validation
+  is possible rather than merely claimed.
 
 ## How it was made
 
@@ -33,7 +35,15 @@ satisfaction and noise; retention campaigns carry a true but confounded uplift.
   instructive*, not to match any specific market. Do not cite any figure from
   it as a real-world statistic.
 - **Simplifications:** usage/billing/engagement are aggregated to monthly grain;
-  one active subscription spell per customer; a single churn cutoff.
+  one active subscription spell per customer.
+- **Customers do not actually leave.** A customer labelled churned at the prior
+  cutoff still has rows — and a label — at the final cutoff. Defining the
+  population that is genuinely scoreable at a given cutoff is left to the case
+  using the data, deliberately: getting that wrong is one of the commonest real
+  errors in churn work, so the dataset does not hide it.
+- **Consent is static**, with no effective-date, so it cannot be re-derived at
+  an earlier cutoff. Cases that need consent *as of* a past date should treat it
+  as an approximation.
 - **The causal parameters are known** (they live in `config.py`). That is a
   feature for teaching — you can check whether a model recovers them — but it
   means the dataset is not a blind benchmark.
