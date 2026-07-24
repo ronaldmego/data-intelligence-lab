@@ -38,6 +38,9 @@ logs/
 build/
 output/
 
+# Generated synthetic datasets — reproduce from the generator (seeded), don't commit
+tracks/customer-analytics/telco-customer-intelligence/data-model/data/
+
 # Claude agent instructions (internal — this repo is destined to be public)
 CLAUDE.md
 .claude/
