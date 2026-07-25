@@ -20,12 +20,13 @@ built to make those problems real.
 
 ## The foundation: [`data-model/`](data-model/)
 
-A seeded generator emits 14 related tables with an explicit causal structure,
+A seeded generator emits 15 related tables with an explicit causal structure,
 so the cases are demonstrable rather than circular. The churn label is emitted at
 **two** observation cutoffs, which is what lets a case train on the past and
-score the future instead of asserting that it did, and one table is an **answer
-key** — each customer's outcome had the campaign never run — that exists to check
-estimators and is fenced off from producing any. See
+score the future instead of asserting that it did; the **contact policy is a
+table** rather than a constant in whichever script is scoring; and one table is
+an **answer key** — each customer's outcome had the campaign never run — that
+exists to check estimators and is fenced off from producing any. See
 [`data-model/README.md`](data-model/README.md) for the schema, the causal design
 and the no-leakage guarantee.
 
@@ -45,7 +46,7 @@ downstream concern.)
 |---|---|---|---|
 | 01 | Actionable segmentation | segments carry behaviour, need, risk, eligible offer, consent and a suggested action — not just RFM clusters | planned |
 | 02 | [Churn without leakage](02-churn-prediction/) | out-of-time split, calibration, explainable drivers, prioritisation by value — accuracy alone isn't success | **built** |
-| 03 | Governed next-best-offer | propensity/uplift **and** eligibility, consent, exclusions, contact policy | planned |
+| 03 | [Governed next-best-offer](03-next-best-offer/) | propensity/uplift **and** eligibility, consent, exclusions, contact policy | **built** |
 | 04 | ARPU / value decomposition | where revenue per user comes from and moves | planned |
 | 05 | [Campaign incrementality](05-campaign-incrementality/) | true uplift vs the confounded naive read, and whether the experiment was big enough to tell | **built** |
 
@@ -57,6 +58,18 @@ time gap but the *calibration* does not, and that re-sorting the same
 probabilities by expected value instead of risk changes the contact list by more
 than half and the profit by +66% at the same budget.
 
+**[03 · Governed next-best-offer](03-next-best-offer/)** — decides who to contact
+with which offer, subject to consent, eligibility, exclusions and a contact
+policy that lives in the data model rather than in the scoring script. Finds that
+every gate is correlated with the outcome and not in the same direction — the
+cool-off window is the most selective rule in the policy, removing customers who
+churn at 24.4% against a base of 11.8%, because they were contacted last quarter
+*for being* high risk. Governance costs 20% of the plan's expected value;
+applying the same rules in the wrong order costs 1.8× that again and silently
+sends 199 contacts against a capacity of 437. Against the answer key, a compliant
+Q1 campaign would have saved 9 customers instead of 39 — and the loss is
+**reach**, not response.
+
 **[05 · Campaign incrementality](05-campaign-incrementality/)** — reads the
 retention campaigns against the control group they held back, four ways: three
 comparisons that were never randomised and disagree about even the *sign*, then
@@ -67,14 +80,26 @@ itself. Settles the save rate case 02 had to assume — measured 12.4%, interval
 −4.0% to 28.9%, truth 11.1%, assumed 25% — and finds that the experiment as
 designed cannot distinguish any of those from each other, or from zero.
 
-### The two cases talk to each other
+### The cases talk to each other
 
-Case 02 declared a debt: its profit figures applied an *assumed* save rate,
-because whether a contact **caused** a save is unknowable without a control
-group. Case 05 measures it, re-prices case 02's contact list from its own scored
-population, and reports what survives — the targeting decision does, the business
-case does not. Case 05 also imports case 02's feature builder, logistic
-regression and `Economics` rather than restating them, so the two cannot drift
-apart silently.
+Each case pays a debt the previous one wrote down, and imports its predecessors
+rather than restating them, so they cannot drift apart silently.
+
+- **02 → 05.** Case 02's profit figures applied an *assumed* save rate, because
+  whether a contact **caused** a save is unknowable without a control group.
+  Case 05 measures it, re-prices case 02's contact list from its own scored
+  population, and reports what survives — the targeting decision does, the
+  business case does not. It imports case 02's feature builder, logistic
+  regression and `Economics`.
+- **02 and 05 → 03.** Both took their audiences exactly as the campaign built
+  them, enforcing neither consent nor eligibility. Case 03 confronts who was
+  *allowed* to be contacted, prices its offers with the save rate case 05
+  measured rather than the one case 02 assumed, and reads the answer key through
+  case 05's quarantined module — so exactly one file in the track ever touches
+  the counterfactual table.
+
+Case 03 also extends the shared data model with the contact policy itself, which
+is what lets a case report the cost of an individual rule instead of asserting
+that governance is expensive.
 
 Tracked in [`ronaldmego/site-ronaldmego#64`](https://github.com/ronaldmego/site-ronaldmego/issues/64).

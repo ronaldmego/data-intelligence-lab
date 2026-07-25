@@ -34,8 +34,9 @@ Reference dimensions are tiny and fixed; facts scale with the population.
 | Table | Grain | Key | Notes |
 |---|---|---|---|
 | `plans` | one row per plan | `plan_id` | prepaid/postpaid, fee, data/voice caps, tier |
-| `offers` | one row per offer | `offer_id` | discount / data_bundle / upgrade |
+| `offers` | one row per offer | `offer_id` | discount / data_bundle / upgrade; `eligible_family` and `upgrade_to_rank` say who it applies to |
 | `campaigns` | one row per campaign | `campaign_id` | objective (retention/upsell/crosssell) → `offer_id` |
+| `contact_policy` | one row per rule | `policy_id` | consent, cool-off, frequency cap, arrears, open complaints — see below |
 | `customers` | one row per customer | `customer_id` | signup, region, channel, age band, current plan, tenure |
 | `subscriptions` | one spell per customer | `subscription_id` | active at cutoff (churn is modelled as future) |
 | `usage_monthly` | customer × month | (`customer_id`,`period_month`) | data_gb, voice, sms, active_days |
@@ -47,6 +48,33 @@ Reference dimensions are tiny and fixed; facts scale with the population.
 | `churn_labels` | one row per customer | `customer_id` | `churned_next_90d`, `observation_cutoff`, `churn_date` |
 | `churn_labels_prior` | one row per customer alive at the earlier cutoff | `customer_id` | same label, observed `prior_cutoff_offset` months earlier — see below |
 | `churn_potential_outcomes` | customer × cutoff | (`customer_id`,`observation_cutoff`) | **the answer key** — `churned_next_90d_if_no_campaign`, `treated`. See below |
+
+## The rules live in the data, not in the scoring script
+
+`contact_policy` holds the rules that decide who may be contacted at all — a
+consent requirement per channel, a cool-off window, a yearly frequency cap, an
+arrears rule and an open-complaint rule — each as a row with an identifier, a
+scope, a parameter, a unit and a rationale. `offers` carries the two eligibility
+facts alongside them: which plan family an offer is sold to, and, for upgrades,
+`upgrade_to_rank` — the position *within the customer's own family* of the plan
+the offer moves them to, so "is this actually an upgrade?" has one answer rather
+than one per consumer.
+
+This is a modelling opinion and worth stating. A policy that lives in whichever
+script is scoring today is not a policy, it is a preference: it cannot be audited
+without reading code, it drifts the moment a second team runs a campaign, and
+nobody can answer *"what were we allowed to do last quarter?"* six months later.
+As data, it is versioned, diffable, and a case can report the cost of each
+individual rule — which is the only way the trade-off gets discussed instead of
+assumed.
+
+**The campaigns in this dataset were not generated under these rules**, on
+purpose. A world where the policy had already been enforced could not show what
+enforcing it costs; case 03 measures exactly that gap.
+
+Both are reference tables and consume no randomness, so adding them left the
+thirteen fact tables byte-for-byte identical (verified by sha256 against a
+previous seed-42 run); `offers` gained one declarative column.
 
 ## The answer key, and the fence around it
 

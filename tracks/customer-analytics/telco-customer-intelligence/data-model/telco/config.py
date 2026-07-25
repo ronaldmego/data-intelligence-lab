@@ -82,6 +82,7 @@ class Config:
             "plans",
             "offers",
             "campaigns",
+            "contact_policy",
             "customers",
             "subscriptions",
             "usage_monthly",

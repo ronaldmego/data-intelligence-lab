@@ -39,12 +39,49 @@ PLANS = [
 ]
 
 OFFERS = [
-    # offer_id, name, type, value, eligible_family
-    ("OF_DISC10", "10% loyalty discount", "discount", 0.10, "any"),
-    ("OF_DATA5", "+5 GB data bundle", "data_bundle", 5, "any"),
-    ("OF_UP_M", "Upgrade to M", "upgrade", 1, "any"),
-    ("OF_UP_L", "Upgrade to L", "upgrade", 1, "postpaid"),
-    ("OF_WAIVE", "Late-fee waiver", "discount", 0.05, "any"),
+    # offer_id, name, type, value, eligible_family, upgrade_to_rank
+    #
+    # ``upgrade_to_rank`` is the position, *within the customer's own plan
+    # family*, of the plan the offer moves them to — so an upgrade offer is
+    # eligible only for customers currently below that rank. It is blank for
+    # offers that do not change the plan. Without it, "Upgrade to M" is a string
+    # that every consumer has to parse for itself, and the customer already on L
+    # gets offered a downgrade by four separate scripts that each re-derive the
+    # rule slightly differently.
+    ("OF_DISC10", "10% loyalty discount", "discount", 0.10, "any", None),
+    ("OF_DATA5", "+5 GB data bundle", "data_bundle", 5, "any", None),
+    ("OF_UP_M", "Upgrade to M", "upgrade", 1, "any", 2),
+    ("OF_UP_L", "Upgrade to L", "upgrade", 1, "postpaid", 3),
+    ("OF_WAIVE", "Late-fee waiver", "discount", 0.05, "any", None),
+]
+
+# The contact policy — the rules that decide who may be contacted at all, kept
+# as *data* rather than as constants inside whichever script is scoring today.
+#
+# This is a modelling opinion and worth stating: a policy that lives in the
+# analyst's code is not a policy, it is a preference. It cannot be audited
+# without reading Python, it drifts the moment a second team scores a campaign,
+# and nobody can answer "what were we allowed to do last quarter?" six months
+# later. Putting it in the data model makes it versioned, shared and diffable —
+# and lets a case report the cost of each individual rule, which is the only way
+# the trade-off ever gets discussed instead of assumed.
+#
+# ``applies_to`` is a campaign objective, or ``all``. ``value`` is the rule's
+# parameter; ``unit`` says how to read it.
+CONTACT_POLICY = [
+    # policy_id, applies_to, rule, value, unit, rationale
+    ("POL_CONSENT", "all", "require_channel_consent", 1, "flag",
+     "Outbound contact requires a recorded opt-in on the channel used"),
+    ("POL_COOLOFF", "all", "min_days_since_last_contact", 270, "days",
+     "Do not contact a customer again within the cool-off window"),
+    ("POL_FREQ_CAP", "all", "max_contacts_per_365d", 2, "contacts",
+     "Cap total outbound contacts per customer per rolling year"),
+    ("POL_ARREARS", "upsell,crosssell", "max_failed_invoices_6m", 0, "invoices",
+     "Do not sell more to a customer who is not paying for what they have"),
+    ("POL_OPEN_ESC", "upsell,crosssell", "block_if_unresolved_escalation", 1, "flag",
+     "Do not upsell a customer whose open complaint is unresolved"),
+    ("POL_ONE_OFFER", "all", "max_offers_per_wave", 1, "offers",
+     "One offer per customer per wave — competing offers cannibalise each other"),
 ]
 
 CAMPAIGNS = [
@@ -188,7 +225,8 @@ def _emit_reference() -> dict[str, list[dict]]:
         for p in PLANS
     ]
     offers = [
-        dict(offer_id=o[0], name=o[1], type=o[2], value=o[3], eligible_family=o[4])
+        dict(offer_id=o[0], name=o[1], type=o[2], value=o[3], eligible_family=o[4],
+             upgrade_to_rank=("" if o[5] is None else o[5]))
         for o in OFFERS
     ]
     campaigns = [
@@ -196,7 +234,12 @@ def _emit_reference() -> dict[str, list[dict]]:
              offer_id=c[4], month_index=c[5])
         for c in CAMPAIGNS
     ]
-    return {"plans": plans, "offers": offers, "campaigns": campaigns}
+    contact_policy = [
+        dict(policy_id=p[0], applies_to=p[1], rule=p[2], value=p[3], unit=p[4], rationale=p[5])
+        for p in CONTACT_POLICY
+    ]
+    return {"plans": plans, "offers": offers, "campaigns": campaigns,
+            "contact_policy": contact_policy}
 
 
 def _emit_customers_and_subscriptions(cfg: Config, customers: list[_Customer]):
