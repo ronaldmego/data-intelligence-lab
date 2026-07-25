@@ -161,6 +161,51 @@ def test_consent_covers_every_customer_and_channel(tables):
         assert r["channel"] in ("email", "sms", "push", "call")
 
 
+def test_contact_policy_is_declared_as_data(tables):
+    """The contact policy is a table, not a constant in whichever script scores.
+
+    Each row has to be machine-readable — an identifier, a scope, a parameter
+    and a unit — or it is documentation pretending to be governance.
+    """
+    _, t = tables
+    rows = t["contact_policy"]
+    assert rows
+
+    ids = [r["policy_id"] for r in rows]
+    assert len(ids) == len(set(ids)), "contact_policy.policy_id has duplicates"
+
+    objectives = {r["objective"] for r in t["campaigns"]} | {"all"}
+    for row in rows:
+        assert row["rule"] and row["rationale"], f"{row['policy_id']} is not self-describing"
+        assert row["unit"] in ("flag", "days", "contacts", "invoices", "offers")
+        assert float(row["value"]) >= 0
+        scope = {part.strip() for part in row["applies_to"].split(",")}
+        assert scope <= objectives, f"{row['policy_id']} scoped to an unknown objective"
+
+
+def test_upgrade_offers_declare_the_plan_they_upgrade_to(tables):
+    """"Upgrade to M" is a string until something says which rank M is.
+
+    Every consumer that re-derives it from the offer name derives it slightly
+    differently, and the customer already on L gets offered a downgrade.
+    """
+    _, t = tables
+    ranks = {}
+    for row in t["plans"]:
+        ranks.setdefault(row["family"], []).append(int(row["tier"]))
+    depth = max(len(tiers) for tiers in ranks.values())
+
+    upgrades = [r for r in t["offers"] if r["type"] == "upgrade"]
+    assert upgrades
+    for row in t["offers"]:
+        target = row["upgrade_to_rank"]
+        if row["type"] == "upgrade":
+            assert target != "", f"{row['offer_id']} is an upgrade with no target rank"
+            assert 1 < int(target) <= depth
+        else:
+            assert target == "", f"{row['offer_id']} is not an upgrade but declares a target"
+
+
 def test_churn_base_rate_is_plausible(tables):
     _, t = tables
     churn = [r["churned_next_90d"] for r in t["churn_labels"]]

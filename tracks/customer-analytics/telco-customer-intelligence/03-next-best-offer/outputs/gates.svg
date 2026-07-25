@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-label="What each governance gate removes">
+  <text x="18.0" y="20.0" text-anchor="start" font-size="13" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">What each gate removes from the list — and who they were</text>
+  <text x="305.0" y="42.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">customers removed</text>
+  <text x="569.0" y="42.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn rate they went on to have</text>
+  <line x1="550.8" y1="58.0" x2="550.8" y2="352.0" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <rect x="202" y="58.0" width="206.0" height="25.9" fill="#4c78a8" fill-opacity="0.32"/>
+  <text x="196.0" y="78.3" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">no opt-in on that channel</text>
+  <text x="414.0" y="78.3" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">1,670</text>
+  <circle cx="558.0" cy="76.0" r="5.5" fill="#e45756"/>
+  <text x="568.0" y="78.3" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">12.8%</text>
+  <rect x="202" y="114.4" width="76.1" height="25.9" fill="#4c78a8" fill-opacity="0.32"/>
+  <text x="196.0" y="134.7" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">in arrears</text>
+  <text x="284.1" y="134.7" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">617</text>
+  <circle cx="550.1" cy="132.4" r="5.5" fill="#54a24b"/>
+  <text x="560.1" y="134.7" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#54a24b">11.7%</text>
+  <rect x="202" y="170.8" width="52.9" height="25.9" fill="#4c78a8" fill-opacity="0.32"/>
+  <text x="196.0" y="191.1" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">at the yearly contact cap</text>
+  <text x="260.9" y="191.1" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">429</text>
+  <circle cx="574.1" cy="188.8" r="5.5" fill="#e45756"/>
+  <text x="584.1" y="191.1" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">15.2%</text>
+  <rect x="202" y="227.2" width="52.1" height="25.9" fill="#4c78a8" fill-opacity="0.32"/>
+  <text x="196.0" y="247.5" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">open unresolved complaint</text>
+  <text x="260.1" y="247.5" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">422</text>
+  <circle cx="600.2" cy="245.2" r="5.5" fill="#e45756"/>
+  <text x="610.2" y="247.5" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">19.0%</text>
+  <rect x="202" y="283.6" width="49.0" height="25.9" fill="#4c78a8" fill-opacity="0.32"/>
+  <text x="196.0" y="303.9" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">inside the cool-off window</text>
+  <text x="257.0" y="303.9" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">397</text>
+  <circle cx="637.8" cy="301.6" r="5.5" fill="#e45756"/>
+  <text x="647.8" y="303.9" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">24.4%</text>
+  <text x="550.8" y="56.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">base 11.8%</text>
+  <line x1="439.0" y1="48" x2="439.0" y2="352.0" stroke="#8b949e" stroke-opacity="0.25" stroke-width="1"/>
+</svg>

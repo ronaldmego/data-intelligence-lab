@@ -43,7 +43,14 @@ satisfaction and noise; retention campaigns carry a true but confounded uplift.
   errors in churn work, so the dataset does not hide it.
 - **Consent is static**, with no effective-date, so it cannot be re-derived at
   an earlier cutoff. Cases that need consent *as of* a past date should treat it
-  as an approximation.
+  as an approximation — case 03 audits past campaigns against present-day opt-ins
+  and says so, which is the honest version of a limitation that cannot be
+  engineered away without a consent history table.
+- **The contact policy is declared, not observed.** `contact_policy` states the
+  rules a governed programme *would* apply; the campaigns in the data were **not**
+  generated under them, which is why case 03 finds violations. That is deliberate
+  — a dataset where the rules were already enforced could not show what enforcing
+  them costs.
 - **The causal parameters are known** (they live in `config.py`). That is a
   feature for teaching — you can check whether a model recovers them — but it
   means the dataset is not a blind benchmark.
