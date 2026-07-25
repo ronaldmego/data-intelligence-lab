@@ -449,9 +449,13 @@ def _emit_churn_labels_at(cfg: Config, customers: list[_Customer], rng: Random, 
 
     Customers who had not signed up yet at ``cutoff_idx`` are omitted: they did
     not exist to be scored. At the final cutoff that excludes nobody.
+
+    Returns the labels **and** their potential outcome under no campaign — see
+    :func:`_counterfactual_row`. The second list is ground truth about the
+    generator, not a fact any real dataset carries.
     """
     cutoff = _month_start(cfg, cutoff_idx)
-    rows = []
+    rows, counterfactual = [], []
     for c in customers:
         if c.active_from > cutoff_idx:
             continue
@@ -461,7 +465,12 @@ def _emit_churn_labels_at(cfg: Config, customers: list[_Customer], rng: Random, 
         z -= cfg.w_retention_response * retention_response  # the true uplift
         z += rng.gauss(0.0, cfg.churn_noise_sd)
         p = _sigmoid(z)
-        churned = int(rng.random() < p)
+        # The uniform draw is held rather than consumed inline, so the same
+        # draw can decide both potential outcomes. That is the whole trick: it
+        # costs no extra randomness, so the tables above stay byte-for-byte
+        # identical to a run without any of this.
+        u = rng.random()
+        churned = int(u < p)
         churn_date = ""
         if churned:
             churn_date = (cutoff + timedelta(days=rng.randint(1, 90))).isoformat()
@@ -471,7 +480,34 @@ def _emit_churn_labels_at(cfg: Config, customers: list[_Customer], rng: Random, 
             churned_next_90d=churned,
             churn_date=churn_date,
         ))
-    return rows
+        counterfactual.append(_counterfactual_row(cfg, c, cutoff, z, u, retention_response))
+    return rows, counterfactual
+
+
+def _counterfactual_row(cfg: Config, c: _Customer, cutoff: date, z: float, u: float,
+                        retention_response: int) -> dict:
+    """The same customer's outcome in a world where the campaign did nothing.
+
+    Adding ``w_retention_response`` back to the log-odds undoes the treatment;
+    comparing the two outcomes **at the same uniform draw** yields the
+    individual-level causal effect rather than an average over a second, noisier
+    world. Re-running the generator with the weight set to zero would *not* give
+    this: the first customer whose outcome flips stops drawing a churn date, the
+    RNG stream desynchronises, and every customer after them differs for reasons
+    that have nothing to do with the campaign.
+
+    **No real dataset has this column.** It exists so an estimator can be checked
+    against the answer, which is the one thing a synthetic world is uniquely good
+    for. It is ground truth, never an input: any case that reads it to *produce*
+    an estimate has stopped measuring anything.
+    """
+    z_untreated = z + cfg.w_retention_response * retention_response
+    return dict(
+        customer_id=c.cid,
+        observation_cutoff=cutoff.isoformat(),
+        churned_next_90d_if_no_campaign=int(u < _sigmoid(z_untreated)),
+        treated=retention_response,
+    )
 
 
 # --- Public entrypoint ----------------------------------------------------
@@ -497,13 +533,17 @@ def generate(cfg: Config) -> dict[str, list[dict]]:
     tables["support_interactions"] = _emit_support(cfg, customers, rng)  # sets support scores
     tables["consent"] = _emit_consent(customers, rng)
     tables["campaign_exposures"] = _emit_exposures(cfg, customers, rng)  # sets retention_response
-    tables["churn_labels"] = _emit_churn_labels_at(cfg, customers, rng, cfg.n_months - 1)
+    tables["churn_labels"], potential = _emit_churn_labels_at(cfg, customers, rng, cfg.n_months - 1)
 
     # The earlier cutoff is emitted *last*, on purpose: every table above draws
     # from `rng` in a fixed order, so appending here leaves their output
     # byte-for-byte identical to a run without this table at all.
-    tables["churn_labels_prior"] = _emit_churn_labels_at(
+    tables["churn_labels_prior"], potential_prior = _emit_churn_labels_at(
         cfg, customers, rng, cfg.n_months - 1 - cfg.prior_cutoff_offset
     )
+
+    # Ground truth for the incrementality case, at both cutoffs. Derived from
+    # draws already made, so it too leaves every table above untouched.
+    tables["churn_potential_outcomes"] = potential + potential_prior
 
     return tables

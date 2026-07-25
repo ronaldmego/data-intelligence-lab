@@ -47,6 +47,12 @@ satisfaction and noise; retention campaigns carry a true but confounded uplift.
 - **The causal parameters are known** (they live in `config.py`). That is a
   feature for teaching — you can check whether a model recovers them — but it
   means the dataset is not a blind benchmark.
+- **One table is an answer key, not data.** `churn_potential_outcomes` holds each
+  customer's outcome in a world where the retention campaign never ran. Nothing
+  equivalent exists in a real dataset, and using it to *produce* an estimate
+  rather than to *check* one turns any result into a fiction. It is there so the
+  incrementality case can show whether its estimator recovered the truth; see
+  `README.md` for the fence around it.
 
 ## License & reuse
 

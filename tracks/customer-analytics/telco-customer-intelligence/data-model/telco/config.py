@@ -92,4 +92,5 @@ class Config:
             "campaign_exposures",
             "churn_labels",
             "churn_labels_prior",
+            "churn_potential_outcomes",
         )
