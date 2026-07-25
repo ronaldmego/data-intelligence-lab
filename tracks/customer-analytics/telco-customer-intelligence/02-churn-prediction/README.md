@@ -106,8 +106,9 @@ act on it.**
 **`retention_offer_taken` looks inert on its own (−0.045) and strongly
 protective conditional on risk (−0.290).** That is confounding, and it is in the
 data on purpose: retention campaigns were targeted at high-risk customers.
-Untangling it properly needs the held-out control group — case 05, not this one.
-Here it stands as a warning: that coefficient is not a campaign ROI.
+Untangling it properly needs the held-out control group —
+[case 05](../05-campaign-incrementality/), not this one. Here it stands as a
+warning: that coefficient is not a campaign ROI.
 
 ## The part that decides whether any of it mattered
 
@@ -135,8 +136,13 @@ not about the metric. Accuracy is not reported anywhere in this case. At an
 ## Limitations
 
 - **The save rate is assumed, not measured.** Whether a contact *caused* a save
-  is unknowable without a control group — case 05. Until then these figures are
-  a planning model, not a measured return.
+  is unknowable without a control group. **[Case 05](../05-campaign-incrementality/)
+  now measures it**, and the assumption used here — 25% — turns out to be about
+  2.3× the true value, while sitting comfortably inside an interval the
+  experiment is too small to narrow. The targeting conclusion below survives
+  (the save rate is a positive constant common to every customer's expected
+  value, so it cannot reorder the list); the profit *level* roughly halves.
+  These figures remain a planning model.
 - **One historical split** gives a point estimate, not a distribution. A rolling
   backtest over several cutoffs would put an error bar on the AUC gap.
 - **Synthetic data with a known generating process.** That is what makes the

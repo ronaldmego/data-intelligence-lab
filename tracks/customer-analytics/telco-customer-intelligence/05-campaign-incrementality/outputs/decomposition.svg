@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-label="Decomposition of each campaign's observed effect">
+  <text x="18.0" y="20.0" text-anchor="start" font-size="13" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Where each campaign's headline came from</text>
+  <line x1="339.8" y1="34" x2="339.8" y2="354" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="339.8" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">-5</text>
+  <line x1="489.7" y1="34" x2="489.7" y2="354" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="489.7" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">0</text>
+  <line x1="639.6" y1="34" x2="639.6" y2="354" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="639.6" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">+5</text>
+  <line x1="489.7" y1="34" x2="489.7" y2="354" stroke="#8b949e" stroke-opacity="0.55" stroke-width="1.2"/>
+  <text x="440.0" y="392.0" text-anchor="middle" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">change in 90-day churn, percentage points</text>
+  <text x="18.0" y="66.0" text-anchor="start" font-size="11" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Q1 Retention Save</text>
+  <rect x="347.4" y="91.0" width="142.3" height="21.7" fill="#54a24b" fill-opacity="0.85"/>
+  <text x="340.4" y="107.8" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">-4.75 pp</text>
+  <text x="34.0" y="107.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">delivered by the campaign</text>
+  <rect x="489.7" y="126.0" width="142.9" height="21.7" fill="#e45756" fill-opacity="0.85"/>
+  <text x="639.6" y="142.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">+4.77 pp</text>
+  <text x="34.0" y="142.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">handed over by the flip</text>
+  <rect x="489.7" y="161.0" width="1.0" height="21.7" fill="#4c78a8" fill-opacity="0.85"/>
+  <text x="497.3" y="177.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">+0.02 pp</text>
+  <text x="34.0" y="177.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">what the readout said</text>
+  <text x="18.0" y="206.0" text-anchor="start" font-size="11" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Q3 Retention Save</text>
+  <rect x="404.6" y="231.0" width="85.1" height="21.7" fill="#54a24b" fill-opacity="0.85"/>
+  <text x="397.6" y="247.8" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">-2.84 pp</text>
+  <text x="34.0" y="247.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">delivered by the campaign</text>
+  <rect x="332.5" y="266.0" width="157.2" height="21.7" fill="#e45756" fill-opacity="0.85"/>
+  <text x="325.5" y="282.8" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">-5.25 pp</text>
+  <text x="34.0" y="282.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">handed over by the flip</text>
+  <rect x="247.4" y="301.0" width="242.3" height="21.7" fill="#4c78a8" fill-opacity="0.85"/>
+  <text x="240.4" y="317.8" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">-8.08 pp</text>
+  <text x="34.0" y="317.8" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">what the readout said</text>
+</svg>

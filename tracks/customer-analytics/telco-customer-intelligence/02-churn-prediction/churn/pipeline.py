@@ -108,6 +108,14 @@ class CaseResult:
     n_fit: int = 0
     n_calibration: int = 0
     converged: bool = False
+    # The scored population, kept so the targeting economics can be re-evaluated
+    # under different commercial assumptions without refitting the model. Case 05
+    # measures the save rate this case had to assume, and re-runs these numbers
+    # against the measured value; refitting to change one constant would be
+    # wasteful and would risk answering with a different model.
+    probabilities: list[float] = field(default_factory=list)
+    monthly_revenue: list[float] = field(default_factory=list)
+    y_test: list[int] = field(default_factory=list)
 
     @property
     def optimism_gap(self) -> float:
@@ -270,5 +278,8 @@ def run_case(
     result.comparison = compare_policies(
         probabilities, monthly_revenue, y_test, economics, capacity_share=capacity_share,
     )
+    result.probabilities = probabilities
+    result.monthly_revenue = monthly_revenue
+    result.y_test = y_test
 
     return result

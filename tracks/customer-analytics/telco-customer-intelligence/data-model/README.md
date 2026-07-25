@@ -46,6 +46,31 @@ Reference dimensions are tiny and fixed; facts scale with the population.
 | `campaign_exposures` | customer × campaign | `exposure_id` | **exposed vs control**, responded |
 | `churn_labels` | one row per customer | `customer_id` | `churned_next_90d`, `observation_cutoff`, `churn_date` |
 | `churn_labels_prior` | one row per customer alive at the earlier cutoff | `customer_id` | same label, observed `prior_cutoff_offset` months earlier — see below |
+| `churn_potential_outcomes` | customer × cutoff | (`customer_id`,`observation_cutoff`) | **the answer key** — `churned_next_90d_if_no_campaign`, `treated`. See below |
+
+## The answer key, and the fence around it
+
+`churn_potential_outcomes` records what each customer would have done **had the
+retention campaign never run**. Subtracting it from `churn_labels` gives the
+individual causal effect — the quantity that is permanently unobservable in
+reality, because a customer is either contacted or not and never both.
+
+It is computed from the *same uniform draw* as the observed label, with the
+retention term added back to the log-odds. That matters more than it sounds:
+re-running the generator with `w_retention_response = 0` would **not** produce
+this. The first customer whose outcome flips stops drawing a churn date, the RNG
+stream desynchronises, and every customer after them differs for reasons that
+have nothing to do with the campaign. Sharing the draw also means the table
+consumes no randomness of its own, so the thirteen tables above are byte-for-byte
+identical to a run without it.
+
+**No real dataset has this column.** It exists so an estimator can be checked
+against the answer — which is the one thing a synthetic world is uniquely good
+for — and it is ground truth, never an input. A case that reads it to *produce*
+an estimate has stopped measuring anything, and the failure would look like an
+unusually good result rather than an error. Case 05 quarantines it in a single
+module and [tests the fence](../tests/test_incrementality_case.py) by corrupting
+the table and asserting that no estimate moves.
 
 ## The causal structure (what makes the cases real)
 
