@@ -122,6 +122,12 @@ class _Customer:
         # accumulated observed scores used by the churn model
         "payment_problem_score", "unresolved_support_score",
         "retention_response", "targeted_risk_at_selection",
+        # ...and the same scores *time-stamped*, so the risk proxy can be
+        # evaluated at any cutoff rather than only at the end of the window.
+        # This is bookkeeping only: it consumes no randomness, so adding it
+        # leaves the generated tables byte-for-byte unchanged.
+        "payment_problem_events", "unresolved_support_events",
+        "retention_response_events",
     )
 
     def __init__(self, cid: str):
@@ -130,6 +136,9 @@ class _Customer:
         self.unresolved_support_score = 0.0
         self.retention_response = 0
         self.targeted_risk_at_selection = 0.0
+        self.payment_problem_events: list[tuple[int, float]] = []  # (month_idx, weight)
+        self.unresolved_support_events: list[int] = []  # month indices
+        self.retention_response_events: list[int] = []  # campaign month indices
 
 
 def _make_customers(cfg: Config, rng: Random) -> list[_Customer]:
@@ -264,10 +273,12 @@ def _emit_billing(cfg: Config, customers: list[_Customer], rng: Random):
             if r < p_fail:
                 status, days_late, paid = "failed", 0, 0.0
                 problems += 1
+                c.payment_problem_events.append((idx, 1.0))
             elif r < p_fail + p_late:
                 days_late = rng.randint(5, 45)
                 status, paid = "late", billed
                 problems += 0.5
+                c.payment_problem_events.append((idx, 0.5))
             else:
                 status, days_late, paid = "paid", 0, billed
             period = _month_start(cfg, idx)
@@ -326,6 +337,7 @@ def _emit_support(cfg: Config, customers: list[_Customer], rng: Random):
             unresolved_esc = escalated and not resolved
             if unresolved_esc:
                 c.unresolved_support_score += 1
+                c.unresolved_support_events.append(idx)
             rows.append(dict(
                 ticket_id=f"TK_{c.cid[1:]}_{n_tickets:02d}",
                 customer_id=c.cid,
@@ -354,18 +366,36 @@ def _emit_consent(customers: list[_Customer], rng: Random):
     return rows
 
 
-def _risk_proxy(cfg: Config, c: _Customer) -> float:
-    """Observable-ish risk used both for campaign targeting (confounder) and as
-    the backbone of the churn propensity. Kept as a log-odds contribution."""
+def _risk_proxy_at(cfg: Config, c: _Customer, cutoff_idx: int) -> float:
+    """Observable-ish risk **as of ``cutoff_idx``**, used both for campaign
+    targeting (the confounder) and as the backbone of the churn propensity.
+    Kept as a log-odds contribution.
+
+    Evaluating it at an arbitrary cutoff — rather than only at the end of the
+    window — is what lets the generator emit a second, earlier label without a
+    trace of hindsight in it. Traits (usage trend, engagement, plan fit) are
+    latent and time-invariant; the accumulated scores are re-derived from the
+    events that had actually happened by ``cutoff_idx``.
+    """
+    months_observed = cutoff_idx + 1 - c.active_from
+    payment_problems = sum(w for m, w in c.payment_problem_events if m <= cutoff_idx)
+    payment_problem_score = payment_problems / max(1, months_observed)
+    unresolved_support = sum(1 for m in c.unresolved_support_events if m <= cutoff_idx)
+
     usage_decline_score = _clamp(-c.usage_decline, 0.0, 1.5)  # steeper decline -> higher
     return (
         cfg.w_usage_decline * usage_decline_score
-        + cfg.w_payment_problems * c.payment_problem_score
-        + cfg.w_unresolved_support * _clamp(c.unresolved_support_score, 0, 3)
+        + cfg.w_payment_problems * payment_problem_score
+        + cfg.w_unresolved_support * _clamp(unresolved_support, 0, 3)
         + cfg.w_low_engagement * _clamp(-c.engagement_level, 0.0, 2.0)
-        + cfg.w_early_life * (1.0 if (cfg.n_months - c.active_from) <= 6 else 0.0)
+        + cfg.w_early_life * (1.0 if months_observed <= 6 else 0.0)
         + cfg.w_plan_misfit * _clamp(-c.plan_fit, 0.0, 2.0)
     )
+
+
+def _risk_proxy(cfg: Config, c: _Customer) -> float:
+    """Risk at the final cutoff — the last month of history."""
+    return _risk_proxy_at(cfg, c, cfg.n_months - 1)
 
 
 def _emit_exposures(cfg: Config, customers: list[_Customer], rng: Random):
@@ -375,7 +405,7 @@ def _emit_exposures(cfg: Config, customers: list[_Customer], rng: Random):
     rows = []
     exp_n = 0
     for camp in CAMPAIGNS:
-        camp_id, _, channel, objective, offer_id, _mo = camp
+        camp_id, _, channel, objective, offer_id, camp_month = camp
         for c in customers:
             risk = _risk_proxy(cfg, c)
             if objective == "retention":
@@ -396,6 +426,7 @@ def _emit_exposures(cfg: Config, customers: list[_Customer], rng: Random):
             responded = int(exposed and rng.random() < _clamp(base_resp, 0.02, 0.7))
             if objective == "retention" and responded:
                 c.retention_response = 1  # feeds the true churn uplift
+                c.retention_response_events.append(camp_month)
                 c.targeted_risk_at_selection = risk
             exp_n += 1
             rows.append(dict(
@@ -409,16 +440,25 @@ def _emit_exposures(cfg: Config, customers: list[_Customer], rng: Random):
     return rows
 
 
-def _emit_churn_labels(cfg: Config, customers: list[_Customer], rng: Random):
-    """The modelling target. Computed at the cutoff (last month of history) and
-    predicting the *next 90 days*. Because every fact table stops at the cutoff,
-    there is nothing post-outcome to leak: features are strictly pre-cutoff."""
-    cutoff = _month_start(cfg, cfg.n_months - 1)
+def _emit_churn_labels_at(cfg: Config, customers: list[_Customer], rng: Random, cutoff_idx: int):
+    """The modelling target, observed at ``cutoff_idx`` and predicting the
+    *next 90 days*. Because every fact table stops at the final cutoff — and the
+    risk proxy is re-derived from only the events that had happened by
+    ``cutoff_idx`` — there is nothing post-outcome to leak: features are
+    strictly pre-cutoff.
+
+    Customers who had not signed up yet at ``cutoff_idx`` are omitted: they did
+    not exist to be scored. At the final cutoff that excludes nobody.
+    """
+    cutoff = _month_start(cfg, cutoff_idx)
     rows = []
     for c in customers:
-        z = cfg.churn_intercept + _risk_proxy(cfg, c)
+        if c.active_from > cutoff_idx:
+            continue
+        retention_response = int(any(m <= cutoff_idx for m in c.retention_response_events))
+        z = cfg.churn_intercept + _risk_proxy_at(cfg, c, cutoff_idx)
         z -= 0.4 * c.satisfaction  # latent, unobserved -> irreducible error
-        z -= cfg.w_retention_response * c.retention_response  # the true uplift
+        z -= cfg.w_retention_response * retention_response  # the true uplift
         z += rng.gauss(0.0, cfg.churn_noise_sd)
         p = _sigmoid(z)
         churned = int(rng.random() < p)
@@ -441,7 +481,7 @@ def generate(cfg: Config) -> dict[str, list[dict]]:
     """Build the full data model and return it as a dict of table_name -> rows.
 
     Order matters: billing/support/exposures accumulate the observed scores that
-    the churn label reads, so churn_labels is generated last.
+    the churn label reads, so the churn labels are generated last.
     """
     rng = Random(cfg.seed)
     tables = _emit_reference()
@@ -457,6 +497,13 @@ def generate(cfg: Config) -> dict[str, list[dict]]:
     tables["support_interactions"] = _emit_support(cfg, customers, rng)  # sets support scores
     tables["consent"] = _emit_consent(customers, rng)
     tables["campaign_exposures"] = _emit_exposures(cfg, customers, rng)  # sets retention_response
-    tables["churn_labels"] = _emit_churn_labels(cfg, customers, rng)
+    tables["churn_labels"] = _emit_churn_labels_at(cfg, customers, rng, cfg.n_months - 1)
+
+    # The earlier cutoff is emitted *last*, on purpose: every table above draws
+    # from `rng` in a fixed order, so appending here leaves their output
+    # byte-for-byte identical to a run without this table at all.
+    tables["churn_labels_prior"] = _emit_churn_labels_at(
+        cfg, customers, rng, cfg.n_months - 1 - cfg.prior_cutoff_offset
+    )
 
     return tables

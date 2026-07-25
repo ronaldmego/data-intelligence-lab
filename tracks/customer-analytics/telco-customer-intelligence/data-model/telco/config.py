@@ -24,6 +24,15 @@ class Config:
     n_customers: int = 5000
     n_months: int = 24  # months of history, all <= the churn observation cutoff
 
+    # A *second*, earlier observation cutoff, this many months before the final
+    # one. Same 90-day label, observed earlier — which is what makes honest
+    # out-of-time validation possible: train on the world as it looked at the
+    # prior cutoff, then score the final cutoff, exactly as a model deployed in
+    # production is judged. With a single cutoff, "temporal validation" can only
+    # ever be asserted, never demonstrated. Must exceed the ~3-month label
+    # window so the two outcome periods do not overlap.
+    prior_cutoff_offset: int = 6
+
     # Calendar anchor for month 0. Kept fixed so dates are reproducible without
     # depending on the machine clock.
     start_year: int = 2024
@@ -82,4 +91,5 @@ class Config:
             "consent",
             "campaign_exposures",
             "churn_labels",
+            "churn_labels_prior",
         )
