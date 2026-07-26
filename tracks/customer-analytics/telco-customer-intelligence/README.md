@@ -44,11 +44,24 @@ downstream concern.)
 
 | # | Case | The real problem it shows | Status |
 |---|---|---|---|
-| 01 | Actionable segmentation | segments carry behaviour, need, risk, eligible offer, consent and a suggested action — not just RFM clusters | planned |
+| 01 | [Actionable segmentation](01-segmentation/) | segments carry behaviour, need, risk, eligible offer, consent and a suggested action — not just RFM clusters | **built** |
 | 02 | [Churn without leakage](02-churn-prediction/) | out-of-time split, calibration, explainable drivers, prioritisation by value — accuracy alone isn't success | **built** |
 | 03 | [Governed next-best-offer](03-next-best-offer/) | propensity/uplift **and** eligibility, consent, exclusions, contact policy | **built** |
 | 04 | ARPU / value decomposition | where revenue per user comes from and moves | planned |
 | 05 | [Campaign incrementality](05-campaign-incrementality/) | true uplift vs the confounded naive read, and whether the experiment was big enough to tell | **built** |
+
+**[01 · Actionable segmentation](01-segmentation/)** — computes RFM as prescribed
+and then measures it: on a subscription, recency has *no variance at all* (one
+distinct value across the base — everybody was invoiced last month) and
+frequency correlates with tenure at 1.0000, because it is tenure. Builds the
+risk-by-value grid instead, finds three of nine cells worth a contact, and then
+attacks it: 45% of the base changes cell in six months and almost all of that is
+the risk axis (41.3% against 6.0% for value) while segment *sizes* move 2.3%, so
+the dashboard is flat while half the people underneath have swapped places. Two
+of its own plays turn out to be undeliverable by the catalogue rather than by
+policy — one of them contradicts the definition of the cell it was written for.
+Priced against the continuous ranking on the same budget, the grid loses 9.1%,
+which is the useful result: rank to choose who, segment to choose what.
 
 **[02 · Churn without leakage](02-churn-prediction/)** — trains at one cutoff and
 scores six months later, then reruns the same model two dishonest ways to show
@@ -97,9 +110,18 @@ rather than restating them, so they cannot drift apart silently.
   measured rather than the one case 02 assumed, and reads the answer key through
   case 05's quarantined module — so exactly one file in the track ever touches
   the counterfactual table.
+- **02, 03 and 05 → 01.** Segmentation is built last on purpose: it consumes all
+  three. Risk and the profit accounting come from case 02, the permission layer
+  that decides whether a segment's action can be delivered comes from case 03,
+  and the measured save rate and the fenced answer key come from case 05. It is
+  also the case that judges the others' output rather than extending it — the
+  grid is priced *against* case 02's ranking on the same budget, and loses.
 
 Case 03 also extends the shared data model with the contact policy itself, which
 is what lets a case report the cost of an individual rule instead of asserting
-that governance is expensive.
+that governance is expensive. Case 01 follows the same principle without
+touching the schema: its playbook — what to *do* with each segment — is a CSV in
+the case rather than a dict in the scoring script, because it is a marketing
+decision that changes without the analysis changing.
 
 Tracked in [`ronaldmego/site-ronaldmego#64`](https://github.com/ronaldmego/site-ronaldmego/issues/64).
