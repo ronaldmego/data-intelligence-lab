@@ -72,9 +72,11 @@ assumed.
 purpose. A world where the policy had already been enforced could not show what
 enforcing it costs; case 03 measures exactly that gap.
 
-Both are reference tables and consume no randomness, so adding them left the
-thirteen fact tables byte-for-byte identical (verified by sha256 against a
-previous seed-42 run); `offers` gained one declarative column.
+`contact_policy` is a new reference table and `upgrade_to_rank` is a new column
+on `offers`; neither consumes randomness, so adding them left **thirteen of the
+fourteen pre-existing tables byte-for-byte identical** (verified by sha256
+against a previous seed-42 run). The fourteenth is `offers` itself, which gained
+that one declarative column.
 
 ## The answer key, and the fence around it
 
@@ -89,7 +91,7 @@ re-running the generator with `w_retention_response = 0` would **not** produce
 this. The first customer whose outcome flips stops drawing a churn date, the RNG
 stream desynchronises, and every customer after them differs for reasons that
 have nothing to do with the campaign. Sharing the draw also means the table
-consumes no randomness of its own, so the thirteen tables above are byte-for-byte
+consumes no randomness of its own, so the fourteen tables above are byte-for-byte
 identical to a run without it.
 
 **No real dataset has this column.** It exists so an estimator can be checked

@@ -136,10 +136,11 @@ effectiveness to move the term that dominates.
   opens `churn_potential_outcomes` itself; it imports case 05's `truth.py`, so
   exactly one file in the track touches that table.
 
-It also adds two reference tables to the shared data model: `contact_policy`
-(the rules, as data) and `upgrade_to_rank` on `offers`. Both consume no
-randomness, so the thirteen fact tables are byte-for-byte identical to a run
-without them.
+It also extends the shared data model twice: a new reference table
+`contact_policy` (the rules, as data) and a new column `upgrade_to_rank` on
+`offers`. Neither consumes randomness, so **thirteen of the fourteen
+pre-existing tables are byte-for-byte identical** to a run without them — the
+fourteenth being `offers`, which gained the column.
 
 ## Limitations
 

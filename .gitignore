@@ -47,3 +47,7 @@ CLAUDE.md
 
 # Playwright artifacts
 .playwright-mcp/
+
+# uv resolves a lockfile even for stdlib-only projects; it carries no
+# information here and following the README should not dirty the tree.
+uv.lock
