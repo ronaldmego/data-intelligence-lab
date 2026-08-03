@@ -70,7 +70,7 @@ Three counts, because one would mislead. **Pairs blocked** is every refusal a ru
 | `ELIG_FAMILY` — offer not sold to that plan family | 2,404 | 623 | 0 | — | — |
 | `ELIG_NOT_AN_UPGRADE` — already on that plan or better | 4,851 | 1,471 | 0 | — | — |
 
-The wave's own churn rate is **11.8%**. A gate that removed a random slice of the base would sit on that number. None of them do, and they miss it in different directions:
+The wave's own churn rate is **11.8%**. A gate that removed a random slice of the base would sit on that number. Instead the groups they remove spread from 11.7% to 24.4% around it, in both directions:
 
 - **`POL_COOLOFF` removes the customers most likely to leave** — 397 customers who went on to churn at 24.4%, against a base of 11.8%. It is not a targeting rule and nobody thinks of it as one, but it is the most selective thing in the policy. The mechanism is circular: they were contacted last quarter *because* they were high risk, and they are barred this quarter for having been contacted.
 - **`ELIG_FAMILY`, `ELIG_NOT_AN_UPGRADE` block 7,255 pairs and remove nobody.** The offers they refuse were never anyone's best offer, so the refusal changes no decision. This is the whole reason the first column is a bad cost metric — and note it does not contradict the audit above: a campaign *sent* those ineligible offers; an engine that scores them simply never picks them.

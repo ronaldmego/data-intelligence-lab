@@ -23,8 +23,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "data-model"))
 
 from nbo import load_tables, run_case  # noqa: E402
-from nbo.charts import cooloff_chart, gates_chart, plans_chart, reach_chart  # noqa: E402
-from nbo.report import RULE_LABELS, render  # noqa: E402
+from nbo.charts import GATES_TEXT_ES, cooloff_chart, gates_chart, plans_chart, reach_chart  # noqa: E402
+from nbo.report import RULE_LABELS, RULE_LABELS_ES, render  # noqa: E402
 from nbo.value import MEASURED_SAVE_RATE  # noqa: E402
 from telco import Config  # noqa: E402
 
@@ -57,6 +57,11 @@ def main() -> None:
     written = {
         "report.md": render(result),
         "gates.svg": gates_chart(result.rule_costs, base_rate, RULE_LABELS),
+        # Same figure, same numbers, Spanish furniture. It is the one chart of
+        # the case that gets embedded in a Spanish-language page, and a figure
+        # whose caption is in one language and whose labels are in another asks
+        # the reader to trust what they cannot read.
+        "gates.es.svg": gates_chart(result.rule_costs, base_rate, RULE_LABELS_ES, GATES_TEXT_ES),
         "plans.svg": plans_chart(
             steps=[("removed by\nthe rules", -comparison.governance_cost),
                    ("lost to filtering\nin the wrong order", -comparison.ordering_cost)],

@@ -17,9 +17,10 @@ Full numbers, charts and reasoning: **[`outputs/report.md`](outputs/report.md)**
 
 ## The finding
 
-Not that governance costs volume — everyone expects that. It is that **every
-gate is correlated with the outcome, and not in the same direction**, so the
-permitted population is a different population rather than a smaller one.
+Not that governance costs volume — everyone expects that. It is that **the gates
+do not remove a random slice**: the group each one takes out went on to churn at
+anywhere from 11.7% to 24.4%, against a base of 11.8%. The permitted population
+is a different population, not just a smaller one.
 
 ![What each gate removes](outputs/gates.svg)
 
