@@ -5,7 +5,8 @@ one asks the question they skipped: who was the company *allowed* to contact,
 with what, and how often?
 
 The finding is not that governance costs volume — everyone expects that. It is
-that every gate is correlated with the outcome, and not in the same direction:
+that the gates do not remove a random slice, and they do not all miss it in the
+same direction:
 consent removes the customers least likely to leave (engaged customers opt in),
 a cool-off window removes the ones most likely to leave (they were contacted
 last quarter *because* they were high risk), and eligibility removes whoever the

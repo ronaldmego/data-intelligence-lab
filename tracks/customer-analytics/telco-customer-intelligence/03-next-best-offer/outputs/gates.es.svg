@@ -1,30 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 328" width="720" height="328" role="img" aria-label="What each governance gate removes">
-  <text x="18.0" y="20.0" text-anchor="start" font-size="13" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">What each gate removes from the list — and who they were</text>
-  <text x="305.0" y="42.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">customers removed</text>
-  <text x="569.0" y="42.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn rate they went on to have</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 328" width="720" height="328" role="img" aria-label="Qué retira de la lista cada compuerta de gobierno">
+  <text x="18.0" y="20.0" text-anchor="start" font-size="13" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Qué retira cada compuerta de la lista — y a quién</text>
+  <text x="305.0" y="42.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">clientes retirados</text>
+  <text x="569.0" y="42.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">tasa de abandono que tuvieron después</text>
   <line x1="550.8" y1="58.0" x2="550.8" y2="315.8" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="5 4"/>
   <rect x="202" y="58.0" width="206.0" height="25.8" fill="#4c78a8" fill-opacity="0.32"/>
-  <text x="196.0" y="78.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">no opt-in on that channel</text>
+  <text x="196.0" y="78.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">sin consentimiento en ese canal</text>
   <text x="414.0" y="78.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">1,670</text>
   <circle cx="558.0" cy="75.9" r="5.5" fill="#e45756"/>
   <text x="568.0" y="78.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">12.8%</text>
   <rect x="202" y="114.0" width="76.1" height="25.8" fill="#4c78a8" fill-opacity="0.32"/>
-  <text x="196.0" y="134.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">in arrears</text>
+  <text x="196.0" y="134.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">en mora</text>
   <text x="284.1" y="134.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">617</text>
   <circle cx="550.1" cy="131.9" r="5.5" fill="#54a24b"/>
   <text x="560.1" y="134.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#54a24b">11.7%</text>
   <rect x="202" y="170.0" width="52.9" height="25.8" fill="#4c78a8" fill-opacity="0.32"/>
-  <text x="196.0" y="190.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">at the yearly contact cap</text>
+  <text x="196.0" y="190.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">en el tope anual de contactos</text>
   <text x="260.9" y="190.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">429</text>
   <circle cx="574.1" cy="187.9" r="5.5" fill="#e45756"/>
   <text x="584.1" y="190.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">15.2%</text>
   <rect x="202" y="226.0" width="52.1" height="25.8" fill="#4c78a8" fill-opacity="0.32"/>
-  <text x="196.0" y="246.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">open unresolved complaint</text>
+  <text x="196.0" y="246.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">con reclamo sin resolver</text>
   <text x="260.1" y="246.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">422</text>
   <circle cx="600.2" cy="243.9" r="5.5" fill="#e45756"/>
   <text x="610.2" y="246.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">19.0%</text>
   <rect x="202" y="282.0" width="49.0" height="25.8" fill="#4c78a8" fill-opacity="0.32"/>
-  <text x="196.0" y="302.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">inside the cool-off window</text>
+  <text x="196.0" y="302.2" text-anchor="end" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">en la ventana de enfriamiento</text>
   <text x="257.0" y="302.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">397</text>
   <circle cx="637.8" cy="299.9" r="5.5" fill="#e45756"/>
   <text x="647.8" y="302.2" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">24.4%</text>

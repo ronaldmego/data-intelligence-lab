@@ -74,10 +74,10 @@ than half and the profit by +66% at the same budget.
 **[03 · Governed next-best-offer](03-next-best-offer/)** — decides who to contact
 with which offer, subject to consent, eligibility, exclusions and a contact
 policy that lives in the data model rather than in the scoring script. Finds that
-every gate is correlated with the outcome and not in the same direction — the
-cool-off window is the most selective rule in the policy, removing customers who
-churn at 24.4% against a base of 11.8%, because they were contacted last quarter
-*for being* high risk. Governance costs 20% of the plan's expected value;
+the gates do not remove a random slice — the groups they take out churn at
+anywhere from 11.7% to 24.4% against a base of 11.8% — and that the cool-off
+window is the most selective rule in the policy, removing the customers who churn
+at 24.4%, because they were contacted last quarter *for being* high risk. Governance costs 20% of the plan's expected value;
 applying the same rules in the wrong order costs 1.8× that again and silently
 sends 199 contacts against a capacity of 437. Against the answer key, a compliant
 Q1 campaign would have saved 9 customers instead of 39 — and the loss is

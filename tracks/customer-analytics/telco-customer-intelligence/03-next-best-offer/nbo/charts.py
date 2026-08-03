@@ -31,6 +31,12 @@ POSITIVE = "#54a24b"   # what survives
 W, H = 720, 400
 PAD_L, PAD_R, PAD_T, PAD_B = 62, 18, 34, 46
 
+# Charts whose height is a function of how many rows they draw take it from the
+# content instead of the constant (case 01's ``_svg(body, title, height)``, same
+# reasoning). ``H`` stays for the ones drawn against an axis, where the frame is
+# the point and a fixed canvas is correct.
+ROW_H = 56.0
+
 
 @dataclass(frozen=True)
 class Axes:
@@ -62,9 +68,10 @@ def _text(x: float, y: float, content: str, anchor: str = "middle", size: int = 
     )
 
 
-def _svg(body: list[str], title: str) -> str:
+def _svg(body: list[str], title: str, height: float = H) -> str:
+    h = math.ceil(height)
     return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {h}" width="{W}" height="{h}" '
         f'role="img" aria-label="{_escape(title)}">\n  '
         + "\n  ".join(body)
         + "\n</svg>\n"
@@ -99,7 +106,28 @@ def _linear(value: float, lo: float, hi: float, x0: float, x1: float) -> float:
     return x0 + (value - lo) / ((hi - lo) or 1.0) * (x1 - x0)
 
 
-def gates_chart(rules, base_rate: float, labels: dict[str, str]) -> str:
+GATES_TEXT = {
+    "aria": "What each governance gate removes",
+    "heading": "What each gate removes from the list — and who they were",
+    "removed": "customers removed",
+    "churn": "churn rate they went on to have",
+    "base": "base {rate}",
+}
+
+# The Spanish wording is kept short on purpose: the rule names are right-aligned
+# against a 196px gutter, and Spanish runs about a fifth longer than English, so
+# a literal translation overflows the left edge of the canvas.
+GATES_TEXT_ES = {
+    "aria": "Qué retira de la lista cada compuerta de gobierno",
+    "heading": "Qué retira cada compuerta de la lista — y a quién",
+    "removed": "clientes retirados",
+    "churn": "tasa de abandono que tuvieron después",
+    "base": "base {rate}",
+}
+
+
+def gates_chart(rules, base_rate: float, labels: dict[str, str],
+                text: dict[str, str] | None = None) -> str:
     """Who each gate removes, and how much they were going to churn.
 
     Two panels, not one axis: volume and risk are different quantities in
@@ -108,9 +136,22 @@ def gates_chart(rules, base_rate: float, labels: dict[str, str]) -> str:
     answer their two questions cleanly — how many, and who.
 
     A gate that removed a random slice of the base would put every dot on the
-    dashed line. That none of them do is the case's central claim, and this is
-    the chart that carries it.
+    dashed line. How far the dots spread either side of it is the case's central
+    claim, and this is the chart that carries it. (Not that *every* dot is off
+    the line — one sits a tenth of a point from it, which is why the wording
+    around this figure says spread and not correlation.)
+
+    The canvas is as tall as the rules it draws. Rows used to be stretched to
+    fill a fixed 400px, which left the two vertical rules running a fifth of the
+    height past the last row — dead band that reads as a cropped chart when the
+    figure is embedded somewhere narrow.
+
+    ``text`` overrides the wording (``GATES_TEXT`` are the defaults). The rule
+    names come from ``labels``, which the caller already localises; the chart's
+    own furniture had no such seam, so a translated render came out half in
+    English.
     """
+    words = {**GATES_TEXT, **(text or {})}
     rules = [r for r in rules if r.customers_removed > 0]
     top_removed = max([r.customers_removed for r in rules] + [1])
     top_churn = max([r.realised_churn_rate for r in rules] + [base_rate]) * 1.18
@@ -118,40 +159,43 @@ def gates_chart(rules, base_rate: float, labels: dict[str, str]) -> str:
     gutter, bar_x0, bar_x1 = 196, 202, 408   # label column, then the bar panel
     dot_x0, dot_x1 = 470, W - PAD_R - 34     # the risk panel, with room for labels
 
-    body = [_text(18, 20, "What each gate removes from the list — and who they were",
-                  anchor="start", size=13)]
-    body.append(_text((bar_x0 + bar_x1) / 2, PAD_T + 8, "customers removed", size=10))
-    body.append(_text((dot_x0 + dot_x1) / 2, PAD_T + 8, "churn rate they went on to have", size=10))
+    body = [_text(18, 20, words["heading"], anchor="start", size=13)]
+    body.append(_text((bar_x0 + bar_x1) / 2, PAD_T + 8, words["removed"], size=10))
+    body.append(_text((dot_x0 + dot_x1) / 2, PAD_T + 8, words["churn"], size=10))
 
-    top, bottom = PAD_T + 24, H - PAD_B - 14
-    height = (bottom - top) / max(1, len(rules))
+    top = PAD_T + 24
+    row = ROW_H
+    # The bar of the last row is the lowest ink; the vertical rules stop just
+    # under it and the canvas just under them.
+    rules_bottom = top + max(0, len(rules) - 1) * row + row * 0.46 + 8
+    height = rules_bottom + 12
 
     line = _linear(base_rate, 0.0, top_churn, dot_x0, dot_x1)
-    body.append(f'<line x1="{line:.1f}" y1="{top:.1f}" x2="{line:.1f}" y2="{H - PAD_B - 2:.1f}" '
+    body.append(f'<line x1="{line:.1f}" y1="{top:.1f}" x2="{line:.1f}" y2="{rules_bottom:.1f}" '
                 f'stroke="{INK}" stroke-width="1.4" stroke-dasharray="5 4"/>')
 
     for i, rule in enumerate(rules):
-        y = top + i * height
+        y = top + i * row
         width = _linear(rule.customers_removed, 0.0, top_removed, bar_x0, bar_x1) - bar_x0
         body.append(f'<rect x="{bar_x0}" y="{y:.1f}" width="{max(1.0, width):.1f}" '
-                    f'height="{height * 0.46:.1f}" fill="{PRIMARY}" fill-opacity="0.32"/>')
-        body.append(_text(gutter, y + height * 0.36, labels.get(rule.rule, rule.rule),
+                    f'height="{row * 0.46:.1f}" fill="{PRIMARY}" fill-opacity="0.32"/>')
+        body.append(_text(gutter, y + row * 0.36, labels.get(rule.rule, rule.rule),
                           anchor="end", size=11))
-        body.append(_text(bar_x0 + width + 6, y + height * 0.36,
+        body.append(_text(bar_x0 + width + 6, y + row * 0.36,
                           f"{rule.customers_removed:,}", anchor="start", size=10))
 
         marker = rule.realised_churn_rate
         colour = ACCENT if marker > base_rate else POSITIVE
         cx = _linear(marker, 0.0, top_churn, dot_x0, dot_x1)
-        body.append(f'<circle cx="{cx:.1f}" cy="{y + height * 0.32:.1f}" r="5.5" fill="{colour}"/>')
-        body.append(_text(cx + 10, y + height * 0.36, f"{marker:.1%}",
+        body.append(f'<circle cx="{cx:.1f}" cy="{y + row * 0.32:.1f}" r="5.5" fill="{colour}"/>')
+        body.append(_text(cx + 10, y + row * 0.36, f"{marker:.1%}",
                           anchor="start", size=10, fill=colour))
 
-    body.append(_text(line, PAD_T + 22, f"base {base_rate:.1%}", size=10))
+    body.append(_text(line, PAD_T + 22, words["base"].format(rate=f"{base_rate:.1%}"), size=10))
     body.append(f'<line x1="{(bar_x1 + dot_x0) / 2:.1f}" y1="{PAD_T + 14}" '
-                f'x2="{(bar_x1 + dot_x0) / 2:.1f}" y2="{H - PAD_B - 2:.1f}" '
+                f'x2="{(bar_x1 + dot_x0) / 2:.1f}" y2="{rules_bottom:.1f}" '
                 f'stroke="{GRID}" stroke-opacity="0.25" stroke-width="1"/>')
-    return _svg(body, "What each governance gate removes")
+    return _svg(body, words["aria"], height)
 
 
 def plans_chart(steps: list[tuple[str, float]], totals: list[tuple[str, float, int, int]]) -> str:

@@ -20,6 +20,19 @@ RULE_LABELS = {
     "ELIG_NOT_AN_UPGRADE": "already on that plan or better",
 }
 
+# Only the gates chart is rendered in Spanish (``run.py`` writes it next to the
+# English one, for a Spanish-language page that embeds the figure). The report
+# and the other three charts stay in English, which is the language of the case.
+RULE_LABELS_ES = {
+    "require_channel_consent": "sin consentimiento en ese canal",
+    "min_days_since_last_contact": "en la ventana de enfriamiento",
+    "max_contacts_per_365d": "en el tope anual de contactos",
+    "max_failed_invoices_6m": "en mora",
+    "block_if_unresolved_escalation": "con reclamo sin resolver",
+    "ELIG_FAMILY": "la oferta no se vende a esa familia de plan",
+    "ELIG_NOT_AN_UPGRADE": "ya tiene ese plan o uno mejor",
+}
+
 
 def _pct(value: float, digits: int = 1) -> str:
     return f"{value * 100:.{digits}f}%"
@@ -199,11 +212,16 @@ def _gates(result: CaseResult) -> list[str]:
             f"{cost.blocked_pairs:,} | {cost.sole_blocker_pairs:,} | {removed} | {risk} | {actual} |"
         )
 
-    lines += ["", f"The wave's own churn rate is **{_pct(base)}**. A gate that removed a random "
-              "slice of the base would sit on that number. None of them do, and they miss it in "
-              "different directions:", ""]
-
     removers = [c for c in result.rule_costs if c.customers_removed]
+    spread = sorted(c.realised_churn_rate for c in removers)
+    # "None of them sit on the base rate" was the earlier wording, and one gate
+    # sits a tenth of a point off it — close enough that calling it a signal
+    # overstates what these numbers support. The spread is the finding, and it
+    # does not need the universal quantifier to be striking.
+    lines += ["", f"The wave's own churn rate is **{_pct(base)}**. A gate that removed a random "
+              "slice of the base would sit on that number. Instead the groups they remove spread "
+              f"from {_pct(spread[0])} to {_pct(spread[-1])} around it, in both directions:", ""]
+
     riskiest = max(removers, key=lambda c: c.realised_churn_rate, default=None)
     if riskiest is not None:
         lines += [
