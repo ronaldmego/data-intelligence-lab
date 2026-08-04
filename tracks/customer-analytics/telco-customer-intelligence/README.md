@@ -4,8 +4,8 @@ Customer-analytics evidence on a single **synthetic, causal, reproducible**
 telco dataset: one data model, feeding a season of cases — segmentation, churn,
 next-best-offer, ARPU and campaign incrementality.
 
-> **Maturity: `work in progress`.** The data model (below) is built, tested and
-> reproducible. The five cases are being added on top of it, one at a time.
+> **Maturity: `reference`.** The data model and all five cases are built, tested
+> and reproducible; two consecutive runs of any case are byte-for-byte identical.
 > Everything here is synthetic — no employer or customer data. See
 > [`data-model/DATA_CARD.md`](data-model/DATA_CARD.md).
 
@@ -47,7 +47,7 @@ downstream concern.)
 | 01 | [Actionable segmentation](01-segmentation/) | segments carry behaviour, need, risk, eligible offer, consent and a suggested action — not just RFM clusters | **built** |
 | 02 | [Churn without leakage](02-churn-prediction/) | out-of-time split, calibration, explainable drivers, prioritisation by value — accuracy alone isn't success | **built** |
 | 03 | [Governed next-best-offer](03-next-best-offer/) | propensity/uplift **and** eligibility, consent, exclusions, contact policy | **built** |
-| 04 | ARPU / value decomposition | where revenue per user comes from and moves | planned |
+| 04 | [ARPU / value decomposition](04-arpu-value/) | where revenue per user comes from, and what the four defensible definitions of a customer's worth do to the same decision | **built** |
 | 05 | [Campaign incrementality](05-campaign-incrementality/) | true uplift vs the confounded naive read, and whether the experiment was big enough to tell | **built** |
 
 **[01 · Actionable segmentation](01-segmentation/)** — computes RFM as prescribed
@@ -83,6 +83,21 @@ sends 199 contacts against a capacity of 437. Against the answer key, a complian
 Q1 campaign would have saved 9 customers instead of 39 — and the loss is
 **reach**, not response.
 
+**[04 · ARPU / value decomposition](04-arpu-value/)** — takes apart the single
+number every other case used for customer value. Finds that 98.03% of the
+variance in what customers are billed is between tariffs, so *"do heavy users
+generate more revenue?"* answers **+0.30** across the base and **−0.02** inside
+any single plan — the aggregate is the plan mix, and nothing errors. Then the
+part that changes a decision: case 02 credited every saved customer with twelve
+months of margin, and the *number* barely mattered (any other constant keeps
+95–98% of its target list) while its *flatness* mattered enormously. Reading each
+customer's own churn probability as a hazard implies lives from 1.7 months up,
+moves half the list, and makes `p` and `1/h` cancel — so the expected value of a
+retention contact stops depending on churn risk and the list becomes 79% the same
+as ranking by revenue with no model at all. Which reading is right turns on
+whether a save *changes* a hazard or *postpones one draw* of it, and neither the
+data nor the answer key contains that.
+
 **[05 · Campaign incrementality](05-campaign-incrementality/)** — reads the
 retention campaigns against the control group they held back, four ways: three
 comparisons that were never randomised and disagree about even the *sign*, then
@@ -116,12 +131,29 @@ rather than restating them, so they cannot drift apart silently.
   and the measured save rate and the fenced answer key come from case 05. It is
   also the case that judges the others' output rather than extending it — the
   grid is priced *against* case 02's ranking on the same budget, and loses.
+- **01, 02 and 05 → 04.** Value is priced last because it needs the others to
+  price. It imports case 02's churn model, feature builder and commercial
+  constants — and a test asserts its revenue figure equals case 02's to the last
+  decimal, so the two cannot drift into disagreeing about what a customer pays —
+  prices with case 05's *measured* save rate, and audits case 01's value axis
+  with case 01's own band machinery, finding that the axis case 01 called stable
+  is a constant for six tariffs and a coin flip for the seventh. It also pays the
+  last debt in the track, the one nobody had written down: every earlier case
+  multiplied revenue by a flat twelve months, and this is where that stops being
+  free. Its fence around the answer key is the strictest in the track and
+  consists of never opening it — corrupt the table and not one number in the
+  result moves — because the question it cannot settle lies past the end of the
+  world the answer key describes.
 
 Case 03 also extends the shared data model with the contact policy itself, which
 is what lets a case report the cost of an individual rule instead of asserting
-that governance is expensive. Case 01 follows the same principle without
-touching the schema: its playbook — what to *do* with each segment — is a CSV in
-the case rather than a dict in the scoring script, because it is a marketing
-decision that changes without the analysis changing.
+that governance is expensive. Cases 01 and 04 follow the same principle without
+touching the schema: case 01's playbook — what to *do* with each segment — and
+case 04's unit costs are CSVs in the case rather than dicts in the scoring
+script, because both are decisions somebody else owns and both change without the
+analysis changing. Case 04 makes the sharper version of the argument: a contact
+rule that is wrong gets argued about by the people it blocks, while a marginal
+cost that is wrong silently re-orders a customer list and the list looks
+identical.
 
 Tracked in [`ronaldmego/site-ronaldmego#64`](https://github.com/ronaldmego/site-ronaldmego/issues/64).

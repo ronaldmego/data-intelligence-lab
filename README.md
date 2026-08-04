@@ -41,7 +41,7 @@ something under active maintenance.
 | [`agent-data-analyst`](tracks/data-governance/agent-data-analyst) | data-governance | Analyses the *data* using the catalog as governance context: who owns the table, did it pass quality, what the codes mean | `reference` · paused | 47 commits · 2026-02 → 2026-06 |
 | [`agent-sql-khipu_ai`](tracks/governed-ai/agent-sql-khipu_ai) | governed-ai | LLM agent with SQL access and a RAG knowledge base, local models | `archived snapshot` | 8 commits · 2025-01 → 2025-11 |
 | [`agent_text_classification`](tracks/governed-ai/agent_text_classification) | governed-ai | Sentiment classification with a local LLM | `archived snapshot` | 8 commits · 2025-02 |
-| [`telco-customer-intelligence`](tracks/customer-analytics/telco-customer-intelligence) | customer-analytics | Synthetic, causal, reproducible telco data model + the analytics cases it feeds (segmentation, churn, NBO, ARPU, incrementality) | `work in progress` | data model + [churn](tracks/customer-analytics/telco-customer-intelligence/02-churn-prediction) and [incrementality](tracks/customer-analytics/telco-customer-intelligence/05-campaign-incrementality) cases built & tested; 3 cases to go |
+| [`telco-customer-intelligence`](tracks/customer-analytics/telco-customer-intelligence) | customer-analytics | Synthetic, causal, reproducible telco data model + the analytics cases it feeds (segmentation, churn, NBO, ARPU, incrementality) | `reference` | data model + all five cases built & tested, each importing its predecessors rather than restating them |
 
 **The two agents in `data-governance/` are a progression, not a duplicate.**
 `openmetadata-mcp-agent` talks *to the catalog*. `agent-data-analyst` analyses *the data*,
@@ -100,9 +100,11 @@ Stated plainly rather than hidden behind a green badge:
   every `tracks/<track>/<project>/tests/` directory as it appears. The `test_*.py` files
   under some `scripts/` folders are **manual integration scripts** — they need a live
   catalog, a database and credentials — so CI deliberately does not collect them.
-- `data-privacy/` is empty; `customer-analytics/` has its data model plus the churn and
-  incrementality cases built, with three cases to go (see
-  [#64](https://github.com/ronaldmego/site-ronaldmego/issues/64)).
+- `data-privacy/` is empty. `customer-analytics/` is complete — data model plus all five
+  cases (see [#64](https://github.com/ronaldmego/site-ronaldmego/issues/64)) — with its own
+  limitations declared in the cases that hit them: the data model has no tariff migration
+  and never stops invoicing a churned customer, which case 04 reports rather than works
+  around.
 - Dependencies in the migrated agent projects are declared with ranges, not pinned. A fresh
   install today may not resolve to what the author ran. (The customer-analytics data model
   has no third-party dependencies — standard library only.)
