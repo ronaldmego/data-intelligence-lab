@@ -41,6 +41,16 @@ satisfaction and noise; retention campaigns carry a true but confounded uplift.
   population that is genuinely scoreable at a given cutoff is left to the case
   using the data, deliberately: getting that wrong is one of the commonest real
   errors in churn work, so the dataset does not hide it.
+- **Nobody changes tariff, and nobody stops being invoiced.** Each customer holds
+  one plan for their whole life, and billing continues for customers who churned
+  at the earlier cutoff. Two consequences, both measured by case 04 rather than
+  worked around: the revenue side has no migration for an ARPU bridge to
+  decompose, so the month-on-month movement in this dataset is sampling noise and
+  the case reports it with the interval that proves it; and 12% of billed revenue
+  after the earlier cutoff belongs to customers who had left, which distorts the
+  revenue total and the subscriber count while very nearly cancelling out of the
+  ratio between them. Where an ARPU analysis is the point, this is the thinnest
+  part of the model.
 - **Consent is static**, with no effective-date, so it cannot be re-derived at
   an earlier cutoff. Cases that need consent *as of* a past date should treat it
   as an approximation — case 03 audits past campaigns against present-day opt-ins
