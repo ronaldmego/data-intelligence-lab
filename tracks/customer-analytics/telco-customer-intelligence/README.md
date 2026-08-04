@@ -18,6 +18,11 @@ decision*: churn without leakage, next-best-offer with consent and eligibility,
 uplift that isn't confounded by who you targeted. So the foundation is a dataset
 built to make those problems real.
 
+The write-up of what the five cases found *together* — the argument that only
+becomes visible because they share one dataset — is
+[**Five cases on one dataset**](https://ronaldmego.com/en/blog/customer-intelligence-lab)
+([ES](https://ronaldmego.com/blog/customer-intelligence-lab)).
+
 ## The foundation: [`data-model/`](data-model/)
 
 A seeded generator emits 15 related tables with an explicit causal structure,
