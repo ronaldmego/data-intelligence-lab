@@ -1,0 +1,9 @@
+# Este track sube el listón del linter por encima del baseline del monorepo
+# (que sólo exige corrección, para no reescribir los snapshots archivados).
+# Acá el código es nuevo, así que se le pide también estilo.
+[tool.ruff]
+target-version = "py310"
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP"]

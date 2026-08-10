@@ -1,0 +1,386 @@
+{
+  "question": "¿Cuántas tiendas tiene el negocio?",
+  "mode": "deterministic",
+  "steps": [
+    {
+      "seq": 1,
+      "phase": "metadata",
+      "tool": "catalog.list_glossary_terms",
+      "args": {},
+      "ok": true,
+      "summary": "23 términos en el glosario",
+      "detail": [
+        "AccessPolicy",
+        "ActiveCustomer",
+        "Actor",
+        "Alquiler",
+        "Catalogo",
+        "Category",
+        "DataCatalog",
+        "DataClassification",
+        "DataContract",
+        "DataLineage",
+        "DataOwner",
+        "DataQuality",
+        "DataSteward",
+        "Film",
+        "Finanzas",
+        "Inventory",
+        "MetadataManagement",
+        "Payment",
+        "PII",
+        "Rental",
+        "RentalRate",
+        "RentalRevenue",
+        "ReturnDate"
+      ]
+    },
+    {
+      "seq": 2,
+      "phase": "metadata",
+      "tool": "catalog.search_tables",
+      "args": {
+        "text": "tienda",
+        "limit": 10
+      },
+      "ok": true,
+      "summary": "4 tablas coinciden con «tienda»",
+      "detail": [
+        "pagila_source.pagila.public.customer",
+        "pagila_source.pagila.public.inventory",
+        "pagila_source.pagila.public.staff",
+        "pagila_source.pagila.public.store"
+      ]
+    },
+    {
+      "seq": 3,
+      "phase": "metadata",
+      "tool": "catalog.search_tables",
+      "args": {
+        "text": "store",
+        "limit": 10
+      },
+      "ok": true,
+      "summary": "5 tablas coinciden con «store»",
+      "detail": [
+        "pagila_source.pagila.public.store",
+        "pagila_source.pagila.public.sales_by_store",
+        "pagila_source.pagila.public.customer",
+        "pagila_source.pagila.public.customer_list",
+        "pagila_source.pagila.public.inventory"
+      ]
+    },
+    {
+      "seq": 4,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "customer"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.customer · 10 columnas · tier Tier.Tier1"
+    },
+    {
+      "seq": 5,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "inventory"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.inventory · 4 columnas · tier Tier.Tier2"
+    },
+    {
+      "seq": 6,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "staff"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.staff · 11 columnas · tier Tier.Tier2"
+    },
+    {
+      "seq": 7,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "store"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.store · 4 columnas · tier Tier.Tier2"
+    },
+    {
+      "seq": 8,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "sales_by_store"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.sales_by_store · 3 columnas · tier sin tier"
+    },
+    {
+      "seq": 9,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "customer_list"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.customer_list · 9 columnas · tier sin tier"
+    },
+    {
+      "seq": 10,
+      "phase": "metadata",
+      "tool": "orchestrator.resolve_anchor",
+      "args": {
+        "concept": "tienda",
+        "aliases": [
+          "store"
+        ]
+      },
+      "ok": true,
+      "summary": "ancla = pagila_source.pagila.public.store (la referencian 3 de las coincidencias)",
+      "detail": {
+        "customer": 0,
+        "inventory": 0,
+        "staff": 0,
+        "store": 3,
+        "sales_by_store": -1,
+        "customer_list": -1
+      }
+    },
+    {
+      "seq": 11,
+      "phase": "metadata",
+      "tool": "catalog.get_lineage",
+      "args": {
+        "table": "pagila_source.pagila.public.store"
+      },
+      "ok": true,
+      "summary": "0 arriba · 3 abajo",
+      "detail": {
+        "upstream": [],
+        "downstream": [
+          "inventory",
+          "staff",
+          "customer"
+        ]
+      }
+    },
+    {
+      "seq": 12,
+      "phase": "metadata",
+      "tool": "catalog.get_lineage",
+      "args": {
+        "table": "pagila_source.pagila.public.inventory"
+      },
+      "ok": true,
+      "summary": "2 arriba · 1 abajo",
+      "detail": {
+        "upstream": [
+          "store",
+          "film"
+        ],
+        "downstream": [
+          "rental"
+        ]
+      }
+    },
+    {
+      "seq": 13,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "rental"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.rental · 7 columnas · tier Tier.Tier1"
+    },
+    {
+      "seq": 14,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "film"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.film · 14 columnas · tier Tier.Tier1"
+    },
+    {
+      "seq": 15,
+      "phase": "metadata",
+      "tool": "catalog.get_lineage",
+      "args": {
+        "table": "pagila_source.pagila.public.staff"
+      },
+      "ok": true,
+      "summary": "3 arriba · 1 abajo",
+      "detail": {
+        "upstream": [
+          "city",
+          "store",
+          "address"
+        ],
+        "downstream": [
+          "payment"
+        ]
+      }
+    },
+    {
+      "seq": 16,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "payment"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.payment · 6 columnas · tier Tier.Tier1"
+    },
+    {
+      "seq": 17,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "city"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.city · 4 columnas · tier Tier.Tier3"
+    },
+    {
+      "seq": 18,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "address"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.address · 8 columnas · tier Tier.Tier2"
+    },
+    {
+      "seq": 19,
+      "phase": "metadata",
+      "tool": "catalog.get_lineage",
+      "args": {
+        "table": "pagila_source.pagila.public.customer"
+      },
+      "ok": true,
+      "summary": "3 arriba · 2 abajo",
+      "detail": {
+        "upstream": [
+          "city",
+          "address",
+          "store"
+        ],
+        "downstream": [
+          "rental",
+          "payment"
+        ]
+      }
+    },
+    {
+      "seq": 20,
+      "phase": "metadata",
+      "tool": "orchestrator.open_sql_phase",
+      "args": {},
+      "ok": true,
+      "summary": "contexto suficiente; se habilita la consulta al dato"
+    },
+    {
+      "seq": 21,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(*) AS value FROM public.store"
+      },
+      "ok": true,
+      "summary": "= 500"
+    },
+    {
+      "seq": 22,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.customer t"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 23,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.inventory t"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 24,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.staff t"
+      },
+      "ok": true,
+      "summary": "= 475"
+    },
+    {
+      "seq": 25,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(*) AS value FROM (\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id\n) u"
+      },
+      "ok": true,
+      "summary": "= 4"
+    },
+    {
+      "seq": 26,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT j.store_id) AS value FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 27,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT j.store_id) AS value FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 28,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT j.store_id) AS value FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 29,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT count(DISTINCT j.store_id) AS value FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id"
+      },
+      "ok": true,
+      "summary": "= 2"
+    }
+  ],
+  "invariants": {
+    "metadata_before_sql": true,
+    "metadata_calls": 20,
+    "sql_calls": 9
+  }
+}

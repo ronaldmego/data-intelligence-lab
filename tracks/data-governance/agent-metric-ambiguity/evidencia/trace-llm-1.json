@@ -1,0 +1,170 @@
+{
+  "question": "¿Cuántas tiendas tiene el negocio?",
+  "mode": "llm:kimi-k2.6",
+  "steps": [
+    {
+      "seq": 1,
+      "phase": "metadata",
+      "tool": "catalog.list_glossary_terms",
+      "args": {},
+      "ok": true,
+      "summary": "23 términos en el glosario",
+      "detail": [
+        "AccessPolicy",
+        "ActiveCustomer",
+        "Actor",
+        "Alquiler",
+        "Catalogo",
+        "Category",
+        "DataCatalog",
+        "DataClassification",
+        "DataContract",
+        "DataLineage",
+        "DataOwner",
+        "DataQuality",
+        "DataSteward",
+        "Film",
+        "Finanzas",
+        "Inventory",
+        "MetadataManagement",
+        "Payment",
+        "PII",
+        "Rental",
+        "RentalRate",
+        "RentalRevenue",
+        "ReturnDate"
+      ]
+    },
+    {
+      "seq": 2,
+      "phase": "metadata",
+      "tool": "catalog.search_tables",
+      "args": {
+        "text": "store",
+        "limit": 10
+      },
+      "ok": true,
+      "summary": "5 tablas coinciden con «store»",
+      "detail": [
+        "pagila_source.pagila.public.store",
+        "pagila_source.pagila.public.sales_by_store",
+        "pagila_source.pagila.public.customer",
+        "pagila_source.pagila.public.customer_list",
+        "pagila_source.pagila.public.inventory"
+      ]
+    },
+    {
+      "seq": 3,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "store"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.store · 4 columnas · tier Tier.Tier2"
+    },
+    {
+      "seq": 4,
+      "phase": "metadata",
+      "tool": "catalog.get_lineage",
+      "args": {
+        "table": "pagila_source.pagila.public.store"
+      },
+      "ok": true,
+      "summary": "0 arriba · 3 abajo",
+      "detail": {
+        "upstream": [],
+        "downstream": [
+          "inventory",
+          "staff",
+          "customer"
+        ]
+      }
+    },
+    {
+      "seq": 5,
+      "phase": "metadata",
+      "tool": "catalog.get_table",
+      "args": {
+        "name": "sales_by_store"
+      },
+      "ok": true,
+      "summary": "pagila_source.pagila.public.sales_by_store · 3 columnas · tier sin tier"
+    },
+    {
+      "seq": 6,
+      "phase": "metadata",
+      "tool": "orchestrator.open_sql_phase",
+      "args": {},
+      "ok": true,
+      "summary": "contexto suficiente; se habilita la consulta al dato"
+    },
+    {
+      "seq": 7,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT COUNT(*) FROM store"
+      },
+      "ok": true,
+      "summary": "= 500"
+    },
+    {
+      "seq": 8,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT COUNT(DISTINCT store_id) FROM inventory"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 9,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT COUNT(DISTINCT store_id) FROM customer"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 10,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT COUNT(*) FROM sales_by_store"
+      },
+      "ok": true,
+      "summary": "= 2"
+    },
+    {
+      "seq": 11,
+      "phase": "sql",
+      "tool": "sql.scalar",
+      "args": {
+        "sql": "SELECT COUNT(DISTINCT store_id) FROM store"
+      },
+      "ok": true,
+      "summary": "= 500"
+    },
+    {
+      "seq": 12,
+      "phase": "respuesta",
+      "tool": "llm.final",
+      "args": {},
+      "ok": true,
+      "summary": "4 definiciones reportadas",
+      "detail": {
+        "ambigua": true,
+        "explicacion": "La tabla maestro store registra 500 tiendas como unidades operativas, pero las tablas operativas (inventory, customer, sales_by_store) únicamente reflejan actividad en 2 tiendas. Por tanto, 'tiendas del negocio' puede interpretarse como (a) el universo maestro de unidades registradas (500) o (b) las tiendas efectivamente operativas con inventario, clientes o ventas (2). El negocio debe definir si se consideran tiendas aquellas sin actividad operativa actual."
+      }
+    }
+  ],
+  "invariants": {
+    "metadata_before_sql": true,
+    "metadata_calls": 6,
+    "sql_calls": 5
+  }
+}
