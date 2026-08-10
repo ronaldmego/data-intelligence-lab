@@ -91,8 +91,19 @@ class TestSinGobierno:
         assert not set(self.answer.facts) & set(self.answer.interpretation)
 
     def test_cada_valor_reportado_viene_con_su_sql(self):
+        """Un número sin su consulta al lado es un número que hay que creer.
+
+        Se compara normalizando los espacios: la consulta de unión va en varias
+        líneas en la opción y en una sola en los hechos, y comparar el texto
+        crudo hacía que este test midiera el formateo en vez de la trazabilidad.
+        """
+        una_linea = lambda s: " ".join(s.split())  # noqa: E731
+        hechos = " ".join(una_linea(f) for f in self.answer.facts)
         for opt in self.answer.options:
-            assert f"{opt['sql']}" in " ".join(self.answer.facts) or opt["sql"] in str(self.answer.options)
+            assert opt["sql"], f"{opt['id']} no reporta SQL"
+            assert una_linea(opt["sql"]) in hechos, (
+                f"el valor de {opt['id']} se reporta sin su consulta"
+            )
 
     def test_el_texto_renderizado_trae_las_secciones(self):
         texto = render_text(self.answer)

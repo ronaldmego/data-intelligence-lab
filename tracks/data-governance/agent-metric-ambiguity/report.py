@@ -204,7 +204,7 @@ def build_answer(question: str, governance: GovernanceFacts, plan: Plan) -> Answ
         f"owner {owners})."
     )
     for c in plan.candidates:
-        facts.append(f"{c.label}: {c.value} — {c.sql}")
+        facts.append(f"{c.label}: {c.value} — {_oneline(c.sql)}")
 
     interpretation: list[str] = []
     if verdict == VERDICT_GOVERNED:
@@ -234,7 +234,7 @@ def build_answer(question: str, governance: GovernanceFacts, plan: Plan) -> Answ
 
     if plan.corroborations:
         facts.extend(
-            f"Camino alternativo hacia «actividad» — {c.label}: {c.value} — {c.sql}"
+            f"Camino alternativo hacia «actividad» — {c.label}: {c.value} — {_oneline(c.sql)}"
             for c in plan.corroborations
         )
         interpretation.extend(_leer_caminos(plan))
