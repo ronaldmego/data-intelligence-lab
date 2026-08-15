@@ -64,8 +64,8 @@ from .costs import (  # noqa: E402
     sensitivity,
 )
 from .data import (  # noqa: E402
-    Product,
     Population,
+    Product,
     RevenueBase,
     Tables,
     _f,

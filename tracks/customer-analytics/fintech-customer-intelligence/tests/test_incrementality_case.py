@@ -31,6 +31,7 @@ for path in (str(_CASE), str(_CHURN), str(_DATA_MODEL)):
         sys.path.insert(0, path)
 
 import pytest  # noqa: E402
+from fintech import Config  # noqa: E402
 from incrementality import build_audience, load_campaigns, load_tables, run_case  # noqa: E402
 from incrementality.balance import check_balance  # noqa: E402
 from incrementality.economics import measured_save_rate  # noqa: E402
@@ -44,7 +45,6 @@ from incrementality.estimators import (  # noqa: E402
     required_per_arm,
     wald,
 )
-from fintech import Config  # noqa: E402
 
 
 @pytest.fixture(scope="module")

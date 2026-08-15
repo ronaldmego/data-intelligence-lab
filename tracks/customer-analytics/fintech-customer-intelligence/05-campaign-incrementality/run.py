@@ -25,10 +25,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "02-churn-predictio
 
 from churn import run_case as run_churn_case  # noqa: E402
 from churn.economics import Economics  # noqa: E402
+from fintech import Config  # noqa: E402
 from incrementality import load_tables, run_case  # noqa: E402
 from incrementality.charts import decomposition_chart, power_chart, readings_chart  # noqa: E402
 from incrementality.report import render  # noqa: E402
-from fintech import Config  # noqa: E402
 
 
 def _power_curve(result, points: int = 80) -> tuple[list[int], list[float]]:

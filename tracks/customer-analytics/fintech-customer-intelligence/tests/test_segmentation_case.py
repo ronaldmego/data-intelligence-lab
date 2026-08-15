@@ -35,10 +35,10 @@ for _name in ("01-segmentation", "02-churn-prediction", "03-next-best-offer",
         sys.path.insert(0, _path)
 
 import pytest  # noqa: E402
+from fintech import Config  # noqa: E402
 from segmentation import load_tables, run_case  # noqa: E402
 from segmentation.grid import Cuts, band_of, build_segments, load_playbook, quantile_cuts  # noqa: E402
 from segmentation.rfm import classic_rfm, correlation, tenure_of  # noqa: E402
-from fintech import Config  # noqa: E402
 
 SEED = Config(seed=123, n_customers=800, n_months=18)
 PLAYBOOK = _TRACK / "01-segmentation" / "playbook.csv"

@@ -14,7 +14,7 @@ run the whole thing without installing anything.
 from .bridge import Bridge, build_bridge
 from .collection import Collection, measure_collection
 from .costs import CostModel, ServiceProfile, load_cost_model
-from .data import Product, Population, RevenueBase, load_tables, revenue_base
+from .data import Population, Product, RevenueBase, load_tables, revenue_base
 from .decision import Accounting, Bakeoff, Constants, run_bakeoff
 from .horizon import expected_remaining_months, hazard_horizon, monthly_hazard
 from .pipeline import MEASURED_SAVE_RATE, CaseResult, run_case

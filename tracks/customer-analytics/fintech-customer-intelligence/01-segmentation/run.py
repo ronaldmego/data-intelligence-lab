@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "data-model"))
 
+from fintech import Config  # noqa: E402
 from segmentation import load_tables, run_case  # noqa: E402
 from segmentation.charts import (  # noqa: E402
     GRID_TEXT_ES,
@@ -33,7 +34,6 @@ from segmentation.charts import (  # noqa: E402
 )
 from segmentation.pipeline import MEASURED_SAVE_RATE  # noqa: E402
 from segmentation.report import render  # noqa: E402
-from fintech import Config  # noqa: E402
 
 
 def main() -> None:

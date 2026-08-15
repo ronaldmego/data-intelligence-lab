@@ -30,6 +30,7 @@ for path in (str(_CASE), str(_CHURN), str(_INCREMENTALITY), str(_DATA_MODEL)):
         sys.path.insert(0, path)
 
 import pytest  # noqa: E402
+from fintech import Config  # noqa: E402
 from nbo import load_consent, load_offers, load_tables, run_case  # noqa: E402
 from nbo.data import ContactHistory, ProductLadder, month_calendar, priced_offers  # noqa: E402
 from nbo.policy import (  # noqa: E402
@@ -41,7 +42,6 @@ from nbo.policy import (  # noqa: E402
     evaluate,
 )
 from nbo.value import _campaign_training_rows  # noqa: E402
-from fintech import Config  # noqa: E402
 
 SEED = Config(seed=123, n_customers=800, n_months=18)
 
