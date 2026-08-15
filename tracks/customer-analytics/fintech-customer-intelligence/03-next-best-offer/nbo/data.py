@@ -85,7 +85,7 @@ def _float(value: object, default: float = 0.0) -> float:
 
 @dataclass(frozen=True)
 class ProductLadder:
-    """Plans ordered *within* their own family.
+    """Products ordered *within* their own family.
 
     The shared ``products`` table carries a ``tier`` that is comparable across the
     whole catalogue, which is the right thing for pricing and the wrong thing
