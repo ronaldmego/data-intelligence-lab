@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-label="Expected value from the promised list to the sendable list">
+  <text x="18.0" y="20.0" text-anchor="start" font-size="13" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">From the plan that was promised to the list that goes out</text>
+  <line x1="62" y1="354.0" x2="702" y2="354.0" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="54.0" y="358.0" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">0</text>
+  <line x1="62" y1="270.2" x2="702" y2="270.2" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="54.0" y="274.2" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">1,000</text>
+  <line x1="62" y1="186.4" x2="702" y2="186.4" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="54.0" y="190.4" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">2,000</text>
+  <line x1="62" y1="102.6" x2="702" y2="102.6" stroke="#8b949e" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="54.0" y="106.6" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">3,000</text>
+  <rect x="94.0" y="78.1" width="64.0" height="275.9" fill="#9a6fb0" fill-opacity="0.85"/>
+  <text x="126.0" y="70.1" text-anchor="middle" font-size="11" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">3,291</text>
+  <text x="126.0" y="56.1" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">437 of 437 contacts</text>
+  <text x="126.0" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">ungoverned</text>
+  <rect x="222.0" y="78.1" width="64.0" height="55.1" fill="#e45756" fill-opacity="0.85"/>
+  <text x="254.0" y="70.1" text-anchor="middle" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-658</text>
+  <line x1="126.0" y1="78.1" x2="286.0" y2="78.1" stroke="#8b949e" stroke-opacity="0.35" stroke-dasharray="3 3"/>
+  <line x1="222.0" y1="133.3" x2="382.0" y2="133.3" stroke="#8b949e" stroke-opacity="0.35" stroke-dasharray="3 3"/>
+  <text x="254.0" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">removed by</text>
+  <text x="254.0" y="382.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">the rules</text>
+  <rect x="350.0" y="133.3" width="64.0" height="220.7" fill="#4c78a8" fill-opacity="0.85"/>
+  <text x="382.0" y="125.3" text-anchor="middle" font-size="11" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">2,633</text>
+  <text x="382.0" y="111.3" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">437 of 437 contacts</text>
+  <text x="382.0" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">governed</text>
+  <rect x="478.0" y="133.3" width="64.0" height="98.3" fill="#e45756" fill-opacity="0.85"/>
+  <text x="510.0" y="125.3" text-anchor="middle" font-size="11" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-1,172</text>
+  <line x1="382.0" y1="133.3" x2="542.0" y2="133.3" stroke="#8b949e" stroke-opacity="0.35" stroke-dasharray="3 3"/>
+  <line x1="478.0" y1="231.6" x2="638.0" y2="231.6" stroke="#8b949e" stroke-opacity="0.35" stroke-dasharray="3 3"/>
+  <text x="510.0" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">lost to filtering</text>
+  <text x="510.0" y="382.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">in the wrong order</text>
+  <rect x="606.0" y="231.6" width="64.0" height="122.4" fill="#4c78a8" fill-opacity="0.85"/>
+  <text x="638.0" y="223.6" text-anchor="middle" font-size="11" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">1,461</text>
+  <text x="638.0" y="209.6" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">199 of 437 contacts</text>
+  <text x="638.0" y="370.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">rank, then suppress</text>
+  <line x1="62" y1="354.0" x2="702" y2="354.0" stroke="#8b949e" stroke-opacity="0.55" stroke-width="1.2"/>
+  <text x="18.0" y="34.0" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">expected value of the wave</text>
+</svg>

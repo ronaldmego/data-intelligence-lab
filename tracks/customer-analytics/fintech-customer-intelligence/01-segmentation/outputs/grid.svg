@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" width="720" height="380" role="img" aria-label="The risk-by-value grid and the expected value of each cell">
+  <text x="18.0" y="20.0" text-anchor="start" font-size="13" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">9 cells, 3 worth contacting</text>
+  <text x="18.0" y="36.0" text-anchor="start" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">expected profit per customer, at case 05's measured save rate</text>
+  <rect x="65.0" y="63.0" width="207.3" height="86.0" fill="#8b949e" fill-opacity="0.06" stroke="#8b949e" stroke-opacity="0.22" stroke-width="1"/>
+  <text x="168.7" y="86.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e" fill-opacity="0.75">Let go</text>
+  <text x="168.7" y="105.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">500 customers</text>
+  <text x="168.7" y="126.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-0.58</text>
+  <text x="168.7" y="141.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 19.8%</text>
+  <rect x="278.3" y="63.0" width="207.3" height="86.0" fill="#54a24b" fill-opacity="0.16" stroke="#54a24b" stroke-opacity="0.55" stroke-width="1"/>
+  <text x="382.0" y="86.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Rescue (economy)</text>
+  <text x="382.0" y="105.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">458 customers</text>
+  <text x="382.0" y="126.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#54a24b">+0.49</text>
+  <text x="382.0" y="141.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 20.7%</text>
+  <rect x="491.7" y="63.0" width="207.3" height="86.0" fill="#54a24b" fill-opacity="0.16" stroke="#54a24b" stroke-opacity="0.55" stroke-width="1"/>
+  <text x="595.3" y="86.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Rescue</text>
+  <text x="595.3" y="105.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">501 customers</text>
+  <text x="595.3" y="126.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#54a24b">+4.30</text>
+  <text x="595.3" y="141.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 20.2%</text>
+  <rect x="65.0" y="155.0" width="207.3" height="86.0" fill="#8b949e" fill-opacity="0.06" stroke="#8b949e" stroke-opacity="0.22" stroke-width="1"/>
+  <text x="168.7" y="178.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e" fill-opacity="0.75">Reprice</text>
+  <text x="168.7" y="197.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">505 customers</text>
+  <text x="168.7" y="218.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-1.16</text>
+  <text x="168.7" y="233.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 7.3%</text>
+  <rect x="278.3" y="155.0" width="207.3" height="86.0" fill="#8b949e" fill-opacity="0.06" stroke="#8b949e" stroke-opacity="0.22" stroke-width="1"/>
+  <text x="382.0" y="178.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e" fill-opacity="0.75">Watch</text>
+  <text x="382.0" y="197.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">450 customers</text>
+  <text x="382.0" y="218.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-0.76</text>
+  <text x="382.0" y="233.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 9.1%</text>
+  <rect x="491.7" y="155.0" width="207.3" height="86.0" fill="#54a24b" fill-opacity="0.16" stroke="#54a24b" stroke-opacity="0.55" stroke-width="1"/>
+  <text x="595.3" y="178.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">Protect</text>
+  <text x="595.3" y="197.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">504 customers</text>
+  <text x="595.3" y="218.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#54a24b">+0.62</text>
+  <text x="595.3" y="233.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 10.9%</text>
+  <rect x="65.0" y="247.0" width="207.3" height="86.0" fill="#8b949e" fill-opacity="0.06" stroke="#8b949e" stroke-opacity="0.22" stroke-width="1"/>
+  <text x="168.7" y="270.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e" fill-opacity="0.75">Self-serve</text>
+  <text x="168.7" y="289.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">452 customers</text>
+  <text x="168.7" y="310.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-1.33</text>
+  <text x="168.7" y="325.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 6.2%</text>
+  <rect x="278.3" y="247.0" width="207.3" height="86.0" fill="#8b949e" fill-opacity="0.06" stroke="#8b949e" stroke-opacity="0.22" stroke-width="1"/>
+  <text x="382.0" y="270.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e" fill-opacity="0.75">Grow (limit)</text>
+  <text x="382.0" y="289.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">512 customers</text>
+  <text x="382.0" y="310.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-1.13</text>
+  <text x="382.0" y="325.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 6.1%</text>
+  <rect x="491.7" y="247.0" width="207.3" height="86.0" fill="#8b949e" fill-opacity="0.06" stroke="#8b949e" stroke-opacity="0.22" stroke-width="1"/>
+  <text x="595.3" y="270.0" text-anchor="middle" font-size="12" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e" fill-opacity="0.75">Grow</text>
+  <text x="595.3" y="289.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">494 customers</text>
+  <text x="595.3" y="310.0" text-anchor="middle" font-size="15" font-weight="bold" font-family="ui-sans-serif,system-ui,sans-serif" fill="#e45756">-0.46</text>
+  <text x="595.3" y="325.0" text-anchor="middle" font-size="9" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">churn 5.7%</text>
+  <text x="52.0" y="106.0" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">high risk</text>
+  <text x="52.0" y="198.0" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">mid risk</text>
+  <text x="52.0" y="290.0" text-anchor="end" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">low risk</text>
+  <text x="168.7" y="354.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">low value</text>
+  <text x="382.0" y="354.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">mid value</text>
+  <text x="595.3" y="354.0" text-anchor="middle" font-size="10" font-weight="normal" font-family="ui-sans-serif,system-ui,sans-serif" fill="#8b949e">high value</text>
+</svg>
