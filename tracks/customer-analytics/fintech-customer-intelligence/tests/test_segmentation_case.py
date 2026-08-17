@@ -18,7 +18,10 @@ quietly broken in the way it exists to prevent:
 * a dimension with no variance reports **no** churn spread, because sorting a
   constant produces quintiles that differ only by row order;
 * segment profiles are computed from the features, so a cell cannot be labelled
-  with a trait it does not have.
+  with a trait it does not have;
+* the playbook and the catalogue agree — a play cannot ask for an offer type
+  nobody sells, and a play that contacts must reach somebody. Both failures are
+  silent: they move a number in a table and fail no test.
 """
 
 from __future__ import annotations
@@ -351,3 +354,59 @@ def test_segments_are_built_from_the_snapshot_not_the_labels(result):
     assert [s.members for s in rebuilt] == [s.members for s in result.segments]
     assert [s.mean_risk for s in rebuilt] == [s.mean_risk for s in result.segments]
     assert [s.realised_churn for s in rebuilt] != [s.realised_churn for s in result.segments]
+
+
+# --- the playbook and the catalogue must agree ------------------------------
+
+
+def test_every_offer_type_in_the_playbook_exists_in_the_catalogue(tables):
+    """A play may only ask for an offer type the catalogue actually sells.
+
+    This is the check that was missing when the catalogue was renamed. The
+    playbook kept asking for a type that had stopped existing, and nothing
+    raised: an offer type nobody sells simply matches no offer, so the play's
+    reach fell to zero, the report still rendered, and the whole suite stayed
+    green. The only visible trace was a number in a table somebody had to go and
+    read.
+
+    Asserted against the catalogue the case actually consumes rather than the
+    CSV on disk, because that is what decides the behaviour.
+    """
+    from nbo.data import load_offers
+
+    sold = {offer.type for offer in load_offers(tables)}
+    with PLAYBOOK.open() as handle:
+        asked = {row["offer_type"] for row in csv.DictReader(handle)} - {"none"}
+
+    missing = sorted(asked - sold)
+    assert not missing, (
+        f"playbook.csv asks for {missing}; the catalogue sells {sorted(sold)}"
+    )
+
+
+def test_every_contacting_play_reaches_somebody(result):
+    """The half that matters more: a type that exists and still reaches nobody.
+
+    A play whose offer type is in the catalogue produces exactly the same silent
+    zero if every offer of that type is refused for every member of its cell.
+    Same green suite, same unread number.
+
+    Low reach is a finding this case makes on purpose — the upgrade plays sit
+    near a fifth of their cell, and ``test_upgrade_plays_are_refused_by_the_
+    catalogue`` pins that. **Exactly zero** is the failure, and the two are
+    different claims: one says the catalogue serves the cell badly, the other
+    says it does not serve it at all.
+
+    A play that contacts without naming an offer is judged on the contact policy
+    alone, which is the only permission it depends on.
+    """
+    by_offer = [row for row in result.deliverability if row.members]
+    assert by_offer, "the playbook should still contain a play with an offer"
+
+    reach_of = {row.segment: row for row in result.policy_reach}
+    no_offer = [reach_of[s.name] for s in result.segments
+                if s.play.contacts and not s.play.has_offer and s.members]
+
+    dead = [f"{row.segment} ({row.offer_type})" for row in by_offer if not row.reachable]
+    dead += [f"{row.segment} (contact only)" for row in no_offer if not row.reachable]
+    assert not dead, f"plays that reach nobody: {dead}"
