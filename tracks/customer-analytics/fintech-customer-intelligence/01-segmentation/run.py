@@ -10,7 +10,12 @@ Fits case 02's churn model twice: once as that case does, and once cross-fitted,
 because measuring whether a segment survives six months with a score that had
 memorised the earlier cutoff would understate the answer.
 
-Deterministic: the same seed produces the same report, byte for byte.
+Deterministic: the same seed produces the same report, byte for byte — on the
+same interpreter. Across CPython versions it is not, and the difference is real
+rather than cosmetic: ``sum()`` over floats became compensated in 3.12, and that
+last bit is enough to move a customer across a quantile cut. The committed
+outputs are reproducible on 3.12; on 3.10 this case puts one more customer in
+Reprice and one fewer in Watch. CI pins the version for that reason.
 """
 
 from __future__ import annotations
