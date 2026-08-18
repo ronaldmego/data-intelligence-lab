@@ -1,0 +1,5 @@
+cost_id,driver,value,unit,rationale
+COST_ACCOUNT,per_account_month,3.00,currency,"Statement run, servicing overhead and the fixed core-banking cost every active account carries whether or not it is used"
+COST_BALANCE,per_balance_carried,0.12,currency,"Marginal cost of carrying one thousand of balance for a month — the number this case turns out to be a function of, and the one nobody in the analytics chain owns"
+COST_TICKET,per_support_ticket,4.00,currency,"Average handling cost of one support contact, across call, chat, branch and app"
+COST_ESCALATION,per_escalated_ticket,15.00,currency,"Second-line time on an escalated ticket, on top of the handling cost above"

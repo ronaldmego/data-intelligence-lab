@@ -30,7 +30,7 @@ something under active maintenance.
 |---|---|
 | [`data-governance/`](tracks/data-governance) | Catalog-aware agents: reading metadata, and using it as context before touching data |
 | [`governed-ai/`](tracks/governed-ai) | LLM agents with grounded access to data — SQL, RAG, classification |
-| [`customer-analytics/`](tracks/customer-analytics) | Segmentation, churn, next-best-offer, ARPU, incrementality — on one synthetic, causal, reproducible telco data model |
+| [`customer-analytics/`](tracks/customer-analytics) | Segmentation, churn, next-best-offer, ARPU, incrementality — on one synthetic, causal, reproducible fintech data model |
 | [`data-privacy/`](tracks/data-privacy) | *(empty)* consent, minimisation, subject rights |
 
 ## Projects
@@ -41,7 +41,7 @@ something under active maintenance.
 | [`agent-data-analyst`](tracks/data-governance/agent-data-analyst) | data-governance | Analyses the *data* using the catalog as governance context: who owns the table, did it pass quality, what the codes mean | `reference` · paused | 47 commits · 2026-02 → 2026-06 |
 | [`agent-sql-khipu_ai`](tracks/governed-ai/agent-sql-khipu_ai) | governed-ai | LLM agent with SQL access and a RAG knowledge base, local models | `archived snapshot` | 8 commits · 2025-01 → 2025-11 |
 | [`agent_text_classification`](tracks/governed-ai/agent_text_classification) | governed-ai | Sentiment classification with a local LLM | `archived snapshot` | 8 commits · 2025-02 |
-| [`telco-customer-intelligence`](tracks/customer-analytics/telco-customer-intelligence) | customer-analytics | Synthetic, causal, reproducible telco data model + the analytics cases it feeds (segmentation, churn, NBO, ARPU, incrementality) | `reference` | data model + all five cases built & tested, each importing its predecessors rather than restating them |
+| [`fintech-customer-intelligence`](tracks/customer-analytics/fintech-customer-intelligence) | customer-analytics | Synthetic, causal, reproducible fintech data model + the analytics cases it feeds (segmentation, churn, NBO, ARPU, incrementality) | `reference` | data model + all five cases built & tested, each importing its predecessors rather than restating them |
 | [`agent-metric-ambiguity`](tracks/data-governance/agent-metric-ambiguity) | data-governance | An agent asked an ambiguous metric question — it consults the catalog, finds the term is ungoverned, and offers the legitimate readings instead of picking one | `POC` | one vertical slice on Pagila + OpenMetadata 1.12.8, with the deterministic-vs-LLM comparison measured |
 
 **The three projects in `data-governance/` are a progression, not duplicates.**
@@ -95,13 +95,13 @@ database document what they need in their own `.env.example` — never real valu
 
 Stated plainly rather than hidden behind a green badge:
 
-- **Tests exist for `telco-customer-intelligence`** (schema, referential integrity,
+- **Tests exist for `fintech-customer-intelligence`** (schema, referential integrity,
   no-leakage, causal signal, the churn case's leakage boundary and metric arithmetic, and
   the incrementality case's fence around its answer key) **and for
   `agent-metric-ambiguity`** (the read-only guard, the metadata-before-SQL invariant, and
   whether the definitions really follow the catalog rather than being hardcoded).
-  Standard-library only in both cases, so CI runs them without installing anything.
-  The three **migrated** projects still have none; CI's pytest job collects
+  Standard-library only in both cases, so CI runs them without installing anything. The
+  migrated agent tracks still have none; CI's pytest job collects
   every `tracks/<track>/<project>/tests/` directory as it appears. The `test_*.py` files
   under some `scripts/` folders are **manual integration scripts** — they need a live
   catalog, a database and credentials — so CI deliberately does not collect them.

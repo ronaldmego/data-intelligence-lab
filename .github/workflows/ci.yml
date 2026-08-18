@@ -55,3 +55,57 @@ jobs:
       - name: Pytest
         if: steps.discover.outputs.suites != ''
         run: uvx pytest ${{ steps.discover.outputs.suites }} -q
+
+  outputs:
+    name: Outputs reproduce from their own commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      # Un caso es un `run.py` con un `outputs/` al lado. Se descubren en vez de
+      # enumerarse, igual que las suites de arriba, para que un caso nuevo entre
+      # solo y uno que todavía no publica figuras no rompa el job.
+      - name: Discover cases
+        id: discover
+        run: |
+          cases=$(find tracks -name run.py -not -path '*/.venv/*' \
+                  -exec sh -c '[ -d "$(dirname "$1")/outputs" ] && dirname "$1"' _ {} \; | sort | tr '\n' ' ')
+          echo "cases=$cases" >> "$GITHUB_OUTPUT"
+          [ -n "$cases" ] || echo "::notice::No case publishes outputs/ yet — nothing to reproduce."
+
+      # PY_REPRO no es una preferencia de versión: es la que reproduce los
+      # outputs commiteados. `sum()` sobre floats pasó a suma compensada de
+      # Neumaier en CPython 3.12, y ese último bit alcanza para mover un cliente
+      # de banda en los cortes por cuantiles — medido: en 3.10 el caso 01 da
+      # Watch 449 / Reprice 506 donde 3.12 da 450 / 505. Sin fijar la versión,
+      # este job falla por el intérprete y no por el commit, que es peor que no
+      # tenerlo. Si se cambia el número, hay que regenerar los outputs en la
+      # versión nueva y commitear el resultado en el mismo PR.
+      - name: Regenerate every case
+        if: steps.discover.outputs.cases != ''
+        env:
+          PY_REPRO: "3.12"
+        run: |
+          for case in ${{ steps.discover.outputs.cases }}; do
+            echo "::group::$case"
+            (cd "$case" && uv run --python "$PY_REPRO" --no-project run.py)
+            echo "::endgroup::"
+          done
+
+      # `git diff` solo ve lo rastreado: un output NUEVO que el commit no trae
+      # pasaría invisible, que es la mitad del hueco. `add --intent-to-add` lo
+      # hace visible al diff sin agregar contenido al índice.
+      - name: Outputs match the commit that ships them
+        if: steps.discover.outputs.cases != ''
+        run: |
+          git add --intent-to-add -- '*/outputs/*'
+          if ! git diff --exit-code --stat -- '*/outputs/*'; then
+            echo "::error::Regenerar los casos produce outputs distintos de los commiteados."
+            echo "Los archivos versionados no salen del código que los acompaña."
+            echo "Corré cada caso y commiteá el resultado, o explicá por qué difiere."
+            git diff -- '*/outputs/*' | head -100
+            exit 1
+          fi

@@ -1,5 +1,0 @@
-cost_id,driver,value,unit,rationale
-COST_LINE,per_subscriber_month,3.00,currency,"Billing run, care overhead and the fixed network cost every active line carries whether or not it is used"
-COST_DATA,per_gb_carried,0.12,currency,"Marginal cost of carrying one gigabyte — the number this case turns out to be a function of, and the one nobody in the analytics chain owns"
-COST_TICKET,per_support_ticket,4.00,currency,"Average handling cost of one support contact, across call, chat, store and app"
-COST_ESCALATION,per_escalated_ticket,15.00,currency,"Second-line time on an escalated ticket, on top of the handling cost above"
