@@ -42,10 +42,13 @@ something under active maintenance.
 | [`agent-sql-khipu_ai`](tracks/governed-ai/agent-sql-khipu_ai) | governed-ai | LLM agent with SQL access and a RAG knowledge base, local models | `archived snapshot` | 8 commits · 2025-01 → 2025-11 |
 | [`agent_text_classification`](tracks/governed-ai/agent_text_classification) | governed-ai | Sentiment classification with a local LLM | `archived snapshot` | 8 commits · 2025-02 |
 | [`fintech-customer-intelligence`](tracks/customer-analytics/fintech-customer-intelligence) | customer-analytics | Synthetic, causal, reproducible fintech data model + the analytics cases it feeds (segmentation, churn, NBO, ARPU, incrementality) | `reference` | data model + all five cases built & tested, each importing its predecessors rather than restating them |
+| [`agent-metric-ambiguity`](tracks/data-governance/agent-metric-ambiguity) | data-governance | An agent asked an ambiguous metric question — it consults the catalog, finds the term is ungoverned, and offers the legitimate readings instead of picking one | `POC` | one vertical slice on Pagila + OpenMetadata 1.12.8, with the deterministic-vs-LLM comparison measured |
 
-**The two agents in `data-governance/` are a progression, not a duplicate.**
+**The three projects in `data-governance/` are a progression, not duplicates.**
 `openmetadata-mcp-agent` talks *to the catalog*. `agent-data-analyst` analyses *the data*,
-using the catalog as context first. Reading them side by side is the point.
+using the catalog as context first. `agent-metric-ambiguity` asks what happens when the
+catalog cannot say what the question means — and makes "metadata before SQL" a structural
+property rather than a prompt instruction. Reading them side by side is the point.
 
 ## Maturity labels
 
@@ -92,10 +95,12 @@ database document what they need in their own `.env.example` — never real valu
 
 Stated plainly rather than hidden behind a green badge:
 
-- **Tests exist only for `fintech-customer-intelligence`** so far (schema, referential
-  integrity, no-leakage, causal signal, the churn case's leakage boundary and metric
-  arithmetic, and the incrementality case's fence around its answer key — standard-library
-  only, so CI runs them without installing anything). The
+- **Tests exist for `fintech-customer-intelligence`** (schema, referential integrity,
+  no-leakage, causal signal, the churn case's leakage boundary and metric arithmetic, and
+  the incrementality case's fence around its answer key) **and for
+  `agent-metric-ambiguity`** (the read-only guard, the metadata-before-SQL invariant, and
+  whether the definitions really follow the catalog rather than being hardcoded).
+  Standard-library only in both cases, so CI runs them without installing anything. The
   migrated agent tracks still have none; CI's pytest job collects
   every `tracks/<track>/<project>/tests/` directory as it appears. The `test_*.py` files
   under some `scripts/` folders are **manual integration scripts** — they need a live

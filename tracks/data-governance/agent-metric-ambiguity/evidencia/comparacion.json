@@ -1,0 +1,413 @@
+{
+  "modelo": "kimi-k2.6",
+  "corridas": 3,
+  "resultados": {
+    "deterministica": [
+      {
+        "orden_metadata_antes_de_sql": true,
+        "llamadas_metadata": 20,
+        "llamadas_sql": 9,
+        "lecturas": [
+          {
+            "etiqueta": "Tiendas registradas",
+            "valor_reportado": 500,
+            "valor_recomprobado": 500,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(*) AS value FROM public.store"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «customer»",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.customer t"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «inventory»",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.inventory t"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «staff»",
+            "valor_reportado": 475,
+            "valor_recomprobado": 475,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.staff t"
+          },
+          {
+            "etiqueta": "Tiendas con actividad transaccional",
+            "valor_reportado": 4,
+            "valor_recomprobado": 4,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(*) AS value FROM (\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id\n) u"
+          }
+        ],
+        "valores": [
+          2,
+          4,
+          475,
+          500
+        ],
+        "menciona_staff": true,
+        "firma": [
+          [
+            "Tiendas con actividad transaccional",
+            4
+          ],
+          [
+            "Tiendas presentes en «customer»",
+            2
+          ],
+          [
+            "Tiendas presentes en «inventory»",
+            2
+          ],
+          [
+            "Tiendas presentes en «staff»",
+            475
+          ],
+          [
+            "Tiendas registradas",
+            500
+          ]
+        ]
+      },
+      {
+        "orden_metadata_antes_de_sql": true,
+        "llamadas_metadata": 20,
+        "llamadas_sql": 9,
+        "lecturas": [
+          {
+            "etiqueta": "Tiendas registradas",
+            "valor_reportado": 500,
+            "valor_recomprobado": 500,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(*) AS value FROM public.store"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «customer»",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.customer t"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «inventory»",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.inventory t"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «staff»",
+            "valor_reportado": 475,
+            "valor_recomprobado": 475,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.staff t"
+          },
+          {
+            "etiqueta": "Tiendas con actividad transaccional",
+            "valor_reportado": 4,
+            "valor_recomprobado": 4,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(*) AS value FROM (\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id\n) u"
+          }
+        ],
+        "valores": [
+          2,
+          4,
+          475,
+          500
+        ],
+        "menciona_staff": true,
+        "firma": [
+          [
+            "Tiendas con actividad transaccional",
+            4
+          ],
+          [
+            "Tiendas presentes en «customer»",
+            2
+          ],
+          [
+            "Tiendas presentes en «inventory»",
+            2
+          ],
+          [
+            "Tiendas presentes en «staff»",
+            475
+          ],
+          [
+            "Tiendas registradas",
+            500
+          ]
+        ]
+      },
+      {
+        "orden_metadata_antes_de_sql": true,
+        "llamadas_metadata": 20,
+        "llamadas_sql": 9,
+        "lecturas": [
+          {
+            "etiqueta": "Tiendas registradas",
+            "valor_reportado": 500,
+            "valor_recomprobado": 500,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(*) AS value FROM public.store"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «customer»",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.customer t"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «inventory»",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.inventory t"
+          },
+          {
+            "etiqueta": "Tiendas presentes en «staff»",
+            "valor_reportado": 475,
+            "valor_recomprobado": 475,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(DISTINCT t.store_id) AS value FROM public.staff t"
+          },
+          {
+            "etiqueta": "Tiendas con actividad transaccional",
+            "valor_reportado": 4,
+            "valor_recomprobado": 4,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT count(*) AS value FROM (\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id\n) u"
+          }
+        ],
+        "valores": [
+          2,
+          4,
+          475,
+          500
+        ],
+        "menciona_staff": true,
+        "firma": [
+          [
+            "Tiendas con actividad transaccional",
+            4
+          ],
+          [
+            "Tiendas presentes en «customer»",
+            2
+          ],
+          [
+            "Tiendas presentes en «inventory»",
+            2
+          ],
+          [
+            "Tiendas presentes en «staff»",
+            475
+          ],
+          [
+            "Tiendas registradas",
+            500
+          ]
+        ]
+      }
+    ],
+    "llm": [
+      {
+        "orden_metadata_antes_de_sql": true,
+        "llamadas_metadata": 7,
+        "llamadas_sql": 4,
+        "lecturas": [
+          {
+            "etiqueta": "Tiendas registradas en el sistema",
+            "valor_reportado": 500,
+            "valor_recomprobado": 500,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(*) FROM store"
+          },
+          {
+            "etiqueta": "Tiendas operativas con inventario",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM inventory"
+          },
+          {
+            "etiqueta": "Tiendas con ventas registradas",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(*) FROM sales_by_store"
+          },
+          {
+            "etiqueta": "Tiendas con clientes asignados",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM customer"
+          }
+        ],
+        "valores": [
+          2,
+          500
+        ],
+        "menciona_staff": false,
+        "firma": [
+          [
+            "Tiendas con clientes asignados",
+            2
+          ],
+          [
+            "Tiendas con ventas registradas",
+            2
+          ],
+          [
+            "Tiendas operativas con inventario",
+            2
+          ],
+          [
+            "Tiendas registradas en el sistema",
+            500
+          ]
+        ]
+      },
+      {
+        "orden_metadata_antes_de_sql": true,
+        "llamadas_metadata": 8,
+        "llamadas_sql": 9,
+        "lecturas": [
+          {
+            "etiqueta": "Tiendas registradas en la tabla maestra store",
+            "valor_reportado": 500,
+            "valor_recomprobado": 500,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(*) FROM store"
+          },
+          {
+            "etiqueta": "Tiendas con unidades de inventario registradas",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM inventory"
+          },
+          {
+            "etiqueta": "Tiendas con personal asignado",
+            "valor_reportado": 475,
+            "valor_recomprobado": 475,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM staff"
+          }
+        ],
+        "valores": [
+          2,
+          475,
+          500
+        ],
+        "menciona_staff": true,
+        "firma": [
+          [
+            "Tiendas con personal asignado",
+            475
+          ],
+          [
+            "Tiendas con unidades de inventario registradas",
+            2
+          ],
+          [
+            "Tiendas registradas en la tabla maestra store",
+            500
+          ]
+        ]
+      },
+      {
+        "orden_metadata_antes_de_sql": true,
+        "llamadas_metadata": 8,
+        "llamadas_sql": 5,
+        "lecturas": [
+          {
+            "etiqueta": "Tiendas registradas en tabla maestra (store)",
+            "valor_reportado": 500,
+            "valor_recomprobado": 500,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM store"
+          },
+          {
+            "etiqueta": "Tiendas con unidades en inventario",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM inventory"
+          },
+          {
+            "etiqueta": "Tiendas con clientes asignados",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store_id) FROM customer"
+          },
+          {
+            "etiqueta": "Tiendas con ventas reportadas",
+            "valor_reportado": 2,
+            "valor_recomprobado": 2,
+            "coincide": true,
+            "nota": "",
+            "sql": "SELECT COUNT(DISTINCT store) FROM sales_by_store"
+          }
+        ],
+        "valores": [
+          2,
+          500
+        ],
+        "menciona_staff": false,
+        "firma": [
+          [
+            "Tiendas con clientes asignados",
+            2
+          ],
+          [
+            "Tiendas con unidades en inventario",
+            2
+          ],
+          [
+            "Tiendas con ventas reportadas",
+            2
+          ],
+          [
+            "Tiendas registradas en tabla maestra (store)",
+            500
+          ]
+        ]
+      }
+    ]
+  }
+}

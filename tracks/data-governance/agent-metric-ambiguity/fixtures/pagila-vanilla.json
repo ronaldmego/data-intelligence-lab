@@ -1,0 +1,839 @@
+{
+  "fixture_version": 1,
+  "about": "Respuestas reales de OpenMetadata y PostgreSQL, saneadas. La conclusión no se guarda: se recalcula al reproducir.",
+  "source": {
+    "openmetadata_url": "http://host-interno:8585",
+    "openmetadata_version": "1.12.8",
+    "postgres": "PostgreSQL 16.13 on x86_64-pc-linux-musl"
+  },
+  "catalog": {
+    "glossary_terms": [
+      {
+        "name": "AccessPolicy",
+        "fqn": "DataGovernance.AccessPolicy",
+        "description": "Regla que define quién puede ver, editar o borrar un activo. Implementa el principio de mínimo privilegio combinando roles y reglas sobre tabla, esquema o columna.",
+        "synonyms": []
+      },
+      {
+        "name": "ActiveCustomer",
+        "fqn": "DemoGlossary.Alquiler.ActiveCustomer",
+        "description": "Cliente con la marca `active`/`activebool` en true — habilitado para alquilar.",
+        "synonyms": []
+      },
+      {
+        "name": "Actor",
+        "fqn": "DemoGlossary.Catalogo.Actor",
+        "description": "Actor/actriz que participa en uno o más films (relación N:M vía film_actor).",
+        "synonyms": []
+      },
+      {
+        "name": "Alquiler",
+        "fqn": "DemoGlossary.Alquiler",
+        "description": "Términos de la operación de alquiler: alquiler, devolución, cliente activo.",
+        "synonyms": []
+      },
+      {
+        "name": "Catalogo",
+        "fqn": "DemoGlossary.Catalogo",
+        "description": "Términos del catálogo de contenido: film, actor, categoría, idioma, inventario.",
+        "synonyms": []
+      },
+      {
+        "name": "Category",
+        "fqn": "DemoGlossary.Catalogo.Category",
+        "description": "Género/categoría de un film (Acción, Comedia, …). Relación N:M vía film_category.",
+        "synonyms": []
+      },
+      {
+        "name": "DataCatalog",
+        "fqn": "DataGovernance.DataCatalog",
+        "description": "Inventario centralizado de los activos de datos de una organización — tablas, columnas, dashboards, pipelines. Habilita descubrimiento, comprensión y confianza.",
+        "synonyms": []
+      },
+      {
+        "name": "DataClassification",
+        "fqn": "DataGovernance.DataClassification",
+        "description": "Proceso de categorizar activos por nivel de sensibilidad (Public, Internal, Confidential, Restricted) y por tipo de contenido (PII, financiero, salud). Alimenta las políticas de acceso.",
+        "synonyms": []
+      },
+      {
+        "name": "DataContract",
+        "fqn": "DataGovernance.DataContract",
+        "description": "Acuerdo formal entre productor y consumidor de datos: esquema, expectativas de calidad, SLA y ownership. Previene cambios rompientes en los pipelines.",
+        "synonyms": []
+      },
+      {
+        "name": "DataLineage",
+        "fqn": "DataGovernance.DataLineage",
+        "description": "Ciclo de vida completo de un dato: dónde se origina, cómo se transforma y dónde se consume. Base del análisis de impacto y de la trazabilidad regulatoria.",
+        "synonyms": []
+      },
+      {
+        "name": "DataOwner",
+        "fqn": "DataGovernance.DataOwner",
+        "description": "Responsable de negocio que rinde cuentas por un activo de datos. Define políticas de acceso, aprueba reglas de calidad y responde por el cumplimiento.",
+        "synonyms": []
+      },
+      {
+        "name": "DataQuality",
+        "fqn": "DataGovernance.DataQuality",
+        "description": "Grado en que el dato cumple los requisitos del negocio: exactitud, completitud, consistencia, oportunidad y validez. Se mide con perfilado y reglas automatizadas.",
+        "synonyms": []
+      },
+      {
+        "name": "DataSteward",
+        "fqn": "DataGovernance.DataSteward",
+        "description": "Rol operativo responsable del día a día: calidad del dato, gestión de metadata y aplicación de las políticas de gobierno. Ejecuta lo que el Data Owner define.",
+        "synonyms": []
+      },
+      {
+        "name": "Film",
+        "fqn": "DemoGlossary.Catalogo.Film",
+        "description": "Película del catálogo, con duración, clasificación, tarifa y costo de reposición.",
+        "synonyms": []
+      },
+      {
+        "name": "Finanzas",
+        "fqn": "DemoGlossary.Finanzas",
+        "description": "Términos financieros: pago, tarifa de alquiler y revenue.",
+        "synonyms": []
+      },
+      {
+        "name": "Inventory",
+        "fqn": "DemoGlossary.Catalogo.Inventory",
+        "description": "Copia física de un film disponible en una tienda. Una unidad alquilable.",
+        "synonyms": []
+      },
+      {
+        "name": "MetadataManagement",
+        "fqn": "DataGovernance.MetadataManagement",
+        "description": "Práctica de recolectar, almacenar y gobernar la metadata: técnica (esquemas), de negocio (descripciones, owners) y operativa (linaje, uso).",
+        "synonyms": []
+      },
+      {
+        "name": "Payment",
+        "fqn": "DemoGlossary.Finanzas.Payment",
+        "description": "Pago de un cliente asociado a un alquiler. Base del revenue.",
+        "synonyms": []
+      },
+      {
+        "name": "PII",
+        "fqn": "DataGovernance.PII",
+        "description": "Dato que permite identificar a una persona concreta — nombre, email, teléfono, documento. Sujeto a normativa de protección de datos. Debe clasificarse, tener owner y control de acceso.",
+        "synonyms": []
+      },
+      {
+        "name": "Rental",
+        "fqn": "DemoGlossary.Alquiler.Rental",
+        "description": "Transacción de alquiler: una copia de inventario entregada a un cliente, con fecha de salida y devolución.",
+        "synonyms": []
+      },
+      {
+        "name": "RentalRate",
+        "fqn": "DemoGlossary.Finanzas.RentalRate",
+        "description": "Tarifa base de alquiler de un film (`film.rental_rate`).",
+        "synonyms": []
+      },
+      {
+        "name": "RentalRevenue",
+        "fqn": "DemoGlossary.Finanzas.RentalRevenue",
+        "description": "Ingreso total por alquileres = suma de `payment.amount`. KPI base del negocio.",
+        "synonyms": []
+      },
+      {
+        "name": "ReturnDate",
+        "fqn": "DemoGlossary.Alquiler.ReturnDate",
+        "description": "Fecha de devolución de un alquiler. Nula = aún no devuelto (alquiler abierto).",
+        "synonyms": []
+      }
+    ],
+    "search": {
+      "tienda": [
+        {
+          "name": "customer",
+          "fqn": "pagila_source.pagila.public.customer",
+          "schema": "public",
+          "description": "Registro maestro de clientes: nombre, email (PII), dirección, tienda de origen y marca de actividad (activebool/active). Base de Customer 360 y segmentación.",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "inventory",
+          "fqn": "pagila_source.pagila.public.inventory",
+          "schema": "public",
+          "description": "Copias físicas de films por tienda. Cada fila es una unidad alquilable (film_id + store_id). Vincula el catálogo con la operación de alquiler.",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "staff",
+          "fqn": "pagila_source.pagila.public.staff",
+          "schema": "public",
+          "description": "Personal de tienda: nombre, email y username (PII), tienda y dirección. ⚠️ Incluye una columna `password` en claro — hallazgo de gobierno/seguridad (ver Governance.Finding).",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "store",
+          "fqn": "pagila_source.pagila.public.store",
+          "schema": "public",
+          "description": "Tiendas físicas: dirección y staff manager. Unidad operativa que posee inventario.",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        }
+      ],
+      "store": [
+        {
+          "name": "store",
+          "fqn": "pagila_source.pagila.public.store",
+          "schema": "public",
+          "description": "Tiendas físicas: dirección y staff manager. Unidad operativa que posee inventario.",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "sales_by_store",
+          "fqn": "pagila_source.pagila.public.sales_by_store",
+          "schema": "public",
+          "description": "",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "customer",
+          "fqn": "pagila_source.pagila.public.customer",
+          "schema": "public",
+          "description": "Registro maestro de clientes: nombre, email (PII), dirección, tienda de origen y marca de actividad (activebool/active). Base de Customer 360 y segmentación.",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "customer_list",
+          "fqn": "pagila_source.pagila.public.customer_list",
+          "schema": "public",
+          "description": "",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        },
+        {
+          "name": "inventory",
+          "fqn": "pagila_source.pagila.public.inventory",
+          "schema": "public",
+          "description": "Copias físicas de films por tienda. Cada fila es una unidad alquilable (film_id + store_id). Vincula el catálogo con la operación de alquiler.",
+          "owners": [],
+          "tier": "",
+          "domain": "",
+          "columns": []
+        }
+      ]
+    },
+    "tables": {
+      "customer": {
+        "name": "customer",
+        "fqn": "pagila_source.pagila.public.customer",
+        "schema": "public",
+        "description": "Registro maestro de clientes: nombre, email (PII), dirección, tienda de origen y marca de actividad (activebool/active). Base de Customer 360 y segmentación.",
+        "owners": [
+          "Customer Service"
+        ],
+        "tier": "Tier.Tier1",
+        "domain": "CustomerManagement",
+        "columns": [
+          {
+            "name": "customer_id",
+            "data_type": "INT",
+            "description": "Identificador único del cliente. Clave primaria."
+          },
+          {
+            "name": "store_id",
+            "data_type": "INT",
+            "description": "Tienda donde se dio de alta el cliente."
+          },
+          {
+            "name": "first_name",
+            "data_type": "TEXT",
+            "description": "Nombre del cliente. Dato personal no sensible."
+          },
+          {
+            "name": "last_name",
+            "data_type": "TEXT",
+            "description": "Apellido del cliente. Dato personal no sensible."
+          },
+          {
+            "name": "email",
+            "data_type": "TEXT",
+            "description": "Correo del cliente. Dato personal sensible."
+          },
+          {
+            "name": "address_id",
+            "data_type": "INT",
+            "description": "Domicilio del cliente. Referencia a `address`."
+          },
+          {
+            "name": "activebool",
+            "data_type": "BOOLEAN",
+            "description": "Marca booleana de cliente activo."
+          },
+          {
+            "name": "create_date",
+            "data_type": "DATE",
+            "description": "Fecha de alta del cliente."
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": "Marca de tiempo de la última modificación del registro."
+          },
+          {
+            "name": "active",
+            "data_type": "INT",
+            "description": "Marca de actividad heredada del sistema anterior."
+          }
+        ]
+      },
+      "inventory": {
+        "name": "inventory",
+        "fqn": "pagila_source.pagila.public.inventory",
+        "schema": "public",
+        "description": "Copias físicas de films por tienda. Cada fila es una unidad alquilable (film_id + store_id). Vincula el catálogo con la operación de alquiler.",
+        "owners": [
+          "Store Operations"
+        ],
+        "tier": "Tier.Tier2",
+        "domain": "RentalOperations",
+        "columns": [
+          {
+            "name": "inventory_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "film_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "store_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          }
+        ]
+      },
+      "staff": {
+        "name": "staff",
+        "fqn": "pagila_source.pagila.public.staff",
+        "schema": "public",
+        "description": "Personal de tienda: nombre, email y username (PII), tienda y dirección. ⚠️ Incluye una columna `password` en claro — hallazgo de gobierno/seguridad (ver Governance.Finding).",
+        "owners": [
+          "Store Operations"
+        ],
+        "tier": "Tier.Tier2",
+        "domain": "RentalOperations",
+        "columns": [
+          {
+            "name": "staff_id",
+            "data_type": "INT",
+            "description": "Identificador único del empleado. Clave primaria."
+          },
+          {
+            "name": "first_name",
+            "data_type": "TEXT",
+            "description": "Nombre del empleado. Dato personal no sensible."
+          },
+          {
+            "name": "last_name",
+            "data_type": "TEXT",
+            "description": "Apellido del empleado. Dato personal no sensible."
+          },
+          {
+            "name": "address_id",
+            "data_type": "INT",
+            "description": "Domicilio del empleado. Referencia a `address`."
+          },
+          {
+            "name": "email",
+            "data_type": "TEXT",
+            "description": "Correo corporativo del empleado. Dato personal sensible."
+          },
+          {
+            "name": "store_id",
+            "data_type": "INT",
+            "description": "Tienda a la que está asignado el empleado."
+          },
+          {
+            "name": "active",
+            "data_type": "BOOLEAN",
+            "description": "Marca de empleado activo."
+          },
+          {
+            "name": "username",
+            "data_type": "TEXT",
+            "description": "Usuario de acceso al sistema de tienda."
+          },
+          {
+            "name": "password",
+            "data_type": "TEXT",
+            "description": "Credencial almacenada en texto plano. Hallazgo de gobierno abierto."
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": "Marca de tiempo de la última modificación del registro."
+          },
+          {
+            "name": "picture",
+            "data_type": "BYTEA",
+            "description": "Fotografía del empleado en binario."
+          }
+        ]
+      },
+      "store": {
+        "name": "store",
+        "fqn": "pagila_source.pagila.public.store",
+        "schema": "public",
+        "description": "Tiendas físicas: dirección y staff manager. Unidad operativa que posee inventario.",
+        "owners": [
+          "Store Operations"
+        ],
+        "tier": "Tier.Tier2",
+        "domain": "RentalOperations",
+        "columns": [
+          {
+            "name": "store_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "manager_staff_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "address_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          }
+        ]
+      },
+      "sales_by_store": {
+        "name": "sales_by_store",
+        "fqn": "pagila_source.pagila.public.sales_by_store",
+        "schema": "public",
+        "description": "",
+        "owners": [],
+        "tier": "",
+        "domain": "",
+        "columns": [
+          {
+            "name": "store",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "manager",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "total_sales",
+            "data_type": "NUMERIC",
+            "description": ""
+          }
+        ]
+      },
+      "customer_list": {
+        "name": "customer_list",
+        "fqn": "pagila_source.pagila.public.customer_list",
+        "schema": "public",
+        "description": "",
+        "owners": [],
+        "tier": "",
+        "domain": "",
+        "columns": [
+          {
+            "name": "id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "name",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "address",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "zip code",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "phone",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "city",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "country",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "notes",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "sid",
+            "data_type": "INT",
+            "description": ""
+          }
+        ]
+      },
+      "rental": {
+        "name": "rental",
+        "fqn": "pagila_source.pagila.public.rental",
+        "schema": "public",
+        "description": "Transacciones de alquiler: copia de inventario entregada a un cliente, fecha de salida y de devolución (nula = abierto), y staff que la procesó. Núcleo operativo.",
+        "owners": [
+          "Store Operations"
+        ],
+        "tier": "Tier.Tier1",
+        "domain": "RentalOperations",
+        "columns": [
+          {
+            "name": "rental_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "rental_date",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          },
+          {
+            "name": "inventory_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "customer_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "return_date",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          },
+          {
+            "name": "staff_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          }
+        ]
+      },
+      "film": {
+        "name": "film",
+        "fqn": "pagila_source.pagila.public.film",
+        "schema": "public",
+        "description": "Catálogo maestro de películas: título, descripción, año, idioma, duración de alquiler, tarifa (rental_rate), clasificación (rating) y costo de reposición. Base del catálogo comercial.",
+        "owners": [
+          "Content & Catalog"
+        ],
+        "tier": "Tier.Tier1",
+        "domain": "FilmCatalog",
+        "columns": [
+          {
+            "name": "film_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "title",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "description",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "release_year",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "language_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "original_language_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "rental_duration",
+            "data_type": "SMALLINT",
+            "description": ""
+          },
+          {
+            "name": "rental_rate",
+            "data_type": "NUMERIC",
+            "description": ""
+          },
+          {
+            "name": "length",
+            "data_type": "SMALLINT",
+            "description": ""
+          },
+          {
+            "name": "replacement_cost",
+            "data_type": "NUMERIC",
+            "description": ""
+          },
+          {
+            "name": "rating",
+            "data_type": "VARCHAR",
+            "description": ""
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          },
+          {
+            "name": "special_features",
+            "data_type": "ARRAY",
+            "description": ""
+          },
+          {
+            "name": "fulltext",
+            "data_type": "TSVECTOR",
+            "description": ""
+          }
+        ]
+      },
+      "payment": {
+        "name": "payment",
+        "fqn": "pagila_source.pagila.public.payment",
+        "schema": "public",
+        "description": "Pagos de clientes asociados a alquileres: monto, cliente, staff y fecha. Suma = revenue por alquiler. Tier1 financiero.",
+        "owners": [
+          "Finance"
+        ],
+        "tier": "Tier.Tier1",
+        "domain": "RentalOperations",
+        "columns": [
+          {
+            "name": "payment_id",
+            "data_type": "INT",
+            "description": "Identificador único del pago. Clave primaria."
+          },
+          {
+            "name": "customer_id",
+            "data_type": "INT",
+            "description": "Cliente que realizó el pago. Referencia a `customer`."
+          },
+          {
+            "name": "staff_id",
+            "data_type": "INT",
+            "description": "Empleado que registró el pago. Referencia a `staff`."
+          },
+          {
+            "name": "rental_id",
+            "data_type": "INT",
+            "description": "Alquiler asociado al pago. Referencia a `rental`."
+          },
+          {
+            "name": "amount",
+            "data_type": "NUMERIC",
+            "description": "Monto cobrado, en la moneda de la tienda. Base del cálculo de revenue."
+          },
+          {
+            "name": "payment_date",
+            "data_type": "TIMESTAMP",
+            "description": "Fecha y hora del cobro. Columna de particionado."
+          }
+        ]
+      },
+      "city": {
+        "name": "city",
+        "fqn": "pagila_source.pagila.public.city",
+        "schema": "public",
+        "description": "Ciudades, enlazadas a country. Dimensión geográfica del cliente.",
+        "owners": [
+          "Customer Service"
+        ],
+        "tier": "Tier.Tier3",
+        "domain": "CustomerManagement",
+        "columns": [
+          {
+            "name": "city_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "city",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "country_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          }
+        ]
+      },
+      "address": {
+        "name": "address",
+        "fqn": "pagila_source.pagila.public.address",
+        "schema": "public",
+        "description": "Direcciones de clientes y staff: calle, distrito, código postal y teléfono (PII). Enlaza a city → country para la geografía.",
+        "owners": [
+          "Customer Service"
+        ],
+        "tier": "Tier.Tier2",
+        "domain": "CustomerManagement",
+        "columns": [
+          {
+            "name": "address_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "address",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "address2",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "district",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "city_id",
+            "data_type": "INT",
+            "description": ""
+          },
+          {
+            "name": "postal_code",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "phone",
+            "data_type": "TEXT",
+            "description": ""
+          },
+          {
+            "name": "last_update",
+            "data_type": "TIMESTAMP",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "lineage": {
+      "pagila_source.pagila.public.store": {
+        "upstream": [],
+        "downstream": [
+          "inventory",
+          "staff",
+          "customer"
+        ]
+      },
+      "pagila_source.pagila.public.inventory": {
+        "upstream": [
+          "store",
+          "film"
+        ],
+        "downstream": [
+          "rental"
+        ]
+      },
+      "pagila_source.pagila.public.staff": {
+        "upstream": [
+          "city",
+          "store",
+          "address"
+        ],
+        "downstream": [
+          "payment"
+        ]
+      },
+      "pagila_source.pagila.public.customer": {
+        "upstream": [
+          "city",
+          "address",
+          "store"
+        ],
+        "downstream": [
+          "rental",
+          "payment"
+        ]
+      }
+    }
+  },
+  "sql": {
+    "SELECT count(*) AS value FROM public.store": 500,
+    "SELECT count(DISTINCT t.store_id) AS value FROM public.customer t": 2,
+    "SELECT count(DISTINCT t.store_id) AS value FROM public.inventory t": 2,
+    "SELECT count(DISTINCT t.store_id) AS value FROM public.staff t": 475,
+    "SELECT count(*) AS value FROM (\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id\nUNION\nSELECT DISTINCT j.store_id AS store_id FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id\n) u": 4,
+    "SELECT count(DISTINCT j.store_id) AS value FROM public.payment t JOIN public.customer j ON j.customer_id = t.customer_id": 2,
+    "SELECT count(DISTINCT j.store_id) AS value FROM public.payment t JOIN public.staff j ON j.staff_id = t.staff_id": 2,
+    "SELECT count(DISTINCT j.store_id) AS value FROM public.rental t JOIN public.customer j ON j.customer_id = t.customer_id": 2,
+    "SELECT count(DISTINCT j.store_id) AS value FROM public.rental t JOIN public.inventory j ON j.inventory_id = t.inventory_id": 2
+  }
+}

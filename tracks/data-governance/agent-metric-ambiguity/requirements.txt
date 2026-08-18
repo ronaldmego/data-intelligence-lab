@@ -1,0 +1,6 @@
+# Sólo hacen falta para la corrida VIVA. El núcleo (guard, derivación,
+# orquestación, informe) y toda la suite de tests son biblioteca estándar: la CI
+# los corre con `uvx pytest`, que no instala nada.
+httpx>=0.27          # cliente REST de OpenMetadata (solo lectura)
+psycopg2-binary>=2.9 # PostgreSQL con transacción READ ONLY
+fastmcp>=2.0         # servidor MCP opcional (mcp_server.py)

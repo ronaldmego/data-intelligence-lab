@@ -1,0 +1,30 @@
+CAPA 1 — análisis de la sentencia (no necesita base)
+  ok     se admite una sola sentencia por llamada                | SELECT 1;DROP TABLE public.store
+  ok     se admite una sola sentencia por llamada                | SELECT/**/1;DROP/**/TABLE/**/public.store
+  ok     palabra no admitida en una consulta de lectura: INTO    | SELECT * INTO nueva FROM public.store
+  ok     una consulta de lectura debe empezar por SELECT o WITH, no por MERGE | MERGE INTO public.store USING public.staff ON true W
+  ok     una consulta de lectura debe empezar por SELECT o WITH, no por CALL | CALL algun_proc()
+  ok     una consulta de lectura debe empezar por SELECT o WITH, no por DO | DO $$ BEGIN PERFORM 1; END $$
+  ok     una consulta de lectura debe empezar por SELECT o WITH, no por REFRESH | REFRESH MATERIALIZED VIEW public.rental_by_category
+  ok     función no admitida: pg_sleep                           | SELECT pg_sleep(600)
+
+  motor: PostgreSQL 16.13 on x86_64-pc-linux-musl
+
+CAPAS 2 y 3 — el motor y el rol, con el guard salteado a propósito
+  ok     CREATE TEMP TABLE poc_intento (x int)                      -> rechazada por el motor: cannot execute CREATE TABLE in a read-only transaction
+  ok     DELETE FROM public.store WHERE false                       -> rechazada por el motor: cannot execute DELETE in a read-only transaction
+  ok     UPDATE public.store SET store_id = store_id WHERE false    -> rechazada por el motor: cannot execute UPDATE in a read-only transaction
+  ok     INSERT INTO public.store (store_id) SELECT 0 WHERE false   -> rechazada por el motor: cannot execute INSERT in a read-only transaction
+  ok     DROP TABLE IF EXISTS public.no_existe                      -> rechazada por el motor: cannot execute DROP TABLE in a read-only transaction
+
+CAPA 3 — privilegios efectivos del rol sobre public.store
+  ok     SELECT    = sí
+  ok     INSERT    = no
+  ok     UPDATE    = no
+  ok     DELETE    = no
+  ok     TRUNCATE  = no
+
+Una lectura legítima sigue funcionando
+  store = 500 filas
+
+TODO EN VERDE
